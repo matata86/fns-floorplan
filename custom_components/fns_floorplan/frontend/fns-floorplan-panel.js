@@ -777,15 +777,18 @@ class FnsFloorplanPanel extends HTMLElement {
       const changedSel = JSON.stringify(this._sel) !== JSON.stringify(sel);
       this._sel = sel;
       const start = this._toPlan(e);
-      let moved = false;
+      let moved = false, axis = null;
       const svg = this.shadowRoot.querySelector("svg");
       svg.setPointerCapture(e.pointerId);
       const move = (ev) => {
         const p = this._toPlan(ev);
         let dx = p[0] - start[0], dz = p[1] - start[1];
         if (!moved && Math.hypot(dx, dz) < 0.03) return;
-        // Ctrl held: only along the axis the pointer moved more
-        if (ev.ctrlKey || ev.metaKey) { if (Math.abs(dx) > Math.abs(dz)) dz = 0; else dx = 0; }
+        // Ctrl (or Shift) held: only along one axis, chosen by the first few cm of the move and kept until released
+        if (ev.ctrlKey || ev.metaKey || ev.shiftKey) {
+          if (!axis && Math.hypot(dx, dz) >= 0.05) axis = Math.abs(dx) >= Math.abs(dz) ? "x" : "z";
+          if (axis === "x" || (!axis && Math.abs(dx) >= Math.abs(dz))) dz = 0; else dx = 0;
+        } else axis = null;
         moved = true;
         this._dragging = true;
         onMove(dx, dz, p);
@@ -861,7 +864,7 @@ class FnsFloorplanPanel extends HTMLElement {
     if (sel?.cat === "rooms") return this._roomForm(side, o);
     if (sel?.cat === "openings") return this._openingForm(side, o);
     if (!o) {
-      side.innerHTML = `<h2>Úpravy půdorysu</h2><p class="hint">Klepni na světlo, spotřebič, senzor, text, nábytek nebo badge místnosti a uprav ho. Táhnutím ji přesuneš (mřížka 5 cm, s Ctrl jen v jedné ose), šipky posouvají vybraný prvek, Delete ho smaže. Vybraný nábytek má úchyty na změnu velikosti a kolečko na otáčení.<br><br>Prvky bez entity mají červený přerušovaný okraj, prvky skryté pravidlem jsou bledé.<br><br>Změny se na dashboardu projeví hned po uložení.</p>`;
+      side.innerHTML = `<h2>Úpravy půdorysu</h2><p class="hint">Klepni na světlo, spotřebič, senzor, text, nábytek nebo badge místnosti a uprav ho. Táhnutím ji přesuneš (mřížka 5 cm, s Ctrl nebo Shift jen v jedné ose), šipky posouvají vybraný prvek, Delete ho smaže. Vybraný nábytek má úchyty na změnu velikosti a kolečko na otáčení.<br><br>Prvky bez entity mají červený přerušovaný okraj, prvky skryté pravidlem jsou bledé.<br><br>Změny se na dashboardu projeví hned po uložení.</p>`;
       return;
     }
     const field = (label, key, value, type = "text", extra = "") =>
