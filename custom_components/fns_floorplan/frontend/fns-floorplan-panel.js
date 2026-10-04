@@ -12,7 +12,7 @@ const SNAP = 0.05; // metres
 const NS = "http://www.w3.org/2000/svg";
 
 const FURNITURE_TYPES = Object.keys(FURNITURE);
-const LIGHT_TYPES = { lamp_ceiling: "Stropní světlo", lamp_pendant: "Závěsné světlo", lamp_panel: "Panel", lamp_table: "Lampička", lamp_wall: "Nástěnné světlo", led_strip: "LED pásek" };
+const LIGHT_TYPES = { lamp_spot: "Bodové světlo (směrové)", lamp_ceiling: "Stropní světlo", lamp_pendant: "Závěsné světlo", lamp_panel: "Panel", lamp_table: "Lampička", lamp_wall: "Nástěnné světlo", led_strip: "LED pásek" };
 const DEVICE_KINDS = {
   fan: "Větrák", purifier: "Čistička", dishwasher: "Myčka", dryer: "Sušička", boiler: "Kotel", radiator: "Radiátor",
   alarm: "Alarm (zabezpečení)", media: "TV / přehrávač", aquarium: "Akvárium (filtrace)", camera: "Kamera", fridge: "Lednice",
@@ -35,6 +35,7 @@ const ADD = [
   ["Stropní světlo", () => ({ cat: "furniture", item: { type: "lamp_ceiling", w: 0.3, d: 0.3, rotation: 0, entity: "" } })],
   ["Lampička", () => ({ cat: "furniture", item: { type: "lamp_table", w: 0.28, d: 0.28, rotation: 0, entity: "" } })],
   ["Nástěnné světlo", () => ({ cat: "furniture", item: { type: "lamp_wall", w: 0.2, d: 0.1, rotation: 0, entity: "" } })],
+  ["Bodové světlo (směrové)", () => ({ cat: "furniture", item: { type: "lamp_spot", w: 0.15, d: 0.15, rotation: 90, beam: 40, entity: "" } })],
   ["LED pásek", () => ({ cat: "furniture", item: { type: "led_strip", w: 1, d: 0.04, rotation: 0, entity: "" } })],
   ["Nábytek", () => ({ cat: "furniture", item: { type: "table", w: 1, d: 0.6, rotation: 0 } })],
   ["Spotřebič", () => ({ cat: "devices", item: { kind: "fan", name: "", entity: "" } })],
@@ -177,6 +178,7 @@ details summary { cursor: pointer; font-weight: 600; font-size: 14px; }
 .modes { display: flex; border: 1px solid var(--divider-color, #e0e0e0); border-radius: 18px; overflow: hidden; }
 .modes button { border: 0; padding: 7px 12px; background: var(--card-background-color, #fff); color: var(--primary-text-color, #212121); cursor: pointer; }
 .modes button.on { background: var(--primary-color, #03a9f4); color: var(--text-primary-color, #fff); }
+.spot-cone { fill: var(--primary-color, #03a9f4); fill-opacity: .1; stroke: var(--primary-color, #03a9f4); stroke-opacity: .35; stroke-dasharray: 3 3; pointer-events: none; }
 .mode-rooms .item { pointer-events: none; opacity: .3; }
 .mode-rooms .floor { cursor: move; }
 .mode-rooms .floor.sel { fill: var(--primary-color, #03a9f4); fill-opacity: .08; stroke: var(--primary-color, #03a9f4); stroke-opacity: 1; }
@@ -635,6 +637,12 @@ class FnsFloorplanPanel extends HTMLElement {
         el("line", { x1: -w / 2, y1: 0, x2: w / 2, y2: 0, class: "strip-hit" }, g);
         el("line", { x1: -w / 2, y1: 0, x2: w / 2, y2: 0, class: "strip" + (missing ? " noent" : "") }, g);
       } else if (isLight(f)) {
+        if (f.type === "lamp_spot") {
+          // preview of the cone, 1.5 m long
+          const a = ((f.rotation || 0) * Math.PI) / 180, h = (((f.beam || 40) / 2) * Math.PI) / 180, L = 1.5 * S / (SIZES[f.size] || 1);
+          const pt = (t) => `${Math.cos(t) * L} ${Math.sin(t) * L}`;
+          el("path", { d: `M0 0 L${pt(a - h)} A${L} ${L} 0 0 1 ${pt(a + h)} Z`, class: "spot-cone" }, g);
+        }
         el("circle", { r: 11, class: "lamp" + (missing ? " noent" : "") }, g);
         icon(g, f, 14, lightIcon(f.type), "ico lamp-ico");
       } else if (f.type === "robot_vacuum") {
@@ -712,7 +720,7 @@ class FnsFloorplanPanel extends HTMLElement {
     const roomOf = (f) => rooms.find((r) => inPoly([f.x, f.z], r.points))?.id;
     const groups = new Map();
     plan.furniture.forEach((f, i) => {
-      if (!isLight(f) || f.type === "led_strip" || !f.entity || !this._on(f)) return;
+      if (!isLight(f) || f.type === "led_strip" || f.type === "lamp_spot" || !f.entity || !this._on(f)) return;
       const key = f.entity + "|" + roomOf(f);
       if (!groups.has(key)) groups.set(key, []);
       groups.get(key).push(i);
@@ -1015,6 +1023,7 @@ class FnsFloorplanPanel extends HTMLElement {
         ${point ? "" : o.type === "led_strip" ? num("Délka (m)", "w", o.w) : `<div class="row2"><div>${num("Šířka (m)", "w", o.w)}</div><div>${num("Hloubka (m)", "d", o.d)}</div></div>`}
         ${point || light ? "" : `<label>Barva</label>${this._colorPick("color", o.color)}`}
         ${point ? "" : rotation}
+        ${o.type === "lamp_spot" ? `${rotation.replace("Otočení (°)", "Směr svícení (°, 0 = doprava, 90 = dolů)")}<label>Šířka kužele (°)</label><input data-k="beam" type="number" min="5" max="180" step="5" value="${o.beam || 40}">` : ""}
         ${o.type === "led_strip" ? "" : this._iconField(o, light ? lightIcon(o.type) : FURNITURE[o.type]?.[1])}
         ${point ? this._sizeField(o) : ""}
         ${dock ? "" : this._layerField(o)}
@@ -1436,6 +1445,7 @@ class FnsFloorplanPanel extends HTMLElement {
       if (["x", "z", "w", "d"].includes(key)) t[key] = r3(Number(value));
       else if (key === "rotation") t.rotation = ((Number(value) % 360) + 360) % 360;
       else if (key === "cover") { if (value) delete t.cover; else t.cover = false; }
+      else if (key === "beam") { if (value === "") delete t.beam; else t.beam = Math.min(180, Math.max(5, Number(value))); }
       else if (key === "sheet_hide") { if (value) t.sheet_hide = true; else delete t.sheet_hide; }
       else if (key === "room_light") { if (value === "") delete t.room_light; else t.room_light = Math.max(0, Number(value)) / 100; }
       else if (key === "color" || key === "color_on" || key === "background") {

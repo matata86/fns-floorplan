@@ -36,7 +36,7 @@ Coordinates are metres, `x` to the right and `z` down.
 |-----|---------|
 | `rooms` | `id`, `name`, `points`, `temperature`, `humidity`, `sheet_extra` (more entities for the room panel); label options `label_info` (list of `temperature`, `humidity`, entity ids or templates), `label_name: false`, `label_hidden: true`, `label_rotation` |
 | `openings` | `id`, `room_id`, `edge`, `offset`, `width`, `type` (door/window), `style` (`passage` = opening only), `hinge` (left/right), `swing` (in/out), `contact`, `blind` (a `cover` entity drawn as a bar along the window, as long as the blind is closed; `blind_side: out` puts it outside the wall, `blind_invert` for blinds that report 100 as closed), `lock` (a lock entity shown at the door) |
-| `furniture` | `id`, `type`, `x`, `z`, `rotation`, `w`, `d`; lights (`lamp_*`, `led_strip`) carry `entity` and optional `room_light`; `tv_wall` with a media player; `robot_vacuum` marks the dock |
+| `furniture` | `id`, `type`, `x`, `z`, `rotation`, `w`, `d`; lights (`lamp_*`, `led_strip`) carry `entity` and optional `room_light` (share of the room glow, 1 = 100 %); `lamp_spot` shines a cone towards `rotation` (0 = right, 90 = down) `beam` degrees wide (default 40); `tv_wall` with a media player; `robot_vacuum` marks the dock |
 | `sensors` | binary sensors with `entity`, `x`, `z` — motion/occupancy/presence ripple, moisture pulses red |
 | `vacuum` | `entity`, `room_sensor` (a sensor whose state is the room name) |
 | `devices` | `kind`, `name`, `entity`, `x`, `z`, `active` (list of states or `{"above": n}`), `info` (text while running), `prefix`, `text` (always), `text_on` (while running), `color` / `color_on` (idle / running; without them the entity's state colour from the Home Assistant theme) |
