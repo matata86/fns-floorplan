@@ -61,6 +61,7 @@ const minutes = (m) => (m >= 60 ? `${Math.floor(m / 60)} h ${Math.round(m % 60)}
 
 // icon sizes XS–XXL of lights, appliances and the robot; furniture keeps its size in metres
 const SIZES = { xs: 0.6, s: 0.8, m: 1, l: 1.25, xl: 1.5, xxl: 2 };
+const TEXT_ALWAYS = ["alarm", "lock"];
 const sizeK = (item) => SIZES[item?.size] || 1;
 // furniture: Czech name and MDI icon of every type
 const FURNITURE = {
@@ -845,8 +846,9 @@ function buildView(card, plan) {
     return !OFF_STATES.has(s.state);
   };
   const devText = (d, on) => {
+    // own text: only while running, unless `text_always` (alarm and lock show it always by default)
+    if (d.text && (on || (d.text_always ?? TEXT_ALWAYS.includes(d.kind)))) return tplText(d.text);
     if (!on) return "";
-    if (d.text) return tplText(d.text);
     if (d.kind === "media") {
       const a = st(d.entity)?.attributes || {};
       const t = [a.media_series_title || a.media_artist, a.media_title].filter(Boolean).join(" – ");
