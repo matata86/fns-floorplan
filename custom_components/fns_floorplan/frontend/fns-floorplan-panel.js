@@ -100,6 +100,7 @@ button, select, input, textarea { font: inherit; }
 .btn.primary { background: var(--primary-color, #03a9f4); border-color: transparent; color: var(--text-primary-color, #fff); font-weight: 600; }
 .btn:disabled { opacity: .45; cursor: default; }
 .btn.undo, .btn.redo { padding: 7px 11px; font-size: 16px; line-height: 1; }
+.top select.level { max-width: 150px; }
 .top select { border-radius: 18px; padding: 6px 10px; border: 1px solid var(--divider-color, #e0e0e0); background: var(--card-background-color, #fff); color: var(--primary-text-color, #212121); }
 .main { display: flex; height: calc(100vh - 56px); }
 .stage { flex: 1; min-width: 0; padding: 12px; box-sizing: border-box; position: relative; }
@@ -267,6 +268,7 @@ class FnsFloorplanPanel extends HTMLElement {
     this._dirty = false;
     this._sel = null;
     this._mode ||= "items";
+    this._level ??= this._levels()[0].id;
     this._undo = [];
     this._redo = [];
     this._last = this._snap();
@@ -282,6 +284,7 @@ class FnsFloorplanPanel extends HTMLElement {
   <h1>Půdorys</h1>
   <span class="state"></span>
   <div class="modes"><button data-m="items">Vybavení</button><button data-m="rooms">Místnosti</button></div>
+  <select class="level" title="Patro"></select>
   <select class="add"><option value="">+ Přidat</option>${ADD.map(([l], i) => `<option value="${i}">${l}</option>`).join("")}</select>
   <button class="btn undo" disabled title="Zpět (Ctrl+Z)">↶</button>
   <button class="btn redo" disabled title="Vpřed (Ctrl+Y)">↷</button>
@@ -308,12 +311,13 @@ class FnsFloorplanPanel extends HTMLElement {
       this._draw();
       this._form();
     }));
+    $(".level").addEventListener("change", (e) => this._levelAction(e.target.value));
     $(".add").addEventListener("change", (e) => {
       if (e.target.value === "") return;
       if (e.target.value === "room") {
         e.target.value = "";
         const [cx, cz] = centroid(this._bounds()).map((v) => r3(snap(v)));
-        this._plan.rooms.push({ id: uid("room"), name: "Nová místnost", points: [[cx - 1, cz - 1], [cx + 1, cz - 1], [cx + 1, cz + 1], [cx - 1, cz + 1]], temperature: null, humidity: null });
+        this._plan.rooms.push(this._stamp({ id: uid("room"), name: "Nová místnost", points: [[cx - 1, cz - 1], [cx + 1, cz - 1], [cx + 1, cz + 1], [cx - 1, cz + 1]], temperature: null, humidity: null }));
         this._mode = "rooms";
         this._sel = { cat: "rooms", i: this._plan.rooms.length - 1 };
         return this._changed();
@@ -321,7 +325,7 @@ class FnsFloorplanPanel extends HTMLElement {
       const { cat, item } = ADD[Number(e.target.value)][1]();
       e.target.value = "";
       const [cx, cz] = centroid(this._bounds());
-      Object.assign(item, { x: r3(snap(cx)), z: r3(snap(cz)) });
+      Object.assign(this._stamp(item), { x: r3(snap(cx)), z: r3(snap(cz)) });
       if (cat === "furniture") item.id = `f_${Date.now().toString(36)}`;
       this._plan[cat].push(item);
       this._sel = { cat, i: this._plan[cat].length - 1 };
@@ -409,9 +413,69 @@ class FnsFloorplanPanel extends HTMLElement {
     this._applyView();
   }
 
+  // floors: plan.levels [{id, name}]; a room or item without `level` is on the first floor
+  _levels() {
+    return this._plan.levels?.length ? this._plan.levels : [{ id: "0", name: "Přízemí" }];
+  }
+
+  _on(x) {
+    return String(x.level ?? this._levels()[0].id) === String(this._level);
+  }
+
+  // what a new room or item gets: nothing on the first floor, otherwise the current floor
+  _stamp(item) {
+    if (String(this._level) !== String(this._levels()[0].id)) item.level = this._level;
+    return item;
+  }
+
+  _roomsHere() {
+    return this._plan.rooms.filter((r) => this._on(r));
+  }
+
+  _fillLevels() {
+    const sel = this.shadowRoot.querySelector(".level");
+    const levels = this._levels();
+    if (!levels.some((l) => String(l.id) === String(this._level))) this._level = levels[0].id;
+    sel.innerHTML = levels.map((l) => `<option value="${esc(l.id)}">${esc(l.name)}</option>`).join("") +
+      '<option value="+new">＋ Nové patro…</option><option value="+rename">Přejmenovat patro…</option>' +
+      (levels.length > 1 && String(this._level) !== String(levels[0].id) ? '<option value="+delete">Smazat patro…</option>' : "");
+    sel.value = String(this._level);
+  }
+
+  _levelAction(v) {
+    const levels = this._levels();
+    const cur = levels.find((l) => String(l.id) === String(this._level));
+    if (v === "+new") {
+      const name = prompt("Název nového patra", `${levels.length}. patro`);
+      if (!name) return this._fillLevels();
+      this._plan.levels = [...levels, { id: uid("lvl"), name }];
+      this._level = this._plan.levels.at(-1).id;
+      this._mode = "rooms"; // an empty floor starts with drawing rooms
+    } else if (v === "+rename") {
+      const name = prompt("Nový název patra", cur.name);
+      if (!name) return this._fillLevels();
+      this._plan.levels = levels.map((l) => (l === cur ? { ...l, name } : l));
+    } else if (v === "+delete") {
+      const rooms = this._roomsHere(), n = rooms.length + ["furniture", "devices", "sensors", "texts"].reduce((t, k) => t + this._plan[k].filter((x) => this._on(x)).length, 0);
+      if (!confirm(`Smazat patro ${cur.name}${n ? ` i s ${n} místnostmi a prvky` : ""}?`)) return this._fillLevels();
+      const ids = new Set(rooms.map((r) => r.id));
+      this._plan.openings = this._plan.openings.filter((o) => !ids.has(o.room_id));
+      for (const id of ids) delete this._plan.labels[id];
+      for (const k of ["rooms", "furniture", "devices", "sensors", "texts"]) this._plan[k] = this._plan[k].filter((x) => !this._on(x));
+      this._plan.levels = levels.filter((l) => l !== cur);
+      this._level = this._plan.levels[0].id;
+    } else this._level = v;
+    this._sel = null;
+    this._view = null;
+    if (v.startsWith("+")) this._changed();
+    else { this._draw(); this._form(); }
+  }
+
   _bounds() {
-    const xs = this._plan.rooms.flatMap((r) => r.points.map((p) => p[0]));
-    const zs = this._plan.rooms.flatMap((r) => r.points.map((p) => p[1]));
+    const rooms = this._roomsHere();
+    if (!rooms.length) return [[0, 0], [6, 0], [6, 6], [0, 6]];
+    const xs = rooms.flatMap((r) => r.points.map((p) => p[0]));
+    const zs = rooms.flatMap((r) => r.points.map((p) => p[1]));
     const x1 = Math.max(...xs), z1 = Math.max(...zs);
     return [[0, 0], [x1, 0], [x1, z1], [0, z1]];
   }
@@ -471,7 +535,9 @@ class FnsFloorplanPanel extends HTMLElement {
       }
     };
     plan.openings ||= [];
+    this._fillLevels();
     plan.rooms.forEach((r, i) => {
+      if (!this._on(r)) return;
       const f = el("path", { d: "M" + r.points.map(P).map((p) => p.join(",")).join("L") + "Z", class: "floor" + (this._sel?.cat === "rooms" && this._sel.i === i ? " sel" : "") }, svg);
       const res = ruled(r), tint = res.tint || res.color;
       if (tint) el("path", { d: f.getAttribute("d"), class: "tint", fill: COLORS[tint] || tint, "fill-opacity": res.opacity ?? 0.14 }, svg);
@@ -486,7 +552,7 @@ class FnsFloorplanPanel extends HTMLElement {
     });
     plan.openings.forEach((o, oi) => {
       const r = plan.rooms.find((x) => x.id === o.room_id);
-      if (!r) return;
+      if (!r || !this._on(r)) return;
       const { a, u, L } = edgeOf(r, o.edge);
       const A = P([a[0] + u[0] * (o.offset - o.width / 2), a[1] + u[1] * (o.offset - o.width / 2)]);
       const B = P([a[0] + u[0] * (o.offset + o.width / 2), a[1] + u[1] * (o.offset + o.width / 2)]);
@@ -555,7 +621,7 @@ class FnsFloorplanPanel extends HTMLElement {
     // furniture first (by layer), lights over it, then appliances, sensors and labels on top
     const order = plan.furniture.map((f, i) => [f, i]).sort((a, b) => isLight(a[0]) - isLight(b[0]) || layer(a[0]) - layer(b[0]));
     for (const [f, i] of order) {
-      if (grouped.has(i)) continue;
+      if (grouped.has(i) || !this._on(f)) continue;
       const res = ruled(f);
       const point = isPoint(f);
       const g = group({ cat: "furniture", i }, f.x, f.z, point ? 0 : f.rotation || 0, point ? SIZES[f.size] || 1 : 1);
@@ -587,7 +653,7 @@ class FnsFloorplanPanel extends HTMLElement {
       el("circle", { cx: 10, cy: -10, r: 7, class: "count" }, g);
       el("text", { class: "count-t", "text-anchor": "middle", x: 10, y: -6.5 }, g).textContent = members.length;
     }
-    plan.devices.map((d, i) => [d, i]).sort((a, b) => layer(a[0]) - layer(b[0])).forEach(([d, i]) => {
+    plan.devices.map((d, i) => [d, i]).filter(([d]) => this._on(d)).sort((a, b) => layer(a[0]) - layer(b[0])).forEach(([d, i]) => {
       const g = group({ cat: "devices", i }, d.x, d.z, 0, SIZES[d.size] || 1);
       const res = ruled(d);
       if (res.hide) g.classList.add("rhid");
@@ -595,12 +661,14 @@ class FnsFloorplanPanel extends HTMLElement {
       icon(g, d, 18, DEVICE_ICON[d.kind] || "mdiShapeOutline");
     });
     plan.sensors.forEach((s, i) => {
+      if (!this._on(s)) return;
       const g = group({ cat: "sensors", i }, s.x, s.z);
       el("circle", { r: 11, class: "sensor" + (s.entity ? "" : " noent") }, g);
       const dc = states[s.entity]?.attributes.device_class;
       icon(g, s, 14, dc === "moisture" ? "mdiWaterAlert" : "mdiMotionSensor", "ico sensor-ico");
     });
     plan.texts.forEach((t, i) => {
+      if (!this._on(t)) return;
       const g = group({ cat: "texts", i }, t.x, t.z, t.rotation || 0, SIZES[t.size] || 1);
       g.classList.add("label");
       const res = ruled(t);
@@ -616,6 +684,7 @@ class FnsFloorplanPanel extends HTMLElement {
       Object.entries({ x: bb.x - 6, y: bb.y - 3, width: bb.width + 12, height: bb.height + 6 }).forEach(([k, v]) => rect.setAttribute(k, v));
     });
     for (const r of plan.rooms) {
+      if (!this._on(r)) continue;
       const [x, z] = plan.labels[r.id] || centroid(r.points);
       const g = group({ cat: "labels", id: r.id }, x, z, r.label_rotation || 0);
       g.classList.add("label");
@@ -636,10 +705,11 @@ class FnsFloorplanPanel extends HTMLElement {
   // fixtures of one light in one room are one item, as on the card (a room's ceiling spots count as one light)
   _groups() {
     const plan = this._plan;
-    const roomOf = (f) => plan.rooms.find((r) => inPoly([f.x, f.z], r.points))?.id;
+    const rooms = this._roomsHere();
+    const roomOf = (f) => rooms.find((r) => inPoly([f.x, f.z], r.points))?.id;
     const groups = new Map();
     plan.furniture.forEach((f, i) => {
-      if (!isLight(f) || f.type === "led_strip" || !f.entity) return;
+      if (!isLight(f) || f.type === "led_strip" || !f.entity || !this._on(f)) return;
       const key = f.entity + "|" + roomOf(f);
       if (!groups.has(key)) groups.set(key, []);
       groups.get(key).push(i);
@@ -894,6 +964,7 @@ class FnsFloorplanPanel extends HTMLElement {
           <option value="false" ${o.room_light === false ? "selected" : ""}>Jen slabě (akvárium, dekorace)</option>
           ${[0.3, 0.5, 0.75].map((v) => `<option value="${v}" ${o.room_light === v ? "selected" : ""}>${Math.round(v * 100)} %</option>`).join("")}
         </select>` : ""}
+        ${light ? `<label class="chk"><input type="checkbox" data-k="sheet_hide" ${o.sheet_hide ? "checked" : ""}> nezobrazovat v panelu místnosti</label>` : ""}
         ${xz}
         ${point ? "" : o.type === "led_strip" ? num("Délka (m)", "w", o.w) : `<div class="row2"><div>${num("Šířka (m)", "w", o.w)}</div><div>${num("Hloubka (m)", "d", o.d)}</div></div>`}
         ${point ? "" : rotation}
@@ -911,6 +982,7 @@ class FnsFloorplanPanel extends HTMLElement {
         ${field("Text pod ikonou z entity", "info", o.info || "", "text", 'list="ents"')}
         ${field("Předpona textu", "prefix", o.prefix || "")}
         ${field("Vlastní text (může být šablona {{ … }})", "text", o.text || "")}
+        <label class="chk"><input type="checkbox" data-k="sheet_hide" ${o.sheet_hide ? "checked" : ""}> nezobrazovat v panelu místnosti</label>
         ${o.kind === "media" ? `<label class="chk"><input type="checkbox" data-k="cover" ${o.cover === false ? "" : "checked"}> obal alba nebo pořadu v odznaku (při přehrávání a pauze)</label>` : ""}
         ${xz}
         ${this._iconField(o, DEVICE_ICON[o.kind])}
@@ -987,7 +1059,7 @@ class FnsFloorplanPanel extends HTMLElement {
 
   _place(where) {
     const sel = this._sel, o = this._get();
-    const room = sel.cat === "labels" ? o.room : this._plan.rooms.find((r) => inPoly([o.x, o.z], r.points));
+    const room = sel.cat === "labels" ? o.room : this._roomsHere().find((r) => inPoly([o.x, o.z], r.points));
     if (!room) return;
     const xs = room.points.map((p) => p[0]), zs = room.points.map((p) => p[1]);
     // keep the whole item inside: half of its turned box, or a fixed gap for point items
@@ -1184,6 +1256,8 @@ class FnsFloorplanPanel extends HTMLElement {
       </details>
       ${v != null ? `<div class="row2"><div><label>Roh ${v + 1}: X (m)</label><input data-k="vx" type="number" step="0.05" value="${r.points[v][0]}"></div><div><label>Z (m)</label><input data-k="vz" type="number" step="0.05" value="${r.points[v][1]}"></div></div>
         <div class="actions"><button data-a="delv" ${r.points.length <= 3 ? "disabled" : ""}>Smazat roh ${v + 1}</button></div>` : `<p class="hint">Rohů: ${r.points.length}. Klepnutím na roh ho vybereš.</p>`}
+      <label>Další entity v panelu místnosti (každá na řádek; světla a spínače s přepínačem)</label>
+      <textarea data-k="sheet_extra" spellcheck="false" style="min-height:60px" placeholder="switch.zasuvka_pracovna">${esc((r.sheet_extra || []).join("\n"))}</textarea>
       <label>Přidat na stěnu</label><select data-k="wall">${walls}</select>
       <div class="actions"><button data-a="adddoor">+ Dveře</button><button data-a="addwin">+ Okno</button></div>
       ${this._rulesUI(r, ["color", "glow", "hide"]).replace("Pravidla: barvy, skrytí", "Pravidla: podbarvení, skrytí badge")}
@@ -1192,6 +1266,7 @@ class FnsFloorplanPanel extends HTMLElement {
       if (await this._setShared([r], k, val, inp)) return;
       if (k === "wall") return (this._wall = Number(val));
       if (k === "vx" || k === "vz") r.points[v][k === "vx" ? 0 : 1] = r3(Math.max(0, Number(val)));
+      else if (k === "sheet_extra") { const list = val.split("\n").map((x) => x.trim()).filter(Boolean); if (list.length) r.sheet_extra = list; else delete r.sheet_extra; }
       else if (k === "label_show") { if (val) delete r.label_hidden; else r.label_hidden = true; }
       else if (k === "label_name") { if (val) delete r.label_name; else r.label_name = false; }
       else if (k === "label_t" || k === "label_h" || k === "label_extra") {
@@ -1239,11 +1314,13 @@ class FnsFloorplanPanel extends HTMLElement {
       ${o.blind ? `<div class="row2"><div><label>Roleta je</label><select data-k="blind_side">${opt("in", "Uvnitř", o.blind_side || "in")}${opt("out", "Venku", o.blind_side)}</select></div>
         <div><label class="chk" style="margin-top:30px"><input type="checkbox" data-k="blind_invert" ${o.blind_invert ? "checked" : ""}> pozice obráceně</label></div></div>` : ""}
       ${win ? "" : `<label>Zámek (lock, nepovinné; klepnutí na odznak otevře jeho detail)</label><input data-k="lock" value="${esc(o.lock || "")}" list="ents">`}
+      <label class="chk"><input type="checkbox" data-k="sheet_hide" ${o.sheet_hide ? "checked" : ""}> nezobrazovat v panelu místnosti</label>
       ${this._actionsUI(o, { tap: o.blind ? "Detail rolety" : o.contact ? "Detail kontaktu" : "" })}`}
       <div class="actions"><button data-a="del" class="del">Smazat</button></div>`;
     this._bind(side, async (k, val, inp) => {
       if (await this._setShared([o], k, val, inp)) return;
-      if (k === "blind_invert") { if (val) o.blind_invert = true; else delete o.blind_invert; }
+      if (k === "sheet_hide") { if (val) o.sheet_hide = true; else delete o.sheet_hide; }
+      else if (k === "blind_invert") { if (val) o.blind_invert = true; else delete o.blind_invert; }
       else if (k === "blind_side") { if (val === "out") o.blind_side = "out"; else delete o.blind_side; }
       else if (k === "width" || k === "offset") o[k] = r3(Math.max(0.1, Number(val)));
       else if (k === "type") { o.type = val; o.style = val === "window" ? null : o.style || "interior"; }
@@ -1286,6 +1363,7 @@ class FnsFloorplanPanel extends HTMLElement {
       if (["x", "z", "w", "d"].includes(key)) t[key] = r3(Number(value));
       else if (key === "rotation") t.rotation = ((Number(value) % 360) + 360) % 360;
       else if (key === "cover") { if (value) delete t.cover; else t.cover = false; }
+      else if (key === "sheet_hide") { if (value) t.sheet_hide = true; else delete t.sheet_hide; }
       else if (key === "room_light") { if (value === "") delete t.room_light; else t.room_light = value === "false" ? false : Number(value); }
       else if (key === "color" || key === "background") {
         const v = value === "custom" ? inp.nextElementSibling.value : value;

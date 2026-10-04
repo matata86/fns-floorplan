@@ -91,6 +91,18 @@ const LOCK_ICON = { locked: "mdiLock", unlocked: "mdiLockOpenVariant", open: "md
 const lockState = (s) => (s === "locked" ? "locked" : s === "jammed" ? "jammed" : s === "locking" || s === "unlocking" || s === "opening" ? "moving" : s === "unlocked" || s === "open" ? "unlocked" : "off");
 const MEDIA_ICON = { tv: "mdiTelevision", speaker: "mdiSpeaker", receiver: "mdiAudioVideo" };
 
+// floors: plan.levels [{id, name}]; a room or item without `level` belongs to the first one
+const levelsOf = (plan) => (plan.levels?.length ? plan.levels : [{ id: "0", name: "Přízemí" }]);
+const onLevel = (item, lvl, base) => String(item.level ?? base) === String(lvl);
+// the part of the plan on one floor (openings follow their room, the robot its dock)
+function planForLevel(plan, lvl) {
+  const base = levelsOf(plan)[0].id;
+  const pick = (k) => (plan[k] || []).filter((x) => onLevel(x, lvl, base));
+  const rooms = pick("rooms"), ids = new Set(rooms.map((r) => r.id));
+  return { ...plan, rooms, openings: (plan.openings || []).filter((o) => ids.has(o.room_id)), furniture: pick("furniture"),
+    devices: pick("devices"), sensors: pick("sensors"), texts: pick("texts") };
+}
+
 // any HA icon ("mdi:…") as a path: from the bundled set, otherwise read from an offscreen <ha-icon>
 const iconCache = new Map();
 const deepPath = (node) => {
@@ -245,6 +257,10 @@ ha-card { overflow: hidden; background: none; border: 0; }
   --text: #1b1f3b; --muted: #5b638f; --chip: rgba(255, 255, 255, .86); --line: rgba(63, 70, 200, .16);
 }
 [hidden] { display: none !important; }
+.floors { position: absolute; left: 10px; top: 10px; z-index: 2; display: flex; gap: 4px; padding: 3px; border-radius: 99px; background: var(--chip); border: 1px solid var(--line);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+.floors button { border: 0; background: none; color: var(--muted); font: 500 12px/1 inherit; font-family: inherit; padding: 6px 11px; border-radius: 99px; cursor: pointer; }
+.floors button.on { background: var(--accent); color: #fff; }
 .stage { position: relative; border-radius: inherit; overflow: hidden; max-height: 85vh;
   background: linear-gradient(160deg, rgba(255,255,255,.025), rgba(255,255,255,0)); }
 svg.plan { width: 100%; height: 100%; display: block; }
@@ -451,7 +467,9 @@ class FnsFloorplanCard extends HTMLElement {
   }
 
   setConfig(config) {
+    const levelChanged = this._config && this._config.level !== config.level;
     this._config = { mode: "auto", rotate: "auto", ...config };
+    if (levelChanged && this._plan) { this._level = config.level; return this._showPlan(); }
     if (this._v) { this._v.update(true); this._v.layout(); }
   }
 
@@ -514,6 +532,18 @@ class FnsFloorplanCard extends HTMLElement {
     const json = JSON.stringify(plan);
     if (json === this._planJson) return; // a reconnect resends the same plan
     this._planJson = json;
+    this._plan = plan;
+    this._showPlan();
+  }
+
+  // draw the chosen floor; with more floors the card shows tabs to switch
+  _showPlan() {
+    const all = this._plan;
+    const levels = levelsOf(all || {});
+    window.fnsFloorplanLevels = levels; // the card editor offers them as the default floor
+    if (!levels.some((l) => String(l.id) === String(this._level))) this._level = this._config?.level ?? levels[0].id;
+    if (!levels.some((l) => String(l.id) === String(this._level))) this._level = levels[0].id;
+    const plan = all?.rooms ? { ...planForLevel(all, this._level), _levels: levels, _level: this._level } : all;
     if (!plan?.rooms?.length) {
       this._v?.detach();
       this._v = null;
@@ -524,6 +554,11 @@ class FnsFloorplanCard extends HTMLElement {
     this._v = buildView(this, plan);
     if (this.isConnected) this._v.attach();
     this._v.update(true);
+  }
+
+  _setLevel(id) {
+    this._level = id;
+    this._showPlan();
   }
 
   _message(text) {
@@ -542,6 +577,7 @@ function buildView(card, plan) {
   const root$ = card.shadowRoot;
   root$.innerHTML = `<style>${STYLE}</style>
 <ha-card><div class="app">
+  <div class="floors"${plan._levels?.length > 1 ? "" : " hidden"}>${(plan._levels || []).map((l) => `<button data-l="${String(l.id).replace(/"/g, "")}"${String(l.id) === String(plan._level) ? ' class="on"' : ""}></button>`).join("")}</div>
   <div class="stage">
     <svg class="plan" preserveAspectRatio="xMidYMid meet"></svg>
     <aside class="sheet">
@@ -555,6 +591,10 @@ function buildView(card, plan) {
   const $ = (sel) => root$.querySelector(sel);
   root$.querySelectorAll("[data-mdi]").forEach((n) => (n.innerHTML = mdiSvg(n.dataset.mdi)));
   const app = $(".app"), stage = $(".stage"), svg = $("svg.plan"), sheet = $(".sheet");
+  root$.querySelectorAll(".floors button").forEach((b, i) => {
+    b.textContent = plan._levels[i].name;
+    b.addEventListener("click", () => card._setLevel(plan._levels[i].id));
+  });
   const hass = () => card._hass;
   const cfg = () => card._config || {};
   const st = (id) => (id ? hass().states[id] : undefined);
@@ -748,7 +788,7 @@ function buildView(card, plan) {
     const mid = [a[0] + u[0] * o.offset, a[1] + u[1] * o.offset], c = centroid(p);
     let n = [-u[1], u[0]];
     if ((c[0] - mid[0]) * n[0] + (c[1] - mid[1]) * n[1] < 0) n = [-n[0], -n[1]];
-    return { kind: "lock", entity: o.lock, x: mid[0] + n[0] * 0.3, z: mid[1] + n[1] * 0.3, size: o.lock_size || "s" };
+    return { kind: "lock", entity: o.lock, x: mid[0] + n[0] * 0.3, z: mid[1] + n[1] * 0.3, size: o.lock_size || "s", sheet_hide: o.sheet_hide };
   });
   const devices = [...(plan.devices || []), ...doorLocks].filter((d) => ICON[d.kind]);
   for (const d of devices) {
@@ -1093,7 +1133,8 @@ function buildView(card, plan) {
   }
   function renderMode() {
     const m = cfg().mode;
-    const day = m === "day" || (m === "auto" && st("sun.sun")?.state === "above_horizon");
+    // "ha" follows HA's own light / dark theme
+    const day = m === "day" || (m === "auto" && st("sun.sun")?.state === "above_horizon") || (m === "ha" && !hass().themes?.darkMode);
     app.dataset.mode = day ? "day" : "night";
   }
 
@@ -1211,7 +1252,10 @@ function buildView(card, plan) {
     sub.querySelectorAll("[data-e]").forEach((n) => n.addEventListener("click", () => moreInfo(n.dataset.e)));
     const rows = sheet.querySelector(".rows");
     rows.innerHTML = "";
-    const ids = Object.entries(lampGroups).filter(([, l]) => l.some((f) => roomAt(f.x, f.z) === r)).map(([e]) => e);
+    // an item can be left out of the panel (sheet_hide); the room can add any entity (sheet_extra)
+    const ids = Object.entries(lampGroups).filter(([, l]) => { const here = l.filter((f) => roomAt(f.x, f.z) === r); return here.length && !here.some((f) => f.sheet_hide); }).map(([e]) => e);
+    const TOGGLE_DOMAINS = ["light", "switch", "fan", "input_boolean", "humidifier", "siren"];
+    for (const e of r.sheet_extra || []) if (TOGGLE_DOMAINS.includes(e.split(".")[0]) && !ids.includes(e)) ids.push(e);
     for (const e of ids) {
       // the whole row opens the light's details, the switch only toggles it
       const line = row(rows, `<span>${esc(nameOf(e))}</span>`, "row link");
@@ -1222,16 +1266,19 @@ function buildView(card, plan) {
       b.onclick = (ev) => { ev.stopPropagation(); toggle(e); };
       line.appendChild(b);
     }
-    for (const o of (plan.openings || []).filter((o) => o.room_id === id && o.contact)) {
+    for (const o of (plan.openings || []).filter((o) => o.room_id === id && o.contact && !o.sheet_hide)) {
       const open = isOpen(o);
       const label = o.type === "window" ? "Okno" : "Dveře";
       row(rows, `<span>${label}</span><span class="st${open ? " open" : ""}">${open ? "otevřeno" : "zavřeno"}</span>`, "row link")
         .addEventListener("click", () => moreInfo(o.contact));
     }
-    for (const d of devices.filter((d) => roomAt(d.x, d.z) === r)) {
+    for (const d of devices.filter((d) => roomAt(d.x, d.z) === r && !d.sheet_hide)) {
       const on = devActive(d);
       row(rows, `<span>${esc(d.name || nameOf(d.entity))}</span><span class="st">${esc(on ? devText(d, on) || "běží" : "vypnuto")}</span>`, "row link")
         .addEventListener("click", () => moreInfo(d.entity));
+    }
+    for (const e of (r.sheet_extra || []).filter((e) => !TOGGLE_DOMAINS.includes(e.split(".")[0]))) {
+      row(rows, `<span>${esc(nameOf(e))}</span><span class="st">${esc(stateText(e))}</span>`, "row link").addEventListener("click", () => moreInfo(e));
     }
     if (!rows.children.length) row(rows, "Nic k ovládání", "row hint");
     sheet.classList.add("open");
@@ -1301,6 +1348,7 @@ function buildView(card, plan) {
   for (const r of rooms) {
     if (r.temperature) tracked.add(r.temperature);
     if (r.humidity) tracked.add(r.humidity);
+    for (const e of r.sheet_extra || []) tracked.add(e);
     for (const k of r.info || []) if (isTpl(k)) templates.add(k); else if (k.includes(".")) tracked.add(k);
   }
   for (const L of lampNodes) ruleEntities(L.rules, tracked);
@@ -1322,6 +1370,7 @@ function buildView(card, plan) {
   if (vacCfg) { tracked.add(vacCfg.entity); if (vacCfg.room_sensor) tracked.add(vacCfg.room_sensor); }
   if (dock) ruleEntities(dock.rules, tracked);
   const seen = new Map();
+  let lastDark;
 
   hydrate(svg);
   const api = {
@@ -1329,6 +1378,7 @@ function buildView(card, plan) {
       const h = hass();
       if (!h) return;
       let changed = force;
+      if (h.themes?.darkMode !== lastDark) { lastDark = h.themes?.darkMode; changed = true; }
       for (const id of tracked) {
         const s = h.states[id];
         if (seen.get(id) !== s) { seen.set(id, s); changed = true; }
@@ -1379,13 +1429,19 @@ defineSafe("fns-floorplan-card", FnsFloorplanCard);
 // visual editor of the card in the dashboard: the card's own options and a way to the plan editor
 const EDITOR_SCHEMA = [
   { name: "mode", selector: { select: { mode: "dropdown", options: [
-    { value: "auto", label: "Podle slunce" }, { value: "day", label: "Vždy den" }, { value: "night", label: "Vždy noc" },
+    { value: "auto", label: "Podle slunce" }, { value: "ha", label: "Podle HA (světlý / tmavý motiv)" }, { value: "day", label: "Vždy den" }, { value: "night", label: "Vždy noc" },
   ] } } },
   { name: "rotate", selector: { select: { mode: "dropdown", options: [
     { value: "auto", label: "Automaticky (úzká karta)" }, { value: "true", label: "Vždy otočit o 90°" }, { value: "false", label: "Nikdy" },
   ] } } },
 ];
-const EDITOR_LABELS = { mode: "Vzhled", rotate: "Otočení plánu" };
+const EDITOR_LABELS = { mode: "Vzhled", rotate: "Otočení plánu", level: "Výchozí patro" };
+const editorSchema = () => {
+  const levels = window.fnsFloorplanLevels || [];
+  return levels.length > 1
+    ? [...EDITOR_SCHEMA, { name: "level", selector: { select: { mode: "dropdown", options: levels.map((l) => ({ value: String(l.id), label: l.name })) } } }]
+    : EDITOR_SCHEMA;
+};
 
 class FnsFloorplanCardEditor extends HTMLElement {
   setConfig(config) {
@@ -1413,7 +1469,7 @@ class FnsFloorplanCardEditor extends HTMLElement {
         window.location.assign("/fns-floorplan");
       });
       this._form = document.createElement("ha-form");
-      this._form.schema = EDITOR_SCHEMA;
+      this._form.schema = editorSchema();
       this._form.computeLabel = (s) => EDITOR_LABELS[s.name] || s.name;
       this._form.addEventListener("value-changed", (e) => {
         const v = { ...e.detail.value };
@@ -1422,13 +1478,17 @@ class FnsFloorplanCardEditor extends HTMLElement {
         else if (v.rotate === "false") config.rotate = false;
         else delete config.rotate;
         if (config.mode === "auto") delete config.mode;
+        if (v.level && v.level !== String((window.fnsFloorplanLevels || [])[0]?.id)) config.level = v.level;
+        else delete config.level;
         this.dispatchEvent(new CustomEvent("config-changed", { detail: { config }, bubbles: true, composed: true }));
       });
       this.querySelector(".fp-form").appendChild(this._form);
     }
     this._form.hass = this._hass;
     const r = this._config?.rotate;
-    this._form.data = { mode: this._config?.mode || "auto", rotate: r === true ? "true" : r === false ? "false" : "auto" };
+    this._form.schema = editorSchema();
+    this._form.data = { mode: this._config?.mode || "auto", rotate: r === true ? "true" : r === false ? "false" : "auto",
+      level: String(this._config?.level ?? (window.fnsFloorplanLevels || [])[0]?.id ?? "") };
   }
 }
 defineSafe("fns-floorplan-card-editor", FnsFloorplanCardEditor);
