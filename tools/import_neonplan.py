@@ -7,7 +7,8 @@ building.json  the result of the websocket command `neonplan3d/building/get`
                (either the whole result or just its "building").
 extras.json    optional: things NeonPlan does not know, merged on top:
                {"devices": [...], "labels": {room_id: [x, z]}, "outdoor": room_id,
-                "room_rules": {room_id: [rules]}, "furniture_rules": {furniture_id: [rules]}}
+                "room_rules": {room_id: [rules]}, "furniture_rules": {furniture_id: [rules]},
+                "furniture_patch": {furniture_id: {field: value}}}
 
 Save the plan with the websocket command
     {"type": "fns_floorplan/plan/save", "plan": <plan.json>}
@@ -77,6 +78,10 @@ def convert(building, extras=None):
         for item in items:
             if item["id"] in by_id:
                 item["rules"] = by_id[item["id"]]
+    # small corrections on top of NeonPlan, e.g. {"f_bed": {"x": 1.6}}
+    patch = extras.pop("furniture_patch", {})
+    for item in furniture:
+        item.update(patch.get(item["id"], {}))
     plan.update(extras)
     return plan
 
