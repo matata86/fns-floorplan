@@ -1011,7 +1011,7 @@ class FnsFloorplanPanel extends HTMLElement {
         ${light ? `<label>Osvětlení místnosti</label><select data-k="room_light">
           <option value="" ${o.room_light == null ? "selected" : ""}>Výchozí</option>
           <option value="false" ${o.room_light === false ? "selected" : ""}>Jen slabě (akvárium, dekorace)</option>
-          ${[0.3, 0.5, 0.75].map((v) => `<option value="${v}" ${o.room_light === v ? "selected" : ""}>${Math.round(v * 100)} %</option>`).join("")}
+          ${[0.3, 0.5, 0.75, 1.25, 1.5, 2].map((v) => `<option value="${v}" ${o.room_light === v ? "selected" : ""}>${Math.round(v * 100)} %</option>`).join("")}
         </select>` : ""}
         ${light ? `<label class="chk"><input type="checkbox" data-k="sheet_hide" ${o.sheet_hide ? "checked" : ""}> nezobrazovat v panelu místnosti</label>` : ""}
         ${xz}
