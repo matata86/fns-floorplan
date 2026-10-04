@@ -18,6 +18,8 @@ const DEVICE_KINDS = {
   alarm: "Alarm (zabezpečení)", media: "TV / přehrávač", aquarium: "Akvárium (filtrace)", camera: "Kamera", fridge: "Lednice",
   fireplace: "Krb", lock: "Zámek", generic: "Jiné zařízení (ikona entity)",
 };
+const DEVICE_FX = { ring: "rozbíhající kruh", radar: "radar", comet: "kometa po obvodu", countdown: "odpočet", spin: "načítání", orbit: "oběžnice", breath: "dýchání", blink: "blikání", heartbeat: "tep", shake: "zvonění", none: "bez animace kruhu" };
+const fxOptions = (v, empty) => `<option value="">${empty}</option>` + Object.entries(DEVICE_FX).map(([k, t]) => `<option value="${k}" ${v === k ? "selected" : ""}>${t}</option>`).join("");
 const DEVICE_ICON = {
   fan: "mdiFan", purifier: "mdiAirPurifier", dishwasher: "mdiDishwasher", dryer: "mdiTumbleDryer", boiler: "mdiWaterBoiler",
   radiator: "mdiRadiator", alarm: "mdiShieldOutline", media: "mdiCastVariant", generic: "mdiShapeOutline",
@@ -1276,6 +1278,7 @@ class FnsFloorplanPanel extends HTMLElement {
         <p class="hint">Oba texty můžou být šablona {{ … }}. Stav entity vložíš šablonou, třeba {{ states('sensor.teplota') }} °C. Když běží, má přednost text pro běh (u přehrávače jinak název), jinak text pod ikonou.</p>
         <div class="row2"><div><label>Barva</label>${this._colorPick("color", o.color)}</div><div><label>Barva, když běží</label>${this._colorPick("color_on", o.color_on)}</div></div>
         <p class="hint">Barva, když běží: Výchozí = stejná jako Barva. Obě výchozí = barva stavu entity z motivu HA.</p>
+        <label>Animace kruhu, když běží</label><select data-k="fx">${fxOptions(o.fx, o.kind === "alarm" ? "výchozí (poplach radar, odpočet při odchodu, jinak kruh)" : "výchozí (rozbíhající kruh)")}</select>
         <label class="chk"><input type="checkbox" data-k="sheet_hide" ${o.sheet_hide ? "checked" : ""}> nezobrazovat v panelu místnosti</label>
         ${o.kind === "media" ? `<label class="chk"><input type="checkbox" data-k="cover" ${o.cover === false ? "" : "checked"}> obal alba nebo pořadu v odznaku (při přehrávání a pauze)</label>` : ""}
         ${xz}
@@ -1283,7 +1286,7 @@ class FnsFloorplanPanel extends HTMLElement {
         ${this._sizeField(o)}
         ${this._layerField(o)}
         ${this._actionsUI(o, { tap: "Detail entity" })}
-        ${this._rulesUI(o, ["color", "glow", "animate", "text", "icon", "wave", "hide"])}`;
+        ${this._rulesUI(o, ["color", "glow", "animate", "fx", "text", "icon", "wave", "hide"])}`;
     } else if (sel.cat === "texts") {
       html = `<h2>Text</h2><p class="hint">Ukáže stav entity (s jednotkou), nebo vlastní text. Text může být šablona, třeba {{ states('sensor.x') }}.</p>
         ${field("Entita", "entity", o.entity || "", "text", 'list="ents"')}
@@ -1443,6 +1446,7 @@ class FnsFloorplanPanel extends HTMLElement {
       if (fields.includes("wave") && o.kind === "radiator") parts.push(`<span>Vlny</span>${this._colorPick(`ro:${i}:wave`, r.wave).replace(/^<div class="outc" style="margin-top:0">|<\/div>$/g, "")}`);
       if (fields.includes("glow")) parts.push(`<label class="chk"><input type="checkbox" data-k="ro:${i}:glow" ${r.glow ? "checked" : ""}> záře</label>`);
       if (fields.includes("animate")) parts.push(`<select data-k="ro:${i}:animate"><option value="">animace podle stavu</option><option value="true" ${r.animate === true ? "selected" : ""}>animovat</option><option value="false" ${r.animate === false ? "selected" : ""}>neanimovat</option></select>`);
+      if (fields.includes("fx")) parts.push(`<select data-k="ro:${i}:fx">${fxOptions(r.fx, "kruh podle prvku")}</select>`);
       if (fields.includes("hide")) parts.push(`<label class="chk"><input type="checkbox" data-k="ro:${i}:hide" ${r.hide ? "checked" : ""}> skrýt</label>`);
       if (o.points) parts.push(`<span>Průhlednost</span><input type="number" step="0.05" min="0" max="1" data-k="ro:${i}:opacity" value="${r.opacity ?? ""}" placeholder="0,14" style="width:70px">`);
       if (fields.includes("icon")) parts.push(`<input type="text" data-k="ro:${i}:icon" value="${esc(r.icon || "")}" placeholder="ikona, např. mdi:timer-sand (none = bez ikony)">`);
