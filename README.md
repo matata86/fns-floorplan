@@ -39,7 +39,7 @@ Coordinates are metres, `x` to the right and `z` down.
 | `furniture` | `id`, `type`, `x`, `z`, `rotation`, `w`, `d`; lights (`lamp_*`, `led_strip`) carry `entity` and optional `room_light`; `tv_wall` with a media player; `robot_vacuum` marks the dock |
 | `sensors` | binary sensors with `entity`, `x`, `z` — motion/occupancy/presence ripple, moisture pulses red |
 | `vacuum` | `entity`, `room_sensor` (a sensor whose state is the room name) |
-| `devices` | `kind`, `name`, `entity`, `x`, `z`, `active` (list of states or `{"above": n}`), `info`, `prefix`, `text`, `color` / `color_on` (idle / running; without them the entity's state colour from the Home Assistant theme) |
+| `devices` | `kind`, `name`, `entity`, `x`, `z`, `active` (list of states or `{"above": n}`), `info` (text while running), `prefix`, `text` (always), `text_on` (while running), `color` / `color_on` (idle / running; without them the entity's state colour from the Home Assistant theme) |
 | `texts` | `entity` or `text` (plain or a `{{ }}` template), `x`, `z`, `rotation`, `size`, `color`, `background` (`none` for no background) |
 | `rules` | on every item: conditional colours, hiding and icons, see below |
 | `labels` | `{room_id: [x, z]}` to place a room label by hand |

@@ -1030,8 +1030,8 @@ class FnsFloorplanPanel extends HTMLElement {
         <label>Běží, když má entita stav (čárkou, nebo {"above": 20})</label><input data-k="active" value="${esc(Array.isArray(o.active) ? o.active.join(", ") : o.active ? JSON.stringify(o.active) : "")}" placeholder="${o.kind === "media" ? "playing" : "on, run"}">
         ${field("Text pod ikonou z entity", "info", o.info || "", "text", 'list="ents"')}
         ${field("Předpona textu", "prefix", o.prefix || "")}
-        ${field("Vlastní text (může být šablona {{ … }})", "text", o.text || "")}
-        <label class="chk"><input type="checkbox" data-k="text_always" ${o.text_always ?? ["alarm", "lock"].includes(o.kind) ? "checked" : ""}> vlastní text zobrazovat i když neběží</label>
+        <div class="row2"><div>${field("Text pod ikonou", "text", o.text || "")}</div><div>${field("Text, když běží", "text_on", o.text_on || "")}</div></div>
+        <p class="hint">Oba texty můžou být šablona {{ … }}. Když běží a text pro běh je prázdný, ukáže se text z entity výše (nebo název u přehrávače), jinak text pod ikonou.</p>
         <div class="row2"><div><label>Barva</label>${this._colorPick("color", o.color)}</div><div><label>Barva, když běží</label>${this._colorPick("color_on", o.color_on)}</div></div>
         <p class="hint">Výchozí = barva stavu entity z motivu HA.</p>
         <label class="chk"><input type="checkbox" data-k="sheet_hide" ${o.sheet_hide ? "checked" : ""}> nezobrazovat v panelu místnosti</label>
@@ -1438,7 +1438,6 @@ class FnsFloorplanPanel extends HTMLElement {
       if (["x", "z", "w", "d"].includes(key)) t[key] = r3(Number(value));
       else if (key === "rotation") t.rotation = ((Number(value) % 360) + 360) % 360;
       else if (key === "cover") { if (value) delete t.cover; else t.cover = false; }
-      else if (key === "text_always") t.text_always = !!value;
       else if (key === "sheet_hide") { if (value) t.sheet_hide = true; else delete t.sheet_hide; }
       else if (key === "room_light") { if (value === "") delete t.room_light; else t.room_light = value === "false" ? false : Number(value); }
       else if (key === "color" || key === "color_on" || key === "background") {
