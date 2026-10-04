@@ -31,22 +31,14 @@ const OPS = { state: "je", state_not: "není", above: "větší než", below: "m
 // a point item (lamp, robot dock) has no size or rotation of its own
 const isPoint = (f) => (isLight(f) && f.type !== "led_strip") || f.type === "robot_vacuum";
 // what "+" can add: [label, factory]
+// the add menu stays short: the light type and the device kind are picked in the item's form
 const ADD = [
-  ["Stropní světlo", () => ({ cat: "furniture", item: { type: "lamp_ceiling", w: 0.3, d: 0.3, rotation: 0, entity: "" } })],
-  ["Lampička", () => ({ cat: "furniture", item: { type: "lamp_table", w: 0.28, d: 0.28, rotation: 0, entity: "" } })],
-  ["Nástěnné světlo", () => ({ cat: "furniture", item: { type: "lamp_wall", w: 0.2, d: 0.1, rotation: 0, entity: "" } })],
-  ["Bodové světlo (směrové)", () => ({ cat: "furniture", item: { type: "lamp_spot", w: 0.15, d: 0.15, rotation: 90, beam: 40, entity: "" } })],
+  ["Světlo (typ zvolíš v detailu)", () => ({ cat: "furniture", item: { type: "lamp_ceiling", w: 0.3, d: 0.3, rotation: 0, entity: "" } })],
   ["LED pásek", () => ({ cat: "furniture", item: { type: "led_strip", w: 1, d: 0.04, rotation: 0, entity: "" } })],
-  ["Nábytek", () => ({ cat: "furniture", item: { type: "table", w: 1, d: 0.6, rotation: 0 } })],
-  ["Spotřebič", () => ({ cat: "devices", item: { kind: "fan", name: "", entity: "" } })],
-  ["Radiátor", () => ({ cat: "devices", item: { kind: "radiator", name: "", entity: "" } })],
-  ["Alarm", () => ({ cat: "devices", item: { kind: "alarm", name: "", entity: "" } })],
-  ["TV / přehrávač", () => ({ cat: "devices", item: { kind: "media", name: "", entity: "" } })],
-  ["Kamera", () => ({ cat: "devices", item: { kind: "camera", name: "", entity: "" } })],
-  ["Zámek", () => ({ cat: "devices", item: { kind: "lock", name: "", entity: "" } })],
-  ["Jiné zařízení", () => ({ cat: "devices", item: { kind: "generic", name: "", entity: "" } })],
-  ["Text (stav entity)", () => ({ cat: "texts", item: { entity: "" } })],
+  ["Zařízení (spotřebič, TV, alarm, zámek, kamera…)", () => ({ cat: "devices", item: { kind: "generic", name: "", entity: "" } })],
   ["Senzor (pohyb, voda)", () => ({ cat: "sensors", item: { entity: "" } })],
+  ["Nábytek", () => ({ cat: "furniture", item: { type: "table", w: 1, d: 0.6, rotation: 0 } })],
+  ["Text", () => ({ cat: "texts", item: { entity: "" } })],
 ];
 
 const el = (tag, attrs = {}, parent) => {
