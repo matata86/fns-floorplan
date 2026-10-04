@@ -33,7 +33,7 @@ Coordinates are metres, `x` to the right and `z` down.
 | Key | Content |
 |-----|---------|
 | `rooms` | `id`, `name`, `points`, `temperature`, `humidity`; label options `label_info` (list of `temperature`, `humidity`, entity ids or templates), `label_name: false`, `label_hidden: true`, `label_rotation` |
-| `openings` | `id`, `room_id`, `edge`, `offset`, `width`, `type` (door/window), `style` (`passage` = opening only), `hinge` (left/right), `swing` (in/out), `contact` |
+| `openings` | `id`, `room_id`, `edge`, `offset`, `width`, `type` (door/window), `style` (`passage` = opening only), `hinge` (left/right), `swing` (in/out), `contact`, `blind` (a `cover` entity drawn as a band inside the window, darker the more it is closed) |
 | `furniture` | `id`, `type`, `x`, `z`, `rotation`, `w`, `d`; lights (`lamp_*`, `led_strip`) carry `entity` and optional `room_light`; `tv_wall` with a media player; `robot_vacuum` marks the dock |
 | `sensors` | binary sensors with `entity`, `x`, `z` — motion/occupancy/presence ripple, moisture pulses red |
 | `vacuum` | `entity`, `room_sensor` (a sensor whose state is the room name) |
@@ -43,7 +43,7 @@ Coordinates are metres, `x` to the right and `z` down.
 | `labels` | `{room_id: [x, z]}` to place a room label by hand |
 | `outdoor` | room id whose temperature shows as the outside temperature |
 
-Device kinds: `fan`, `purifier`, `dishwasher`, `dryer`, `boiler`, `radiator` (heat waves rise while it animates), `alarm` (shield by state; the flat pulses red when triggered and orange while arming), `media` (TV, speaker or Kodi icon, sound waves and the title while playing), `aquarium`, `camera`, `fridge`, `fireplace`, `generic` (the entity's own icon).
+Device kinds: `fan`, `purifier`, `dishwasher`, `dryer`, `boiler`, `radiator` (heat waves rise while it animates), `alarm` (shield by state; the flat pulses red when triggered and orange while arming), `media` (TV, speaker or Kodi icon, sound waves and the title while playing, the cover art inside the badge while playing or paused; `cover: false` turns it off), `aquarium`, `camera`, `fridge`, `fireplace`, `generic` (the entity's own icon).
 
 Optional on any item: `icon` (any `mdi:` icon), `size` (`xs`, `s`, `m`, `l`, `xl`, `xxl`), `layer` (stacking order within its kind), and `tap_action`, `double_tap_action`, `hold_action` in Home Assistant's format (`toggle`, `more-info`, `perform-action` with `perform_action` and `data`, `navigate`, `url`, `none`). Doors and windows take actions too (default: the contact's details). Doors without a contact are drawn ajar at 45°.
 

@@ -134,6 +134,7 @@ svg { width: 100%; height: 100%; display: block; touch-action: none; user-select
 .flip { cursor: pointer; }
 .flip circle { fill: var(--primary-color, #03a9f4); stroke: #fff; stroke-width: 2; }
 .flip text { fill: #fff; font-size: 13px; font-weight: 700; pointer-events: none; }
+.blind { stroke: var(--secondary-text-color, #727272); stroke-width: 4; stroke-dasharray: 5 3; pointer-events: none; }
 .rsz { fill: #fff; stroke: var(--primary-color, #03a9f4); stroke-width: 2; cursor: nwse-resize; }
 .rot-line { stroke: var(--primary-color, #03a9f4); stroke-width: 1.5; stroke-dasharray: 3 2; pointer-events: none; }
 .rot-h { fill: var(--primary-color, #03a9f4); stroke: #fff; stroke-width: 2; cursor: grab; }
@@ -416,6 +417,12 @@ class FnsFloorplanPanel extends HTMLElement {
           const [mx, mz] = P([g.H[0] + (g.along[0] + g.nn[0]) * g.w * 0.45, g.H[1] + (g.along[1] + g.nn[1]) * g.w * 0.45]);
           flip(mx, mz, "⇅", "Otevírat na druhou stranu", () => (o.swing = o.swing === "out" ? "in" : "out"));
         }
+      }
+      if (o.blind) {
+        const c = centroid(r.points), m = [a[0] + u[0] * o.offset, a[1] + u[1] * o.offset];
+        let n = [-u[1], u[0]];
+        if ((c[0] - m[0]) * n[0] + (c[1] - m[1]) * n[1] < 0) n = [-n[0], -n[1]];
+        el("line", { x1: A[0] + n[0] * 8, y1: A[1] + n[1] * 8, x2: B[0] + n[0] * 8, y2: B[1] + n[1] * 8, class: "blind" }, svg);
       }
       if (selected) el("line", { x1: A[0], y1: A[1], x2: B[0], y2: B[1], class: "open-sel" }, svg);
       // dragging slides the opening along its wall
@@ -761,6 +768,7 @@ class FnsFloorplanPanel extends HTMLElement {
         ${field("Text pod ikonou z entity", "info", o.info || "", "text", 'list="ents"')}
         ${field("Předpona textu", "prefix", o.prefix || "")}
         ${field("Vlastní text (může být šablona {{ … }})", "text", o.text || "")}
+        ${o.kind === "media" ? `<label class="chk"><input type="checkbox" data-k="cover" ${o.cover === false ? "" : "checked"}> obal alba nebo pořadu v odznaku (při přehrávání a pauze)</label>` : ""}
         ${xz}
         ${this._iconField(o, DEVICE_ICON[o.kind])}
         ${this._sizeField(o)}
@@ -1047,7 +1055,8 @@ class FnsFloorplanPanel extends HTMLElement {
       ${o.style === "passage" ? "" : `<div class="row2"><div><label>Panty (z místnosti)</label><select data-k="hinge">${opt("left", "Vlevo", o.hinge || "left")}${opt("right", "Vpravo", o.hinge)}</select></div>
         <div><label>Otevírá se</label><select data-k="swing">${opt("in", "Dovnitř", o.swing || "in")}${opt("out", "Ven", o.swing)}</select></div></div>
       <label>Kontakt (binary_sensor; ${win ? "okno bez něj zůstane zavřené" : "dveře bez něj jsou pootevřené na 45°"})</label><input data-k="contact" value="${esc(o.contact || "")}" list="ents">
-      ${this._actionsUI(o, { tap: o.contact ? "Detail kontaktu" : "" })}`}
+      <label>Roleta (cover, nepovinné)</label><input data-k="blind" value="${esc(o.blind || "")}" list="ents">
+      ${this._actionsUI(o, { tap: o.blind ? "Detail rolety" : o.contact ? "Detail kontaktu" : "" })}`}
       <div class="actions"><button data-a="del" class="del">Smazat</button></div>`;
     this._bind(side, async (k, val, inp) => {
       if (await this._setShared([o], k, val, inp)) return;
@@ -1091,6 +1100,7 @@ class FnsFloorplanPanel extends HTMLElement {
     for (const t of targets) {
       if (["x", "z", "w", "d"].includes(key)) t[key] = r3(Number(value));
       else if (key === "rotation") t.rotation = ((Number(value) % 360) + 360) % 360;
+      else if (key === "cover") { if (value) delete t.cover; else t.cover = false; }
       else if (key === "room_light") { if (value === "") delete t.room_light; else t.room_light = value === "false" ? false : Number(value); }
       else if (key === "color" || key === "background") {
         const v = value === "custom" ? inp.nextElementSibling.value : value;
