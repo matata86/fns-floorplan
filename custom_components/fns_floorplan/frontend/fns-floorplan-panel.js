@@ -459,4 +459,10 @@ class FnsFloorplanPanel extends HTMLElement {
   }
 }
 
-customElements.define("fns-floorplan-panel", FnsFloorplanPanel);
+// see defineSafe in the card: a scoped-registry polyfill may replace the registry after load
+const ensurePanel = () => {
+  if (customElements.get("fns-floorplan-panel")) return;
+  try { customElements.define("fns-floorplan-panel", class extends FnsFloorplanPanel {}); } catch (err) { /* defined meanwhile */ }
+};
+ensurePanel();
+for (const ms of [500, 2000, 5000, 10000]) setTimeout(ensurePanel, ms);
