@@ -1407,6 +1407,36 @@ class FnsFloorplanPanel extends HTMLElement {
     this._changed();
   }
 
+  // Ctrl+C / Ctrl+V: an in-editor clipboard for items and rooms (not doors, windows or labels)
+  _copy() {
+    const sel = this._sel;
+    if (!sel || sel.cat === "openings" || sel.cat === "labels") return false;
+    const items = sel.cat === "rooms" ? [this._plan.rooms[sel.i]] : this._targets();
+    this._clip = { cat: sel.cat, items: JSON.parse(JSON.stringify(items)), level: this._level, n: 0 };
+    return true;
+  }
+
+  _paste() {
+    const c = this._clip, base = this._plan[c.cat].length;
+    // on the same floor every paste moves a bit further, on another floor it lands in the same spot
+    const d = String(c.level) === String(this._level) ? r3(++c.n * (c.cat === "rooms" ? 0.5 : 0.3)) : 0;
+    c.items.forEach((t, k) => {
+      const copy = JSON.parse(JSON.stringify(t));
+      delete copy.level;
+      this._stamp(copy);
+      if (c.cat === "rooms") {
+        copy.id = uid("room");
+        copy.points = copy.points.map(([x, z]) => [r3(x + d), r3(z + d)]);
+      } else Object.assign(copy, { x: r3(copy.x + d), z: r3(copy.z + d) });
+      if (c.cat === "furniture") copy.id = `f_${Date.now().toString(36)}${base + k}`;
+      this._plan[c.cat].push(copy);
+    });
+    if (c.cat === "rooms") this._mode = "rooms";
+    else if (this._mode === "rooms") this._mode = "items";
+    this._sel = c.items.length > 1 ? { cat: c.cat, i: base, g: c.items.map((_, k) => base + k) } : { cat: c.cat, i: base };
+    this._changed();
+  }
+
   _key(e) {
     if (!this.isConnected || !this._plan) return;
     const typing = e.composedPath().some((n) => n.tagName === "INPUT" || n.tagName === "TEXTAREA" || n.tagName === "SELECT");
@@ -1414,6 +1444,11 @@ class FnsFloorplanPanel extends HTMLElement {
       e.preventDefault();
       const redo = e.key.toLowerCase() === "y" || e.shiftKey;
       return redo ? this._history(this._redo, this._undo) : this._history(this._undo, this._redo);
+    }
+    if ((e.ctrlKey || e.metaKey) && !typing && /^[cv]$/i.test(e.key)) {
+      if (e.key.toLowerCase() === "c") return this._copy() && e.preventDefault();
+      if (this._clip) { e.preventDefault(); this._paste(); }
+      return;
     }
     if (!this._sel) return;
     if (e.composedPath().some((n) => n.tagName === "INPUT" || n.tagName === "TEXTAREA" || n.tagName === "SELECT")) return;
