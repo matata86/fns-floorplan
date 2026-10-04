@@ -9,5 +9,16 @@
     "abort": {
       "single_instance_allowed": "FNS Floorplan is already set up."
     }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "FNS Floorplan",
+        "description": "The floor plan editor always opens from the integration's Configure button, from the card editor or at [{url}]({url}).",
+        "data": {
+          "sidebar": "Show the Půdorys editor in the sidebar"
+        }
+      }
+    }
   }
 }

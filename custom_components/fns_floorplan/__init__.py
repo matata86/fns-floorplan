@@ -13,7 +13,7 @@ import os
 
 import voluptuous as vol
 
-from homeassistant.components import frontend, panel_custom, websocket_api
+from homeassistant.components import frontend, websocket_api
 from homeassistant.components.frontend import add_extra_js_url
 from homeassistant.components.http import StaticPathConfig
 from homeassistant.config_entries import ConfigEntry
@@ -32,6 +32,7 @@ PANEL_PATH = "fns-floorplan"
 DATA_STORE = "store"
 DATA_PLAN = "plan"
 SIGNAL_PLAN = f"{DOMAIN}_plan"
+CONF_SIDEBAR = "sidebar"
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
@@ -54,15 +55,22 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         add_extra_js_url(hass, f"{CARD_URL}?v={version}")
     except RuntimeError:  # already registered after a reload of the entry
         pass
-    await panel_custom.async_register_panel(
+    # the editor is always reachable from the integration's Configure button (config_panel_domain)
+    # and from the card editor; the sidebar entry is optional
+    frontend.async_register_built_in_panel(
         hass,
-        frontend_url_path=PANEL_PATH,
-        webcomponent_name="fns-floorplan-panel",
+        component_name="custom",
         sidebar_title="Půdorys",
         sidebar_icon="mdi:floor-plan",
-        module_url=f"{PANEL_URL}?v={version}",
+        frontend_url_path=PANEL_PATH,
+        config={"_panel_custom": {"name": "fns-floorplan-panel", "module_url": f"{PANEL_URL}?v={version}",
+                                  "embed_iframe": False, "trust_external": False}},
         require_admin=True,
+        config_panel_domain=DOMAIN,
+        show_in_sidebar=entry.options.get(CONF_SIDEBAR, True),
+        update=True,
     )
+    entry.async_on_unload(entry.add_update_listener(_options_updated))
 
     websocket_api.async_register_command(hass, ws_plan_get)
     websocket_api.async_register_command(hass, ws_plan_save)
@@ -70,6 +78,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     websocket_api.async_register_command(hass, ws_yaml_parse)
     websocket_api.async_register_command(hass, ws_yaml_dump)
     return True
+
+
+async def _options_updated(hass: HomeAssistant, entry: ConfigEntry) -> None:
+    await hass.config_entries.async_reload(entry.entry_id)
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:

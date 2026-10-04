@@ -1460,7 +1460,7 @@ class FnsFloorplanCardEditor extends HTMLElement {
         <div class="fp-form"></div>
         <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
           <button class="fp-open">Upravit půdorys</button>
-          <span style="color:var(--secondary-text-color);font-size:13px">Světla, spotřebiče, senzory, nábytek a jmenovky se upravují v panelu Půdorys v postranním menu.</span>
+          <span style="color:var(--secondary-text-color);font-size:13px">Světla, spotřebiče, senzory, nábytek a jmenovky se upravují v editoru Půdorys (postranní menu nebo Nastavení → Zařízení a služby → FNS Floorplan → Konfigurovat).</span>
         </div></div>`;
       const btn = this.querySelector(".fp-open");
       btn.style.cssText = "cursor:pointer;padding:8px 16px;border-radius:18px;border:0;background:var(--primary-color);color:var(--text-primary-color,#fff);font:inherit;font-weight:500";
