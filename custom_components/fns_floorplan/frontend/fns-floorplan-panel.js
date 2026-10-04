@@ -1278,7 +1278,7 @@ class FnsFloorplanPanel extends HTMLElement {
         <p class="hint">Oba texty můžou být šablona {{ … }}. Stav entity vložíš šablonou, třeba {{ states('sensor.teplota') }} °C. Když běží, má přednost text pro běh (u přehrávače jinak název), jinak text pod ikonou.</p>
         <div class="row2"><div><label>Barva</label>${this._colorPick("color", o.color)}</div><div><label>Barva, když běží</label>${this._colorPick("color_on", o.color_on)}</div></div>
         <p class="hint">Barva, když běží: Výchozí = stejná jako Barva. Obě výchozí = barva stavu entity z motivu HA.</p>
-        <label>Animace kruhu, když běží</label><select data-k="fx">${fxOptions(o.fx, o.kind === "alarm" ? "výchozí (poplach radar, odpočet při odchodu, jinak kruh)" : "výchozí (rozbíhající kruh)")}</select>
+        <label>Animace kruhu, když běží</label><select data-k="fx">${fxOptions(o.fx, o.kind === "alarm" ? "výchozí (střeženo radar, zabezpečování načítání, poplach blikání)" : "výchozí (rozbíhající kruh)")}</select>
         <label class="chk"><input type="checkbox" data-k="sheet_hide" ${o.sheet_hide ? "checked" : ""}> nezobrazovat v panelu místnosti</label>
         ${o.kind === "media" ? `<label class="chk"><input type="checkbox" data-k="cover" ${o.cover === false ? "" : "checked"}> obal alba nebo pořadu v odznaku (při přehrávání a pauze)</label>` : ""}
         ${xz}
