@@ -712,7 +712,10 @@ function buildView(card, plan) {
     if (o.blind) {
       const k = o.blind_side === "out" ? -7 : 7; // inside the room by default, or outside the wall
       // a thin track over the whole window and a solid bar as long as the blind is closed
-      const a0 = [A[0] + n[0] * k, A[1] + n[1] * k], b0 = [B[0] + n[0] * k, B[1] + n[1] * k];
+      let a0 = [A[0] + n[0] * k, A[1] + n[1] * k], b0 = [B[0] + n[0] * k, B[1] + n[1] * k];
+      // the blind comes down from the top end of the window (the left end on a horizontal wall)
+      const vertical = Math.abs(b0[1] - a0[1]) > Math.abs(b0[0] - a0[0]);
+      if (vertical ? a0[1] > b0[1] : a0[0] > b0[0]) [a0, b0] = [b0, a0];
       el("line", { x1: a0[0], y1: a0[1], x2: b0[0], y2: b0[1], class: "blind-track" }, gOpen);
       blinds.push({ o, a0, b0, node: el("line", { x1: a0[0], y1: a0[1], x2: a0[0], y2: a0[1], class: "blind" }, gOpen) });
     }
