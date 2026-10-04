@@ -86,7 +86,9 @@ const inPoly = ([x, z], pts) => {
   return c;
 };
 const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
-const uid = (p) => `${p}_${Date.now().toString(36)}`;
+const uid = (p) => `${p}_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 5)}`;
+const selEq = (a, b) => !!a && !!b && a.cat === b.cat && (a.cat === "labels" ? a.id === b.id : a.i === b.i);
+const GROUPABLE = ["furniture", "devices", "sensors", "texts"];
 
 const STYLE = `
 :host { display: block; height: 100%; background: var(--primary-background-color, #fafafa); color: var(--primary-text-color, #212121);
@@ -520,6 +522,7 @@ class FnsFloorplanPanel extends HTMLElement {
     if (!this._dragging) this._applyView();
     svg.innerHTML = "";
     svg.setAttribute("class", "mode-" + this._mode);
+    if (this._multi && !this._multi.some((m) => selEq(m, this._sel))) this._multi = null;
     this.shadowRoot.querySelectorAll(".modes button").forEach((b) => b.classList.toggle("on", b.dataset.m === this._mode));
     this._fillAdd();
     const plan = this._plan;
@@ -607,7 +610,7 @@ class FnsFloorplanPanel extends HTMLElement {
         });
       });
     });
-    const same = (sel) => this._sel && this._sel.cat === sel.cat && (sel.cat === "labels" ? this._sel.id === sel.id : this._sel.i === sel.i);
+    const same = (sel) => selEq(this._sel, sel) || !!this._multi?.some((m) => selEq(m, sel));
     const groups = this._groups();
     const grouped = new Set([...groups.values()].filter((g) => g.length > 1).flat());
     const group = (sel, x, z, rot = 0, k = 1) => {
@@ -836,9 +839,47 @@ class FnsFloorplanPanel extends HTMLElement {
 
   _drag(g, sel) {
     g.addEventListener("pointerdown", (e) => {
-      const o = this._get(sel), base = [o.x, o.z];
-      this._press(e, sel, (dx, dz) => this._move(sel, base[0] + dx, base[1] + dz));
+      let bases = null;
+      this._press(e, sel, (dx, dz) => {
+        // a dragged member of the multi-selection moves all of it by the same snapped offset
+        bases ??= (this._multi?.some((m) => selEq(m, sel)) ? this._multi : [sel]).map((s) => [s, this._get(s)]);
+        if (bases.length === 1) return this._move(sel, bases[0][1].x + dx, bases[0][1].z + dz);
+        const sx = snap(dx), sz = snap(dz);
+        for (const [s, o] of bases) {
+          if (s.g || s.cat === "labels") this._move(s, o.x + sx, o.z + sz);
+          else Object.assign(this._plan[s.cat][s.i], { x: r3(o.x + sx), z: r3(o.z + sz) });
+        }
+      });
     });
+  }
+
+  // all items sharing the `group` of the item under `sel` (null when it has none)
+  _groupOf(sel) {
+    const o = GROUPABLE.includes(sel.cat) && !sel.g && this._plan[sel.cat][sel.i];
+    if (!o?.group) return null;
+    const out = [];
+    for (const cat of GROUPABLE) this._plan[cat].forEach((x, i) => { if (x.group === o.group && this._on(x)) out.push({ cat, i }); });
+    return out.length > 1 ? out : null;
+  }
+
+  // Ctrl+click: add an item (with its group) to the selection or take it out
+  _toggle(sel) {
+    const add = this._groupOf(sel) || [sel];
+    let m = this._multi || (this._sel && this._sel.cat !== "rooms" && this._sel.cat !== "openings" ? [this._sel] : []);
+    if (m.some((x) => selEq(x, sel))) m = m.filter((x) => !add.some((a) => selEq(a, x)));
+    else m = [...m, ...add.filter((a) => !m.some((x) => selEq(x, a)))];
+    this._multi = m.length > 1 ? m : null;
+    this._sel = m.at(-1) || null;
+  }
+
+  // the selection as plan objects: [cat, object, index]; light groups expand to their fixtures, labels are left out
+  _picked() {
+    const out = [];
+    for (const s of this._multi || (this._sel ? [this._sel] : [])) {
+      if (s.cat === "labels" || s.cat === "rooms" || s.cat === "openings") continue;
+      for (const i of s.g || [s.i]) out.push([s.cat, this._plan[s.cat][i], i]);
+    }
+    return out;
   }
 
   // select `sel` on press; while the pointer moves, onMove(dx, dz, point) gets the offset in metres
@@ -846,7 +887,12 @@ class FnsFloorplanPanel extends HTMLElement {
     {
       e.stopPropagation();
       const changedSel = JSON.stringify(this._sel) !== JSON.stringify(sel);
-      this._sel = sel;
+      const toggle = (e.ctrlKey || e.metaKey) && this._mode === "items";
+      const inMulti = this._multi?.some((m) => selEq(m, sel));
+      if (!toggle) {
+        if (!inMulti) this._multi = this._groupOf(sel);
+        this._sel = sel;
+      }
       const start = this._toPlan(e);
       let moved = false, axis = null;
       const svg = this.shadowRoot.querySelector("svg");
@@ -860,6 +906,7 @@ class FnsFloorplanPanel extends HTMLElement {
           if (!axis && Math.hypot(dx, dz) >= 0.05) axis = Math.abs(dx) >= Math.abs(dz) ? "x" : "z";
           if (axis === "x" || (!axis && Math.abs(dx) >= Math.abs(dz))) dz = 0; else dx = 0;
         } else axis = null;
+        if (!moved && toggle && !inMulti) { this._sel = sel; this._multi = this._groupOf(sel); }
         moved = true;
         this._dragging = true;
         onMove(dx, dz, p);
@@ -872,7 +919,8 @@ class FnsFloorplanPanel extends HTMLElement {
         svg.removeEventListener("pointerup", up);
         svg.removeEventListener("pointercancel", up);
         if (moved) this._changed();
-        else if (changedSel) { this._draw(); this._form(); }
+        else if (toggle) { this._toggle(sel); this._draw(); this._form(); }
+        else if (changedSel || this._multi) { this._draw(); this._form(); }
       };
       svg.addEventListener("pointermove", move);
       svg.addEventListener("pointerup", up);
@@ -932,10 +980,11 @@ class FnsFloorplanPanel extends HTMLElement {
       side.innerHTML = `<h2>Místnosti, okna a dveře</h2><p class="hint">Klepni na místnost: táhnutím ji posuneš celou, za modré body táhneš rohy (přichytí se k rohům sousedních místností), poloprůhledné body mezi rohy přidají nový roh.<br><br>Okno nebo dveře vybereš klepnutím a táhnutím posuneš po stěně. U vybraných dveří přehodí ⇄ panty a ⇅ směr otevírání. Nové přidáš v panelu vybrané místnosti.<br><br>Místnosti mají každá své stěny: když posuneš společnou stěnu, posuň i sousední místnost.</p>`;
       return;
     }
+    if (this._multi && this._mode === "items") return this._multiForm(side);
     if (sel?.cat === "rooms") return this._roomForm(side, o);
     if (sel?.cat === "openings") return this._openingForm(side, o);
     if (!o) {
-      side.innerHTML = `<h2>Úpravy půdorysu</h2><p class="hint">Klepni na světlo, spotřebič, senzor, text, nábytek nebo badge místnosti a uprav ho. Táhnutím ji přesuneš (mřížka 5 cm, s Ctrl nebo Shift jen v jedné ose), šipky posouvají vybraný prvek, Delete ho smaže. Vybraný nábytek má úchyty na změnu velikosti a kolečko na otáčení.<br><br>Prvky bez entity mají červený přerušovaný okraj, prvky skryté pravidlem jsou bledé.<br><br>Změny se na dashboardu projeví hned po uložení.</p>`;
+      side.innerHTML = `<h2>Úpravy půdorysu</h2><p class="hint">Klepni na světlo, spotřebič, senzor, text, nábytek nebo badge místnosti a uprav ho. Táhnutím ji přesuneš (mřížka 5 cm, s Ctrl nebo Shift jen v jedné ose), šipky posouvají vybraný prvek, Delete ho smaže. Ctrl+klik vybere víc prvků najednou (pak je jde táhnout spolu a seskupit), Ctrl+C / Ctrl+V kopíruje. Vybraný nábytek má úchyty na změnu velikosti a kolečko na otáčení.<br><br>Prvky bez entity mají červený přerušovaný okraj, prvky skryté pravidlem jsou bledé.<br><br>Změny se na dashboardu projeví hned po uložení.</p>`;
       return;
     }
     const field = (label, key, value, type = "text", extra = "") =>
@@ -1035,6 +1084,29 @@ class FnsFloorplanPanel extends HTMLElement {
   }
 
   // the objects a change applies to: every fixture of a light group, otherwise the selected item
+  _multiForm(side) {
+    const items = this._picked().map(([, o]) => o);
+    const groups = new Set(items.map((o) => o.group));
+    const one = groups.size === 1 && !groups.has(undefined);
+    side.innerHTML = `<h2>Vybráno ${this._multi.length} prvků</h2>
+      <p class="hint">Ctrl+klik přidá nebo odebere další prvek. Táhnutím nebo šipkami posuneš všechny najednou, Ctrl+C / Ctrl+V je zkopíruje, Delete smaže. ${one ? "Prvky tvoří skupinu: klepnutí na kterýkoli vybere celou skupinu." : "Seskupené prvky se pak vybírají a táhnou vždy spolu."}</p>
+      <div class="actions">${one ? "" : '<button data-a="group">Seskupit</button>'}${[...groups].some(Boolean) ? '<button data-a="ungroup">Zrušit skupinu</button>' : ""}<button data-a="mdel" class="del">Smazat</button></div>`;
+    side.querySelectorAll("[data-a]").forEach((btn) => btn.addEventListener("click", () => {
+      const a = btn.dataset.a;
+      if (a === "group") { const id = uid("grp"); for (const o of items) o.group = id; }
+      else if (a === "ungroup") for (const o of items) delete o.group;
+      else if (a === "mdel") this._deletePicked();
+      this._changed();
+    }));
+  }
+
+  _deletePicked() {
+    const picked = this._picked().sort((a, b) => b[2] - a[2]);
+    for (const [cat, , i] of picked) this._plan[cat].splice(i, 1);
+    this._sel = null;
+    this._multi = null;
+  }
+
   _targets() {
     const sel = this._sel;
     if (!sel) return [];
@@ -1410,30 +1482,33 @@ class FnsFloorplanPanel extends HTMLElement {
   // Ctrl+C / Ctrl+V: an in-editor clipboard for items and rooms (not doors, windows or labels)
   _copy() {
     const sel = this._sel;
-    if (!sel || sel.cat === "openings" || sel.cat === "labels") return false;
-    const items = sel.cat === "rooms" ? [this._plan.rooms[sel.i]] : this._targets();
-    this._clip = { cat: sel.cat, items: JSON.parse(JSON.stringify(items)), level: this._level, n: 0 };
+    if (!sel || sel.cat === "openings") return false;
+    const items = sel.cat === "rooms" ? [["rooms", this._plan.rooms[sel.i]]] : this._picked().map(([cat, o]) => [cat, o]);
+    if (!items.length) return false;
+    this._clip = { items: JSON.parse(JSON.stringify(items)), level: this._level, n: 0 };
     return true;
   }
 
   _paste() {
-    const c = this._clip, base = this._plan[c.cat].length;
+    const c = this._clip, rooms = c.items[0][0] === "rooms";
     // on the same floor every paste moves a bit further, on another floor it lands in the same spot
-    const d = String(c.level) === String(this._level) ? r3(++c.n * (c.cat === "rooms" ? 0.5 : 0.3)) : 0;
-    c.items.forEach((t, k) => {
+    const d = String(c.level) === String(this._level) ? r3(++c.n * (rooms ? 0.5 : 0.3)) : 0;
+    const groups = {}, sels = [];
+    c.items.forEach(([cat, t], k) => {
       const copy = JSON.parse(JSON.stringify(t));
       delete copy.level;
       this._stamp(copy);
-      if (c.cat === "rooms") {
+      if (cat === "rooms") {
         copy.id = uid("room");
         copy.points = copy.points.map(([x, z]) => [r3(x + d), r3(z + d)]);
       } else Object.assign(copy, { x: r3(copy.x + d), z: r3(copy.z + d) });
-      if (c.cat === "furniture") copy.id = `f_${Date.now().toString(36)}${base + k}`;
-      this._plan[c.cat].push(copy);
+      if (cat === "furniture") copy.id = `f_${Date.now().toString(36)}${this._plan.furniture.length}${k}`;
+      if (copy.group) copy.group = groups[copy.group] ||= uid("grp");
+      sels.push({ cat, i: this._plan[cat].push(copy) - 1 });
     });
-    if (c.cat === "rooms") this._mode = "rooms";
-    else if (this._mode === "rooms") this._mode = "items";
-    this._sel = c.items.length > 1 ? { cat: c.cat, i: base, g: c.items.map((_, k) => base + k) } : { cat: c.cat, i: base };
+    this._mode = rooms ? "rooms" : "items";
+    this._sel = sels.at(-1);
+    this._multi = sels.length > 1 ? sels : null;
     this._changed();
   }
 
@@ -1450,8 +1525,9 @@ class FnsFloorplanPanel extends HTMLElement {
       if (this._clip) { e.preventDefault(); this._paste(); }
       return;
     }
+    if (e.key === "Escape" && !typing && this._sel) { this._sel = null; this._draw(); return this._form(); }
     if (!this._sel) return;
-    if (e.composedPath().some((n) => n.tagName === "INPUT" || n.tagName === "TEXTAREA" || n.tagName === "SELECT")) return;
+    if (typing) return;
     const step = { ArrowLeft: [-SNAP, 0], ArrowRight: [SNAP, 0], ArrowUp: [0, -SNAP], ArrowDown: [0, SNAP] }[e.key];
     if (this._sel.cat === "rooms" || this._sel.cat === "openings") {
       if (e.key === "Delete" || e.key === "Backspace") {
@@ -1477,8 +1553,15 @@ class FnsFloorplanPanel extends HTMLElement {
     }
     if (step) {
       e.preventDefault();
-      const o = this._get();
-      this._move(this._sel, o.x + step[0], o.z + step[1]);
+      for (const s of this._multi || [this._sel]) {
+        const o = this._get(s);
+        if (this._multi && !s.g && s.cat !== "labels") Object.assign(this._plan[s.cat][s.i], { x: r3(o.x + step[0]), z: r3(o.z + step[1]) });
+        else this._move(s, o.x + step[0], o.z + step[1]);
+      }
+      this._changed();
+    } else if ((e.key === "Delete" || e.key === "Backspace") && this._multi) {
+      e.preventDefault();
+      this._deletePicked();
       this._changed();
     } else if ((e.key === "Delete" || e.key === "Backspace") && this._sel.cat !== "labels") {
       e.preventDefault();
