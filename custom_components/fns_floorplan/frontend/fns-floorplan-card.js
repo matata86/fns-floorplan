@@ -1,7 +1,7 @@
 // FNS Floorplan card: an animated 2D floor plan with the home's live state.
 // The plan comes from the fns_floorplan integration (websocket fns_floorplan/plan/get).
 
-const VERSION = "0.2.0";
+const VERSION = "0.2.2";
 // Material Design Icons paths (the icon set HA uses), 24×24
 const MDI = {"mdiFan":"M12,11A1,1 0 0,0 11,12A1,1 0 0,0 12,13A1,1 0 0,0 13,12A1,1 0 0,0 12,11M12.5,2C17,2 17.11,5.57 14.75,6.75C13.76,7.24 13.32,8.29 13.13,9.22C13.61,9.42 14.03,9.73 14.35,10.13C18.05,8.13 22.03,8.92 22.03,12.5C22.03,17 18.46,17.1 17.28,14.73C16.78,13.74 15.72,13.3 14.79,13.11C14.59,13.59 14.28,14 13.88,14.34C15.87,18.03 15.08,22 11.5,22C7,22 6.91,18.42 9.27,17.24C10.25,16.75 10.69,15.71 10.89,14.79C10.4,14.59 9.97,14.27 9.65,13.87C5.96,15.85 2,15.07 2,11.5C2,7 5.56,6.89 6.74,9.26C7.24,10.25 8.29,10.68 9.22,10.87C9.41,10.39 9.73,9.97 10.14,9.65C8.15,5.96 8.94,2 12.5,2Z","mdiAirPurifier":"M11,9A4,4 0 0,1 15,13A4,4 0 0,1 11,17A4,4 0 0,1 7,13A4,4 0 0,1 11,9M11,11A2,2 0 0,0 9,13A2,2 0 0,0 11,15A2,2 0 0,0 13,13A2,2 0 0,0 11,11M7,4H14A4,4 0 0,1 18,8V9H16V8A2,2 0 0,0 14,6H7A2,2 0 0,0 5,8V20H16V18H18V22H3V8A4,4 0 0,1 7,4M16,11C18.5,11 18.5,9 21,9V11C18.5,11 18.5,13 16,13V11M16,15C18.5,15 18.5,13 21,13V15C18.5,15 18.5,17 16,17V15Z","mdiDishwasher":"M18,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V4A2,2 0 0,0 18,2M10,4A1,1 0 0,1 11,5A1,1 0 0,1 10,6A1,1 0 0,1 9,5A1,1 0 0,1 10,4M7,4A1,1 0 0,1 8,5A1,1 0 0,1 7,6A1,1 0 0,1 6,5A1,1 0 0,1 7,4M18,20H6V8H18V20M14.67,15.33C14.69,16.03 14.41,16.71 13.91,17.21C12.86,18.26 11.15,18.27 10.09,17.21C9.59,16.71 9.31,16.03 9.33,15.33C9.4,14.62 9.63,13.94 10,13.33C10.37,12.5 10.81,11.73 11.33,11L12,10C13.79,12.59 14.67,14.36 14.67,15.33","mdiTumbleDryer":"M6,2H18A2,2 0 0,1 20,4V20A2,2 0 0,1 18,22H6A2,2 0 0,1 4,20V4A2,2 0 0,1 6,2M7,4A1,1 0 0,0 6,5A1,1 0 0,0 7,6A1,1 0 0,0 8,5A1,1 0 0,0 7,4M10,4A1,1 0 0,0 9,5A1,1 0 0,0 10,6A1,1 0 0,0 11,5A1,1 0 0,0 10,4M12,8A6,6 0 0,0 6,14A6,6 0 0,0 12,20A6,6 0 0,0 18,14A6,6 0 0,0 12,8M8.11,10.5H10C9.76,11.88 10,12.67 10.58,13.29C11.68,14.36 12.16,15.71 11.89,17.5H10C10.24,16.12 10,15.33 9.42,14.71C8.32,13.64 7.85,12.29 8.11,10.5M12.11,10.5H14C13.76,11.88 14,12.67 14.58,13.29C15.68,14.36 16.16,15.71 15.89,17.5H14C14.24,16.12 14,15.33 13.42,14.71C12.32,13.64 11.85,12.29 12.11,10.5Z","mdiWaterBoiler":"M8 2C6.89 2 6 2.89 6 4V16C6 17.11 6.89 18 8 18H9V20H6V22H9C10.11 22 11 21.11 11 20V18H13V20C13 21.11 13.89 22 15 22H18V20H15V18H16C17.11 18 18 17.11 18 16V4C18 2.89 17.11 2 16 2H8M12 4.97A2 2 0 0 1 14 6.97A2 2 0 0 1 12 8.97A2 2 0 0 1 10 6.97A2 2 0 0 1 12 4.97M10 14.5H14V16H10V14.5Z","mdiFire":"M17.66 11.2C17.43 10.9 17.15 10.64 16.89 10.38C16.22 9.78 15.46 9.35 14.82 8.72C13.33 7.26 13 4.85 13.95 3C13 3.23 12.17 3.75 11.46 4.32C8.87 6.4 7.85 10.07 9.07 13.22C9.11 13.32 9.15 13.42 9.15 13.55C9.15 13.77 9 13.97 8.8 14.05C8.57 14.15 8.33 14.09 8.14 13.93C8.08 13.88 8.04 13.83 8 13.76C6.87 12.33 6.69 10.28 7.45 8.64C5.78 10 4.87 12.3 5 14.47C5.06 14.97 5.12 15.47 5.29 15.97C5.43 16.57 5.7 17.17 6 17.7C7.08 19.43 8.95 20.67 10.96 20.92C13.1 21.19 15.39 20.8 17.03 19.32C18.86 17.66 19.5 15 18.56 12.72L18.43 12.46C18.22 12 17.66 11.2 17.66 11.2M14.5 17.5C14.22 17.74 13.76 18 13.4 18.1C12.28 18.5 11.16 17.94 10.5 17.28C11.69 17 12.4 16.12 12.61 15.23C12.78 14.43 12.46 13.77 12.33 13C12.21 12.26 12.23 11.63 12.5 10.94C12.69 11.32 12.89 11.7 13.13 12C13.9 13 15.11 13.44 15.37 14.8C15.41 14.94 15.43 15.08 15.43 15.23C15.46 16.05 15.1 16.95 14.5 17.5H14.5Z","mdiCeilingLight":"M8,9H11V4H13V9H16L20,17H4L8,9M14,18A2,2 0 0,1 12,20A2,2 0 0,1 10,18H14Z","mdiLamp":"M8,2H16L20,14H4L8,2M11,15H13V20H18V22H6V20H11V15Z","mdiWallSconceFlat":"M5,5V11H19V5H5M5.27,13.32L3.5,15.09L4.91,16.5L6.68,14.73L5.27,13.32M18.73,13.32L17.32,14.73L19.09,16.5L20.5,15.09L18.73,13.32M11,16V19H13V16H11Z","mdiLightbulbOn":"M12,6A6,6 0 0,1 18,12C18,14.22 16.79,16.16 15,17.2V19A1,1 0 0,1 14,20H10A1,1 0 0,1 9,19V17.2C7.21,16.16 6,14.22 6,12A6,6 0 0,1 12,6M14,21V22A1,1 0 0,1 13,23H11A1,1 0 0,1 10,22V21H14M20,11H23V13H20V11M1,11H4V13H1V11M13,1V4H11V1H13M4.92,3.5L7.05,5.64L5.63,7.05L3.5,4.93L4.92,3.5M16.95,5.63L19.07,3.5L20.5,4.93L18.37,7.05L16.95,5.63Z","mdiWindowOpenVariant":"M21 20V2H3V20H1V23H23V20M19 4V11H17V4M5 4H7V11H5M5 20V13H7V20M9 20V4H15V20M17 20V13H19V20Z","mdiWaterAlert":"M10 3.25C10 3.25 16 10 16 14C16 17.31 13.31 20 10 20S4 17.31 4 14C4 10 10 3.25 10 3.25M20 7V13H18V7H20M18 17H20V15H18V17Z","mdiThermometer":"M15 13V5A3 3 0 0 0 9 5V13A5 5 0 1 0 15 13M12 4A1 1 0 0 1 13 5V8H11V5A1 1 0 0 1 12 4Z","mdiRobotVacuum":"M12,2C14.65,2 17.19,3.06 19.07,4.93L17.65,6.35C16.15,4.85 14.12,4 12,4C9.88,4 7.84,4.84 6.35,6.35L4.93,4.93C6.81,3.06 9.35,2 12,2M3.66,6.5L5.11,7.94C4.39,9.17 4,10.57 4,12A8,8 0 0,0 12,20A8,8 0 0,0 20,12C20,10.57 19.61,9.17 18.88,7.94L20.34,6.5C21.42,8.12 22,10.04 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12C2,10.04 2.58,8.12 3.66,6.5M12,6A6,6 0 0,1 18,12C18,13.59 17.37,15.12 16.24,16.24L14.83,14.83C14.08,15.58 13.06,16 12,16C10.94,16 9.92,15.58 9.17,14.83L7.76,16.24C6.63,15.12 6,13.59 6,12A6,6 0 0,1 12,6M12,8A1,1 0 0,0 11,9A1,1 0 0,0 12,10A1,1 0 0,0 13,9A1,1 0 0,0 12,8Z","mdiWeatherNight":"M17.75,4.09L15.22,6.03L16.13,9.09L13.5,7.28L10.87,9.09L11.78,6.03L9.25,4.09L12.44,4L13.5,1L14.56,4L17.75,4.09M21.25,11L19.61,12.25L20.2,14.23L18.5,13.06L16.8,14.23L17.39,12.25L15.75,11L17.81,10.95L18.5,9L19.19,10.95L21.25,11M18.97,15.95C19.8,15.87 20.69,17.05 20.16,17.8C19.84,18.25 19.5,18.67 19.08,19.07C15.17,23 8.84,23 4.94,19.07C1.03,15.17 1.03,8.83 4.94,4.93C5.34,4.53 5.76,4.17 6.21,3.85C6.96,3.32 8.14,4.21 8.06,5.04C7.79,7.9 8.75,10.87 10.95,13.06C13.14,15.26 16.1,16.22 18.97,15.95M17.33,17.97C14.5,17.81 11.7,16.64 9.53,14.5C7.36,12.31 6.2,9.5 6.04,6.68C3.23,9.82 3.34,14.64 6.35,17.66C9.37,20.67 14.19,20.78 17.33,17.97Z","mdiWhiteBalanceSunny":"M3.55 19.09L4.96 20.5L6.76 18.71L5.34 17.29M12 6C8.69 6 6 8.69 6 12S8.69 18 12 18 18 15.31 18 12C18 8.68 15.31 6 12 6M20 13H23V11H20M17.24 18.71L19.04 20.5L20.45 19.09L18.66 17.29M20.45 5L19.04 3.6L17.24 5.39L18.66 6.81M13 1H11V4H13M6.76 5.39L4.96 3.6L3.55 5L5.34 6.81L6.76 5.39M1 13H4V11H1M13 20H11V23H13","mdiClockOutline":"M12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22C6.47,22 2,17.5 2,12A10,10 0 0,1 12,2M12.5,7V12.25L17,14.92L16.25,16.15L11,13V7H12.5Z","rWave1":"M7.95,3L6.53,5.19L7.95,7.4H7.94L5.95,10.5L4.22,9.6L5.64,7.39L4.22,5.19L6.22,2.09L7.95,3","rWave2":"M13.95,2.89L12.53,5.1L13.95,7.3L13.94,7.31L11.95,10.4L10.22,9.5L11.64,7.3L10.22,5.1L12.22,2L13.95,2.89","rWave3":"M20,2.89L18.56,5.1L20,7.3V7.31L18,10.4L16.25,9.5L17.67,7.3L16.25,5.1L18.25,2L20,2.89","rBody":"M2,22V14A2,2 0 0,1 4,12H20A2,2 0 0,1 22,14V22H20V20H4V22H2M6,14A1,1 0 0,0 5,15V17A1,1 0 0,0 6,18A1,1 0 0,0 7,17V15A1,1 0 0,0 6,14M10,14A1,1 0 0,0 9,15V17A1,1 0 0,0 10,18A1,1 0 0,0 11,17V15A1,1 0 0,0 10,14M14,14A1,1 0 0,0 13,15V17A1,1 0 0,0 14,18A1,1 0 0,0 15,17V15A1,1 0 0,0 14,14M18,14A1,1 0 0,0 17,15V17A1,1 0 0,0 18,18A1,1 0 0,0 19,17V15A1,1 0 0,0 18,14Z"};
 const S = 80; // px per metre
@@ -80,19 +80,6 @@ ha-card { overflow: hidden; background: none; border: 0; }
   --text: #1b1f3b; --muted: #5b638f; --chip: rgba(255, 255, 255, .86); --line: rgba(63, 70, 200, .16);
 }
 [hidden] { display: none !important; }
-header { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-header h1 { font-size: 18px; font-weight: 700; margin: 0 6px 0 0; }
-.chip {
-  display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border-radius: 999px;
-  background: var(--chip); border: 1px solid var(--line); font-weight: 500; font-size: 13px; white-space: nowrap;
-}
-.chip b { font-weight: 700; }
-.mi { display: inline-flex; width: 16px; height: 16px; }
-.mi svg { width: 100%; height: 100%; fill: var(--muted); }
-.mi.warm svg { fill: var(--warm); }
-.mi.open svg { fill: var(--open); }
-.mi.alarm svg { fill: var(--alarm); animation: blink 1s infinite; }
-.spacer { flex: 1; }
 .stage { position: relative; border-radius: 18px; border: 1px solid var(--line); overflow: hidden;
   background: linear-gradient(160deg, rgba(255,255,255,.025), rgba(255,255,255,0)); }
 svg.plan { width: 100%; height: 100%; display: block; }
@@ -200,7 +187,6 @@ svg.plan { width: 100%; height: 100%; display: block; }
 @container (max-width: 600px) {
   .app { padding: 8px; gap: 8px; }
   .stage { border-radius: 14px; }
-  .chip { font-size: 12px; padding: 4px 8px; }
   .sheet { left: 8px; right: 8px; top: auto; width: auto; max-height: 60%; bottom: 8px; transform: translateY(120%); }
 }
 @keyframes heatwave { 0%, 100% { opacity: .45; transform: translateY(1px); } 50% { opacity: 1; transform: translateY(-1.4px); } }
@@ -216,7 +202,7 @@ svg.plan { width: 100%; height: 100%; display: block; }
 @keyframes leak { 50% { opacity: .22; } }
 @keyframes blink { 50% { opacity: .3; } }
 @keyframes tvHue { 0% { fill: #3b2bff; } 33% { fill: #ff2bd1; } 66% { fill: #2bd9ff; } 100% { fill: #3b2bff; } }
-@media (prefers-reduced-motion: reduce) { .ripple, .alert-open.fresh *, .leak, .tv.playing, .mi.alarm svg, .dev *, .lamp * { animation: none !important; } }
+@media (prefers-reduced-motion: reduce) { .ripple, .alert-open.fresh *, .leak, .tv.playing, .dev *, .lamp * { animation: none !important; } }
 `;
 
 // appliance glyphs: an MDI icon plus the bits that animate
@@ -303,15 +289,6 @@ function buildView(card, plan) {
   const root$ = card.shadowRoot;
   root$.innerHTML = `<style>${STYLE}</style>
 <ha-card><div class="app">
-  <header>
-    <h1 hidden></h1>
-    <span class="chip"><i class="mi warm" data-mdi="mdiLightbulbOn"></i><b class="sLights">0</b> světel</span>
-    <span class="chip"><i class="mi open" data-mdi="mdiWindowOpenVariant"></i><b class="sOpen">0</b> otevřeno</span>
-    <span class="chip sAlarm" hidden><i class="mi alarm" data-mdi="mdiWaterAlert"></i>Únik vody</span>
-    <span class="chip sOutWrap" hidden><i class="mi" data-mdi="mdiThermometer"></i>venku <b class="sOut"></b></span>
-    <span class="spacer"></span>
-    <span class="chip"><i class="mi" data-mdi="mdiClockOutline"></i><span class="clock"></span></span>
-  </header>
   <div class="stage">
     <svg class="plan" preserveAspectRatio="xMidYMid meet"></svg>
     <aside class="sheet">
@@ -572,13 +549,17 @@ function buildView(card, plan) {
     r.labelRect = el("rect", { rx: 10 }, g);
     const t1 = el("text", { class: "name", "text-anchor": "middle", y: r.temperature ? -2 : 4 }, g);
     t1.textContent = r.name;
+    r.nameText = t1;
     if (r.temperature) r.clim = el("text", { class: "clim", "text-anchor": "middle", y: 12 }, g);
     r.labelG = g;
   }
   const fitLabels = () => {
+    // measure only the texts: the group's box includes the rect itself, which would grow on every update
     for (const r of rooms) {
-      const bb = r.labelG.getBBox();
-      if (!bb.width) continue;
+      const boxes = [r.nameText, r.clim].filter(Boolean).map((t) => t.getBBox());
+      if (!boxes[0].width) continue;
+      const x0 = Math.min(...boxes.map((b) => b.x)), y0 = Math.min(...boxes.map((b) => b.y));
+      const bb = { x: x0, y: y0, width: Math.max(...boxes.map((b) => b.x + b.width)) - x0, height: Math.max(...boxes.map((b) => b.y + b.height)) - y0 };
       r.labelRect.setAttribute("x", bb.x - 8);
       r.labelRect.setAttribute("y", bb.y - 4);
       r.labelRect.setAttribute("width", bb.width + 16);
@@ -614,8 +595,6 @@ function buildView(card, plan) {
   };
   function renderLights() {
     for (const r of rooms) r.glowLayer.innerHTML = "";
-    let count = 0;
-    for (const id of Object.keys(lampGroups)) if (st(id)?.state === "on") count++;
     for (const L of lampNodes) {
       const s = lightState(L.id);
       L.node.classList.toggle("on", s.on);
@@ -651,15 +630,12 @@ function buildView(card, plan) {
       const [cx, cz] = P([L.x, L.z]);
       el("circle", { cx, cy: cz, r: rad, fill: `url(#${gid})`, class: "glow" }, L.room.glowLayer);
     }
-    $(".sLights").textContent = count;
   }
   const isOpen = (o) => o.contact && st(o.contact)?.state === "on";
   const FRESH_MS = 6000; // an opening pulses this long after it opened, then stays plain orange
   function renderOpenings() {
-    let open = 0;
     for (const sw of swingers) {
       const on = isOpen(sw.o);
-      if (on) open++;
       sw.target = on ? sw.max : 0;
       sw.g.classList.toggle("alert-open", !!on);
       const age = on ? Date.now() - Date.parse(st(sw.o.contact).last_changed) : Infinity;
@@ -668,12 +644,10 @@ function buildView(card, plan) {
       if (age < FRESH_MS) sw.freshTimer = setTimeout(() => sw.g.classList.remove("fresh"), FRESH_MS - age);
       if (sw.cur === 0 && sw.target === 0) drawSwing(sw);
     }
-    $(".sOpen").textContent = open;
   }
   const sensors = (plan.sensors || []).map((s) => ({ ...s, room: roomAt(s.x, s.z) })).filter((s) => s.room);
   function renderFx() {
     for (const r of rooms) r.fx.innerHTML = "";
-    let leak = false;
     for (const s of sensors) {
       const e = st(s.entity);
       if (e?.state !== "on") continue;
@@ -682,26 +656,15 @@ function buildView(card, plan) {
         const [cx, cz] = P([s.x, s.z]);
         for (const k of ["", " r2", " r3"]) el("circle", { cx, cy: cz, r: 6, class: "ripple" + k }, s.room.fx);
       } else if (dc === "moisture") {
-        leak = true;
         el("path", { d: polyD(s.room.points), class: "leak" }, s.room.fx);
       }
     }
-    $(".sAlarm").hidden = !leak;
     for (const t of tvs) t.node.classList.toggle("playing", !OFF_STATES.has(st(t.entity)?.state ?? "off"));
-  }
-  function renderOutdoor() {
-    const r = R[plan.outdoor];
-    const t = r ? roomClimate(r).t : null;
-    $(".sOutWrap").hidden = t == null;
-    if (t != null) $(".sOut").textContent = `${Math.round(t)} °C`;
   }
   function renderMode() {
     const m = cfg().mode;
     const day = m === "day" || (m === "auto" && st("sun.sun")?.state === "above_horizon");
     app.dataset.mode = day ? "day" : "night";
-    const h1 = $("header h1");
-    h1.hidden = !cfg().title;
-    h1.textContent = cfg().title || "";
   }
 
   // ---- robot vacuum: drives lanes through the room its sensor reports ----
@@ -869,7 +832,6 @@ function buildView(card, plan) {
   }
   const ro = new ResizeObserver(() => layout());
   const clock = () => {
-    $(".clock").textContent = new Date().toLocaleTimeString("cs-CZ", { hour: "2-digit", minute: "2-digit" });
     renderDevices(); // a finishing time counts down without a state change
   };
   let clockTimer = 0;
@@ -897,7 +859,7 @@ function buildView(card, plan) {
         if (seen.get(id) !== s) { seen.set(id, s); changed = true; }
       }
       if (!changed) return;
-      renderMode(); renderLights(); renderOpenings(); renderFx(); renderDevices(); renderRuled(); renderLabels(); renderOutdoor(); renderVac();
+      renderMode(); renderLights(); renderOpenings(); renderFx(); renderDevices(); renderRuled(); renderLabels(); renderVac();
       if (sheetRoom) openSheet(sheetRoom);
       kick();
     },

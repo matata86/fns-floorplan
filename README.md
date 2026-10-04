@@ -10,7 +10,6 @@ An animated 2D floor plan card for Home Assistant that shows the live state of t
 
 ```yaml
 type: custom:fns-floorplan-card
-title: Home        # optional
 mode: auto         # auto (follows sun.sun) | day | night
 rotate: auto       # auto | true | false — narrow cards turn a wide plan by 90°
 ```
