@@ -260,6 +260,16 @@ ha-card { overflow: hidden; background: none; border: 0; }
   backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
 .floors button { border: 0; background: none; color: var(--muted); font: 500 12px/1 inherit; font-family: inherit; padding: 6px 11px; border-radius: 99px; cursor: pointer; }
 .floors button.on { background: var(--accent); color: #fff; }
+.tools { position: absolute; right: 10px; top: 10px; z-index: 2; display: flex; gap: 4px; padding: 3px; border-radius: 99px; background: var(--chip); border: 1px solid var(--line);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+.tools button { border: 0; background: none; color: var(--muted); font: 500 12px/1 inherit; font-family: inherit; padding: 6px 11px; border-radius: 99px; cursor: pointer; }
+.tools button.on { background: var(--accent); color: #fff; }
+.heat { pointer-events: none; transition: opacity .6s, fill .6s; }
+.replay { position: absolute; left: 10px; right: 10px; bottom: 10px; z-index: 3; display: flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 99px;
+  background: var(--chip); border: 1px solid var(--line); color: var(--text); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+.replay input { flex: 1; min-width: 0; }
+.replay button { border: 0; background: none; color: var(--muted); font: 500 12px/1 inherit; font-family: inherit; padding: 6px 11px; border-radius: 99px; cursor: pointer; }
+.replay .rp-time { font-size: 12px; white-space: nowrap; }
 .stage { position: relative; border-radius: inherit; overflow: hidden; max-height: 85vh;
   background: linear-gradient(160deg, rgba(255,255,255,.025), rgba(255,255,255,0)); }
 svg.plan { width: 100%; height: 100%; display: block; }
@@ -599,6 +609,7 @@ function buildView(card, plan) {
   root$.innerHTML = `<style>${STYLE}</style>
 <ha-card><div class="app">
   <div class="floors"${plan._levels?.length > 1 ? "" : " hidden"}>${(plan._levels || []).map((l) => `<button data-l="${String(l.id).replace(/"/g, "")}"${String(l.id) === String(plan._level) ? ' class="on"' : ""}></button>`).join("")}</div>
+  <div class="tools"${card._config?.tools === false ? " hidden" : ""}><button data-t="temp" title="Teploty místností">°C</button><button data-t="hum" title="Vlhkost místností">%</button><button data-t="replay" title="Přehrát den">⏱</button></div>
   <div class="stage">
     <svg class="plan" preserveAspectRatio="xMidYMid meet"></svg>
     <aside class="sheet">
@@ -618,7 +629,9 @@ function buildView(card, plan) {
   });
   const hass = () => card._hass;
   const cfg = () => card._config || {};
-  const st = (id) => (id ? hass().states[id] : undefined);
+  let replay = null; // { from, to, t, hist: {id: [[time_ms, state, attributes]]}, view: {}, timer } while replaying
+  const curStates = () => (replay ? replay.view : hass().states);
+  const st = (id) => (id ? curStates()[id] : undefined);
   const moreInfo = (entityId) =>
     card.dispatchEvent(new CustomEvent("hass-more-info", { detail: { entityId }, bubbles: true, composed: true }));
   const toggle = (entityId) => hass().callService("homeassistant", "toggle", { entity_id: entityId });
@@ -629,11 +642,11 @@ function buildView(card, plan) {
   const isTpl = (v) => typeof v === "string" && v.includes("{{");
   const tplText = (v) => (isTpl(v) ? String(tpl.get(v) ?? "") : v);
   const applyRules = (rules) => {
-    const out = evalRules(rules, hass().states, tpl);
+    const out = evalRules(rules, curStates(), tpl);
     if (out.text != null) out.text = tplText(out.text);
     return out;
   };
-  const condOk1 = (c) => condOk(c, hass().states, tpl);
+  const condOk1 = (c) => condOk(c, curStates(), tpl);
   const templates = new Set();
   const ruleEntities = (rules, into) => {
     const walk = (c) => { if (c.any) c.any.forEach(walk); else if (c.template) templates.add(c.template); else if (c.entity) into.add(c.entity); };
@@ -673,6 +686,7 @@ function buildView(card, plan) {
     const f = el("path", { d, class: "room-floor", "data-room": r.id }, gFloor);
     f.addEventListener("click", () => openSheet(r.id));
     if (r.rules) r.tint = el("path", { d, class: "tint", opacity: 0 }, gFloor);
+    r.heat = el("path", { d, class: "heat", opacity: 0 }, gFloor);
     r.glowLayer = el("g", { "clip-path": `url(#clip_${r.id})` }, gGlow);
     el("path", { d, class: "walls" }, gWalls);
     r.fx = el("g", { "clip-path": `url(#clip_${r.id})` }, gFx);
@@ -1466,11 +1480,117 @@ function buildView(card, plan) {
   const seen = new Map();
   let lastDark;
 
+  // ---- overlays (temperature / humidity colours) and the day replay ----
+  const tool = (t) => root$.querySelector(`.tools [data-t="${t}"]`);
+  let overlay = null;
+  try { overlay = localStorage.getItem("fns-floorplan-overlay") || null; } catch (err) { /* storage blocked */ }
+  if (overlay !== "temp" && overlay !== "hum") overlay = null;
+  // piecewise linear hue between the given [value, hue] points, clamped outside
+  const hue = (v, pts) => {
+    if (v <= pts[0][0]) return pts[0][1];
+    for (let i = 1; i < pts.length; i++) {
+      if (v <= pts[i][0]) { const [a, h0] = pts[i - 1], [b, h1] = pts[i]; return h0 + ((h1 - h0) * (v - a)) / (b - a); }
+    }
+    return pts.at(-1)[1];
+  };
+  const HEAT = { temp: [[17, 220], [21, 130], [25, 0]], hum: [[30, 30], [50, 130], [70, 210]] };
+  function renderHeat() {
+    for (const r of rooms) {
+      const v = overlay ? Number(st(overlay === "temp" ? r.temperature : r.humidity)?.state) : NaN;
+      if (!Number.isFinite(v)) { r.heat.setAttribute("opacity", 0); continue; }
+      r.heat.setAttribute("fill", `hsl(${Math.round(hue(v, HEAT[overlay]))}, 75%, 50%)`);
+      r.heat.setAttribute("opacity", 0.32);
+    }
+    for (const t of ["temp", "hum"]) tool(t)?.classList.toggle("on", overlay === t);
+  }
+  for (const t of ["temp", "hum"]) tool(t)?.addEventListener("click", () => {
+    overlay = overlay === t ? null : t;
+    try { localStorage.setItem("fns-floorplan-overlay", overlay || ""); } catch (err) { /* storage blocked */ }
+    renderHeat();
+  });
+
+  let bar = null, loading = false;
+  const stopReplay = (silent) => {
+    if (replay) clearInterval(replay.timer);
+    bar?.remove();
+    bar = null;
+    replay = null;
+    tool("replay")?.classList.remove("on");
+    if (!silent) api.update(true);
+  };
+  // the state of every followed entity at time t (untracked ones fall back to the live state)
+  const seek = (t) => {
+    replay.t = t;
+    const view = Object.create(hass().states);
+    for (const id of tracked) {
+      const list = replay.hist[id];
+      if (!list?.length) continue;
+      let e = list[0]; // before its first change the entity had that first state
+      for (const x of list) { if (x[0] <= t) e = x; else break; }
+      const iso = new Date(e[0]).toISOString();
+      view[id] = { entity_id: id, state: e[1], attributes: e[2] || {}, last_changed: iso, last_updated: iso };
+    }
+    replay.view = view;
+    bar.querySelector(".rp-time").textContent = new Date(t).toLocaleString("cs-CZ", { weekday: "short", hour: "2-digit", minute: "2-digit" });
+    bar.querySelector("input").value = t;
+    api.update(true);
+  };
+  const startReplay = async () => {
+    if (loading) return;
+    loading = true;
+    const btn = tool("replay");
+    btn.textContent = "…";
+    const to = Date.now(), from = to - 24 * 3600e3;
+    try {
+      const res = await hass().callWS({
+        type: "history/history_during_period", start_time: new Date(from).toISOString(), end_time: new Date(to).toISOString(),
+        entity_ids: [...tracked].filter(Boolean), minimal_response: false, no_attributes: false, significant_changes_only: false,
+      });
+      if (!attached) return;
+      const hist = {};
+      for (const [id, list] of Object.entries(res || {})) {
+        let attrs = {}; // compressed states leave out unchanged attributes
+        hist[id] = list.map((e) => {
+          if (e.a) attrs = e.a;
+          const tt = e.lu ?? e.lc;
+          return [typeof tt === "string" ? Date.parse(tt) : tt * 1000, e.s, attrs];
+        });
+      }
+      replay = { from, to, t: from, hist, view: null, timer: 0 };
+      bar = document.createElement("div");
+      bar.className = "replay";
+      bar.innerHTML = `<button class="rp-play">▶</button><input type="range" min="${from}" max="${to}" step="60000" value="${from}"><span class="rp-time"></span><button class="rp-close">Živě</button>`;
+      stage.appendChild(bar);
+      const playBtn = bar.querySelector(".rp-play");
+      const pause = () => { clearInterval(replay.timer); replay.timer = 0; playBtn.textContent = "▶"; };
+      playBtn.addEventListener("click", () => {
+        if (replay.timer) return pause();
+        if (replay.t >= to) replay.t = from;
+        playBtn.textContent = "⏸";
+        replay.timer = setInterval(() => {
+          seek(Math.min(to, replay.t + 120000)); // a day in about 72 s
+          if (replay.t >= to) pause();
+        }, 100);
+      });
+      bar.querySelector("input").addEventListener("input", (e) => { pause(); seek(Number(e.target.value)); });
+      bar.querySelector(".rp-close").addEventListener("click", () => stopReplay());
+      tool("replay").classList.add("on");
+      seek(from);
+    } catch (err) {
+      stopReplay(true);
+      alert(`Historie nejde načíst: ${err.message || err.code || err}`);
+    } finally {
+      loading = false;
+      btn.textContent = "⏱";
+    }
+  };
+  tool("replay")?.addEventListener("click", () => (replay ? stopReplay() : startReplay()));
+
   hydrate(svg);
   const api = {
     update(force = false) {
       const h = hass();
-      if (!h) return;
+      if (!h || (replay && !force)) return; // live changes are ignored while replaying
       let changed = force;
       if (h.themes?.darkMode !== lastDark) { lastDark = h.themes?.darkMode; changed = true; }
       for (const id of tracked) {
@@ -1478,7 +1598,7 @@ function buildView(card, plan) {
         if (seen.get(id) !== s) { seen.set(id, s); changed = true; }
       }
       if (!changed) return;
-      renderMode(); renderLights(); renderOpenings(); renderFx(); renderDevices(); renderRuled(); renderLabels(); renderTexts(); renderVac();
+      renderMode(); renderLights(); renderOpenings(); renderFx(); renderDevices(); renderRuled(); renderLabels(); renderTexts(); renderVac(); renderHeat();
       if (sheetRoom) openSheet(sheetRoom);
       kick();
     },
@@ -1495,6 +1615,7 @@ function buildView(card, plan) {
     },
     detach() {
       attached = false;
+      stopReplay(true);
       closeSheet();
       tplUnsubs.splice(0).forEach((u) => u());
       ro.disconnect();
@@ -1528,8 +1649,9 @@ const EDITOR_SCHEMA = [
   { name: "rotate", selector: { select: { mode: "dropdown", options: [
     { value: "auto", label: "Automaticky (úzká karta)" }, { value: "true", label: "Vždy otočit o 90°" }, { value: "false", label: "Nikdy" },
   ] } } },
+  { name: "tools", selector: { boolean: {} } },
 ];
-const EDITOR_LABELS = { mode: "Vzhled", rotate: "Otočení plánu", level: "Výchozí patro" };
+const EDITOR_LABELS = { mode: "Vzhled", rotate: "Otočení plánu", level: "Výchozí patro", tools: "Tlačítka vrstev a přehrávání" };
 const editorSchema = () => {
   const levels = window.fnsFloorplanLevels || [];
   return levels.length > 1
@@ -1572,6 +1694,8 @@ class FnsFloorplanCardEditor extends HTMLElement {
         else if (v.rotate === "false") config.rotate = false;
         else delete config.rotate;
         if (config.mode === "auto") delete config.mode;
+        if (v.tools === false) config.tools = false;
+        else delete config.tools;
         if (v.level && v.level !== String((window.fnsFloorplanLevels || [])[0]?.id)) config.level = v.level;
         else delete config.level;
         this.dispatchEvent(new CustomEvent("config-changed", { detail: { config }, bubbles: true, composed: true }));
@@ -1581,7 +1705,7 @@ class FnsFloorplanCardEditor extends HTMLElement {
     this._form.hass = this._hass;
     const r = this._config?.rotate;
     this._form.schema = editorSchema();
-    this._form.data = { mode: this._config?.mode || "auto", rotate: r === true ? "true" : r === false ? "false" : "auto",
+    this._form.data = { mode: this._config?.mode || "auto", rotate: r === true ? "true" : r === false ? "false" : "auto", tools: this._config?.tools !== false,
       level: String(this._config?.level ?? (window.fnsFloorplanLevels || [])[0]?.id ?? "") };
   }
 }

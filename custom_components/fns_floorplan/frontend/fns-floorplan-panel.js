@@ -196,6 +196,12 @@ details summary { cursor: pointer; font-weight: 600; font-size: 14px; }
 .actions { display: flex; gap: 8px; margin-top: 18px; }
 .actions .del { color: var(--error-color, #db4437); }
 .err { color: var(--error-color, #db4437); margin: 12px 16px; }
+.prob { display: block; width: 100%; text-align: left; border: 0; border-bottom: 1px solid var(--divider-color, #e0e0e0); background: none; color: inherit; padding: 8px 4px; cursor: pointer; }
+.prob:hover { background: var(--secondary-background-color, #f5f5f5); }
+.hist-row { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px solid var(--divider-color, #e0e0e0); }
+.hist-row span { flex: 1; }
+.guide { stroke: #ff4081; stroke-width: 1; stroke-dasharray: 4 3; pointer-events: none; }
+.side h3 { font-size: 14px; margin: 18px 0 4px; }
 @media (max-width: 800px) {
   .main { flex-direction: column; }
   .stage { flex: none; height: 58vh; }
@@ -283,6 +289,8 @@ class FnsFloorplanPanel extends HTMLElement {
   <select class="add"><option value="">+ Přidat</option>${ADD.map(([l], i) => `<option value="${i}">${l}</option>`).join("")}</select>
   <button class="btn undo" disabled title="Zpět (Ctrl+Z)">↶</button>
   <button class="btn redo" disabled title="Vpřed (Ctrl+Y)">↷</button>
+  <button class="btn hist" title="Historie uložení">Historie</button>
+  <button class="btn check" title="Kontrola entit">Kontrola</button>
   <button class="btn revert" disabled>Zahodit</button>
   <button class="btn primary save" disabled>Uložit</button>
 </div>
@@ -299,6 +307,8 @@ class FnsFloorplanPanel extends HTMLElement {
     $(".save").addEventListener("click", () => this._save());
     $(".undo").addEventListener("click", () => this._history(this._undo, this._redo));
     $(".redo").addEventListener("click", () => this._history(this._redo, this._undo));
+    $(".hist").addEventListener("click", () => this._showHistory());
+    $(".check").addEventListener("click", () => this._showCheck());
     $(".revert").addEventListener("click", () => { if (confirm("Zahodit neuložené změny?")) this._load(); });
     this.shadowRoot.querySelectorAll(".modes button").forEach((b) => b.addEventListener("click", () => {
       this._mode = b.dataset.m;
@@ -456,6 +466,7 @@ class FnsFloorplanPanel extends HTMLElement {
       const ids = new Set(rooms.map((r) => r.id));
       this._plan.openings = this._plan.openings.filter((o) => !ids.has(o.room_id));
       for (const id of ids) delete this._plan.labels[id];
+      delete this._plan.backgrounds?.[cur.id];
       for (const k of ["rooms", "furniture", "devices", "sensors", "texts"]) this._plan[k] = this._plan[k].filter((x) => !this._on(x));
       this._plan.levels = levels.filter((l) => l !== cur);
       this._level = this._plan.levels[0].id;
@@ -498,15 +509,17 @@ class FnsFloorplanPanel extends HTMLElement {
     return this._plan[sel.cat][sel.i];
   }
 
-  _move(sel, x, z) {
+  // exact: the position comes from a snap guide, keep it instead of rounding to the grid
+  _move(sel, x, z, exact) {
     if (sel.cat === "rooms" || sel.cat === "openings") return; // moved by their own handlers
+    const q = exact ? (v) => v : snap;
     if (sel.g) {
-      const o = this._get(sel), dx = snap(x - o.x), dz = snap(z - o.z);
+      const o = this._get(sel), dx = q(x - o.x), dz = q(z - o.z);
       for (const i of sel.g) { const f = this._plan.furniture[i]; f.x = r3(f.x + dx); f.z = r3(f.z + dz); }
       return;
     }
-    if (sel.cat === "labels") this._plan.labels[sel.id] = [r3(snap(x)), r3(snap(z))];
-    else Object.assign(this._plan[sel.cat][sel.i], { x: r3(snap(x)), z: r3(snap(z)) });
+    if (sel.cat === "labels") this._plan.labels[sel.id] = [r3(q(x)), r3(q(z))];
+    else Object.assign(this._plan[sel.cat][sel.i], { x: r3(q(x)), z: r3(q(z)) });
   }
 
   _draw() {
@@ -514,6 +527,12 @@ class FnsFloorplanPanel extends HTMLElement {
     // the view stays put while dragging, so a moved corner does not shift the whole plan under the pointer
     if (!this._dragging) this._applyView();
     svg.innerHTML = "";
+    // tracing image of the floor (editor only)
+    const bg = this._plan.backgrounds?.[this._level];
+    if (bg?.url) {
+      const [bx, bz] = P([bg.left || 0, bg.top || 0]);
+      el("image", { href: bg.url, x: bx, y: bz, width: bg.width * S, height: bg.width * S * 3, preserveAspectRatio: "xMinYMin meet", opacity: bg.opacity ?? 0.4, style: "pointer-events:none" }, svg);
+    }
     svg.setAttribute("class", "mode-" + this._mode);
     if (this._multi && !this._multi.some((m) => selEq(m, this._sel))) this._multi = null;
     this.shadowRoot.querySelectorAll(".modes button").forEach((b) => b.classList.toggle("on", b.dataset.m === this._mode));
@@ -702,6 +721,23 @@ class FnsFloorplanPanel extends HTMLElement {
     if (this._sel?.cat === "rooms") this._handles(svg, this._sel.i);
     const f = this._sel?.cat === "furniture" && !this._sel.g && plan.furniture[this._sel.i];
     if (f && !isPoint(f) && this._mode === "items") this._resize(svg, f, this._sel);
+    if (f && f.type === "lamp_spot" && this._mode === "items") {
+      const a = ((f.rotation || 0) * Math.PI) / 180, [cx, cz] = P([f.x, f.z]), [hx, hz] = P([f.x + Math.cos(a) * 1.2, f.z + Math.sin(a) * 1.2]);
+      el("line", { x1: cx, y1: cz, x2: hx, y2: hz, class: "rot-line" }, svg);
+      const h = el("circle", { cx: hx, cy: hz, r: 7, class: "rot-h" }, svg);
+      el("title", {}, h).textContent = "Směr svícení";
+      h.addEventListener("pointerdown", (e) => this._press(e, this._sel, (dx, dz, p) => {
+        const deg = (Math.atan2(p[1] - f.z, p[0] - f.x) * 180) / Math.PI;
+        f.rotation = (((Math.round(deg / 5) * 5) % 360) + 360) % 360;
+      }));
+    }
+    if (this._guides) {
+      const b = this._bounds(), x1 = b[2][0] + 1, z1 = b[2][1] + 1;
+      for (const g of this._guides) {
+        const [A, B] = g.x != null ? [P([g.x, -1]), P([g.x, z1])] : [P([-1, g.z]), P([x1, g.z])];
+        el("line", { x1: A[0], y1: A[1], x2: B[0], y2: B[1], class: "guide" }, svg);
+      }
+    }
     // custom icons load asynchronously from HA's icon set
     svg.querySelectorAll("[data-icon]").forEach((p) => resolveIcon(p.dataset.icon).then((d) => d && p.setAttribute("d", d)));
   }
@@ -782,19 +818,29 @@ class FnsFloorplanPanel extends HTMLElement {
         this._changed();
       });
     });
-    const others = this._plan.rooms.filter((x) => x !== r).flatMap((x) => x.points);
     r.points.forEach((p, k) => {
       const [cx, cz] = P(p);
       el("circle", { cx, cy: cz, r: 8, class: "vtx" + (this._sel.v === k ? " sel" : "") }, svg).addEventListener("pointerdown", (e) => {
         const base = [...p];
-        this._press(e, { cat: "rooms", i: ri, v: k }, (dx, dz) => {
+        // the same corner of a neighbouring room (a shared wall) moves along, unless Alt is held
+        const twins = this._twins(r, base);
+        const skip = new Set(twins.map((t) => t.room.points[t.k]));
+        const others = this._plan.rooms.filter((x) => x !== r).flatMap((x) => x.points).filter((o) => !skip.has(o));
+        this._press(e, { cat: "rooms", i: ri, v: k }, (dx, dz, pt, ev) => {
           let x = base[0] + dx, z = base[1] + dz;
           const near = others.find((o) => Math.hypot(o[0] - x, o[1] - z) < 0.15);
           [x, z] = near || [snap(x), snap(z)];
           r.points[k] = [r3(Math.max(0, x)), r3(Math.max(0, z))];
+          if (!ev?.altKey) for (const t of twins) t.room.points[t.k] = [...r.points[k]];
         });
       });
     });
+  }
+
+  // corners of other rooms on this floor that sit on `pt` (within 2 cm): [{room, k}]
+  _twins(r, pt) {
+    return this._plan.rooms.filter((x) => x !== r && this._on(x))
+      .flatMap((x) => x.points.map((q, k) => ({ room: x, k, q })).filter((t) => Math.hypot(t.q[0] - pt[0], t.q[1] - pt[1]) < 0.02));
   }
 
   // a new corner splits edge k; openings further along that wall move to the second half
@@ -841,17 +887,48 @@ class FnsFloorplanPanel extends HTMLElement {
   _drag(g, sel) {
     g.addEventListener("pointerdown", (e) => {
       let bases = null;
-      this._press(e, sel, (dx, dz) => {
+      this._press(e, sel, (dx, dz, p, ev) => {
         // a dragged member of the multi-selection moves all of it by the same snapped offset
         bases ??= (this._multi?.some((m) => selEq(m, sel)) ? this._multi : [sel]).map((s) => { const o = this._get(s); return [s, { x: o.x, z: o.z }]; }); // start positions, not the live objects
-        if (bases.length === 1) return this._move(sel, bases[0][1].x + dx, bases[0][1].z + dz);
-        const sx = snap(dx), sz = snap(dz);
+        const base = bases.find(([s]) => selEq(s, sel))[1];
+        // snap to the axis of another item, a room centre or a wall (Alt turns it off)
+        const gd = ev?.altKey ? { x: null, z: null, lines: null } : this._guide(base.x + dx, base.z + dz, bases.map(([s]) => s));
+        this._guides = gd.lines;
+        const exact = gd.x != null || gd.z != null;
+        if (gd.x != null) dx = gd.x - base.x;
+        if (gd.z != null) dz = gd.z - base.z;
+        if (bases.length === 1) {
+          const x = base.x + dx, z = base.z + dz;
+          return this._move(sel, gd.x != null || !exact ? x : snap(x), gd.z != null || !exact ? z : snap(z), exact);
+        }
+        const sx = gd.x != null ? dx : snap(dx), sz = gd.z != null ? dz : snap(dz);
         for (const [s, o] of bases) {
-          if (s.g || s.cat === "labels") this._move(s, o.x + sx, o.z + sz);
+          if (s.g || s.cat === "labels") this._move(s, o.x + sx, o.z + sz, exact);
           else Object.assign(this._plan[s.cat][s.i], { x: r3(o.x + sx), z: r3(o.z + sz) });
         }
       });
     });
+  }
+
+  // nearest axis (per x and z) of other items, label and room centres or axis-parallel walls on this floor
+  _guide(x, z, exclude) {
+    const plan = this._plan, xs = [], zs = [];
+    const ex = (cat, i, id) => exclude.some((s) => s.cat === cat && (cat === "labels" ? s.id === id : s.i === i || s.g?.includes(i)));
+    for (const cat of GROUPABLE) plan[cat].forEach((o, i) => { if (this._on(o) && !ex(cat, i)) { xs.push(o.x); zs.push(o.z); } });
+    for (const r of this._roomsHere()) {
+      if (!ex("labels", null, r.id)) { const l = plan.labels[r.id] || centroid(r.points); xs.push(l[0]); zs.push(l[1]); }
+      const c = centroid(r.points);
+      xs.push(c[0]); zs.push(c[1]);
+      r.points.forEach((a, k) => {
+        const b = r.points[(k + 1) % r.points.length];
+        if (Math.abs(a[0] - b[0]) < 1e-3) xs.push(a[0]);
+        if (Math.abs(a[1] - b[1]) < 1e-3) zs.push(a[1]);
+      });
+    }
+    const th = clamp(0.1 / (this._view ? this._fullView().w / this._view.w : 1), 0.03, 0.15); // closer when zoomed in
+    const near = (v, list) => { let best = null, d = th; for (const c of list) if (Math.abs(c - v) < d) { d = Math.abs(c - v); best = c; } return best; };
+    const gx = near(x, xs), gz = near(z, zs);
+    return { x: gx, z: gz, lines: [...(gx != null ? [{ x: gx }] : []), ...(gz != null ? [{ z: gz }] : [])] };
   }
 
   // all items sharing the `group` of the item under `sel` (null when it has none)
@@ -865,6 +942,7 @@ class FnsFloorplanPanel extends HTMLElement {
 
   // Ctrl+click: add an item (with its group) to the selection or take it out
   _toggle(sel) {
+    this._sidePage = null;
     const add = this._groupOf(sel) || [sel];
     let m = this._multi || (this._sel && this._sel.cat !== "rooms" && this._sel.cat !== "openings" ? [this._sel] : []);
     if (m.some((x) => selEq(x, sel))) m = m.filter((x) => !add.some((a) => selEq(a, x)));
@@ -893,6 +971,7 @@ class FnsFloorplanPanel extends HTMLElement {
       if (!toggle) {
         if (!inMulti) this._multi = this._groupOf(sel);
         this._sel = sel;
+        this._sidePage = null;
       }
       const start = this._toPlan(e);
       let moved = false, axis = null;
@@ -910,12 +989,13 @@ class FnsFloorplanPanel extends HTMLElement {
         if (!moved && toggle && !inMulti) { this._sel = sel; this._multi = this._groupOf(sel); }
         moved = true;
         this._dragging = true;
-        onMove(dx, dz, p);
+        onMove(dx, dz, p, ev);
         this._dirty = true;
         this._draw();
       };
       const up = () => {
         this._dragging = false;
+        this._guides = null;
         svg.removeEventListener("pointermove", move);
         svg.removeEventListener("pointerup", up);
         svg.removeEventListener("pointercancel", up);
@@ -963,29 +1043,189 @@ class FnsFloorplanPanel extends HTMLElement {
     this._form();
   }
 
+  // everything in the plan that points to a missing or unavailable entity: [{name, text, sel, level, mode}]
+  _problems() {
+    const out = [], states = this._hass.states, plan = this._plan, first = this._levels()[0].id;
+    const bad = (id) => (!(id in states) ? "entita neexistuje" : ["unavailable", "unknown"].includes(states[id].state) ? "nedostupná" : null);
+    const add = (name, text, sel, level, mode = "items") => out.push({ name, text, sel, level: level ?? first, mode });
+    const check = (id, name, sel, level, mode, empty) => {
+      if (!id) return empty && add(name, empty, sel, level, mode);
+      const b = bad(id);
+      if (b) add(name, `${id}: ${b}`, sel, level, mode);
+    };
+    const rules = (o, name, sel, mode) => {
+      const walk = (c) => {
+        if (c.any) c.any.forEach(walk);
+        else if (c.entity && !(c.entity in states)) add(name, `pravidlo: entita neexistuje (${c.entity})`, sel, o.level, mode);
+      };
+      for (const r of o.rules || []) [].concat(r.if || []).forEach(walk);
+    };
+    plan.furniture.forEach((f, i) => {
+      const light = isLight(f), name = light ? LIGHT_TYPES[f.type] || f.type : FURNITURE[f.type]?.[0] || f.type, sel = { cat: "furniture", i };
+      check(f.entity, name, sel, f.level, "items", light && "bez entity");
+      rules(f, name, sel, "items");
+    });
+    plan.devices.forEach((d, i) => {
+      const name = d.name || DEVICE_KINDS[d.kind] || d.entity || "Zařízení", sel = { cat: "devices", i };
+      check(d.entity, name, sel, d.level, "items", "bez entity");
+      rules(d, name, sel, "items");
+    });
+    plan.sensors.forEach((s, i) => check(s.entity, s.entity || "Senzor", { cat: "sensors", i }, s.level, "items", "bez entity"));
+    plan.texts.forEach((t, i) => {
+      const name = t.text || t.entity || "Text", sel = { cat: "texts", i };
+      if (!t.entity && !t.text) add(name, "bez entity i textu", sel, t.level);
+      else if (t.entity) check(t.entity, name, sel, t.level, "items");
+      rules(t, name, sel, "items");
+    });
+    plan.openings?.forEach((o, i) => {
+      const r = plan.rooms.find((x) => x.id === o.room_id);
+      const name = `${o.type === "window" ? "Okno" : "Dveře"} (${r?.name || "?"})`, sel = { cat: "openings", i };
+      for (const k of ["contact", "blind", "lock"]) if (o[k]) check(o[k], name, sel, r?.level, "rooms");
+    });
+    plan.rooms.forEach((r, i) => {
+      const sel = { cat: "rooms", i };
+      for (const id of [r.temperature, r.humidity, ...(r.sheet_extra || [])]) if (id) check(id, r.name, sel, r.level, "rooms");
+      rules(r, r.name, sel, "rooms");
+    });
+    for (const k of ["entity", "room_sensor"]) if (plan.vacuum?.[k]) check(plan.vacuum[k], "Vysavač", null, null, "items");
+    return out;
+  }
+
+  _sideHead(page, title, hint) {
+    this._sel = null;
+    this._multi = null;
+    this._sidePage = page;
+    this._draw();
+    const side = this.shadowRoot.querySelector(".side");
+    side.innerHTML = `<h2>${title}</h2>${hint ? `<p class="hint">${hint}</p>` : ""}<div class="list"></div><div class="actions"><button data-a="close">Zavřít</button></div>`;
+    side.querySelector('[data-a="close"]').addEventListener("click", () => { this._sidePage = null; this._form(); });
+    return side.querySelector(".list");
+  }
+
+  _showCheck() {
+    const list = this._sideHead("check", "Kontrola entit");
+    const probs = this._problems();
+    if (!probs.length) list.innerHTML = '<p class="hint">Vše v pořádku.</p>';
+    probs.forEach((p) => {
+      const b = document.createElement("button");
+      b.className = "prob";
+      b.innerHTML = `<b>${esc(p.name)}</b><br>${esc(p.text)}`;
+      b.addEventListener("click", () => {
+        this._level = p.level; this._mode = p.mode; this._sidePage = null;
+        this._sel = p.sel; this._multi = null; this._view = null;
+        this._draw(); this._form();
+      });
+      list.appendChild(b);
+    });
+  }
+
+  async _showHistory() {
+    const list = this._sideHead("history", "Historie uložení", "Posledních 20 uložení. Načtená verze se otevře v editoru jako neuložená změna — uložíš ji tlačítkem Uložit, nebo ji zahodíš.");
+    let rows;
+    try {
+      rows = await this._hass.callWS({ type: "fns_floorplan/history/list" });
+    } catch (err) {
+      list.innerHTML = `<p class="err">Historie nejde načíst: ${esc(err.message || err.code || err)}</p>`;
+      return;
+    }
+    if (this._sidePage !== "history") return;
+    if (!rows.length) list.innerHTML = '<p class="hint">Zatím nic.</p>';
+    for (const h of rows) {
+      const row = document.createElement("div");
+      row.className = "hist-row";
+      row.innerHTML = `<span><b>#${h.rev}</b> ${esc(new Date(h.saved_at).toLocaleString("cs-CZ"))}<br><small>${h.rooms} místností, ${h.items} prvků</small></span><button class="mini">Načíst do editoru</button>`;
+      row.querySelector("button").addEventListener("click", async () => {
+        if (this._dirty && !confirm("Zahodit neuložené změny a načíst tuto verzi?")) return;
+        try {
+          const old = await this._hass.callWS({ type: "fns_floorplan/history/get", rev: h.rev });
+          const rev = this._plan.rev;
+          this._plan = old;
+          this._plan.rev = rev;
+          for (const k of ["furniture", "devices", "sensors", "texts"]) this._plan[k] ||= [];
+          this._plan.labels ||= {};
+          this._sel = null; this._multi = null; this._sidePage = null;
+          this._changed();
+        } catch (err) {
+          alert(`Verzi nejde načíst: ${err.message || err.code || err}`);
+        }
+      });
+      list.appendChild(row);
+    }
+  }
+
+  // tracing image of the current floor: upload, position, opacity (the card never shows it)
+  _bgUI(side) {
+    const lvl = String(this._level), bg = this._plan.backgrounds?.[lvl];
+    const box = document.createElement("div");
+    const num = (k, label, step) => `<label>${label}</label><input type="number" step="${step}" data-bg="${k}" value="${bg[k] ?? ""}">`;
+    box.innerHTML = `<h3>Podklad patra</h3>
+      <input type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml">
+      ${bg ? `<div class="row2"><div>${num("width", "Šířka (m)", 0.05)}</div><div>${num("left", "Vlevo (m)", 0.05)}</div></div>${num("top", "Nahoře (m)", 0.05)}
+        <label>Průhlednost</label><input type="range" min="0.1" max="1" step="0.05" data-bg="opacity" value="${bg.opacity ?? 0.4}">
+        <div class="actions"><button data-a="bgdel" class="del">Odebrat podklad</button></div>` : ""}
+      <p class="hint">Obrázek půdorysu (PNG, JPG, WebP, SVG) jen pro obkreslení v editoru, na kartě se nezobrazí. PDF nejdřív ulož jako obrázek.</p>`;
+    side.appendChild(box);
+    box.querySelector("input[type=file]").addEventListener("change", async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const fd = new FormData();
+      fd.append("level", lvl); // before the file, the server reads fields in order
+      fd.append("file", file);
+      try {
+        const res = await this._hass.fetchWithAuth("/api/fns_floorplan/background", { method: "POST", body: fd });
+        if (!res.ok) throw new Error((await res.text()) || res.status);
+        const { url } = await res.json();
+        (this._plan.backgrounds ||= {})[lvl] = { url, left: 0, top: 0, width: r3(this._bounds()[2][0]) || 10, opacity: 0.4 };
+        this._changed();
+      } catch (err) {
+        alert(`Nahrání podkladu selhalo: ${err.message || err}`);
+      }
+    });
+    box.querySelectorAll("[data-bg]").forEach((inp) => inp.addEventListener("change", () => {
+      const v = Number(inp.value);
+      if (!Number.isFinite(v)) return;
+      bg[inp.dataset.bg] = inp.dataset.bg === "width" ? Math.max(0.5, v) : v;
+      this._changed();
+    }));
+    box.querySelector('[data-a="bgdel"]')?.addEventListener("click", async () => {
+      try {
+        const res = await this._hass.fetchWithAuth(`/api/fns_floorplan/background?level=${encodeURIComponent(lvl)}`, { method: "DELETE" });
+        if (!res.ok) throw new Error((await res.text()) || res.status);
+        delete this._plan.backgrounds[lvl];
+        this._changed();
+      } catch (err) {
+        alert(`Odebrání podkladu selhalo: ${err.message || err}`);
+      }
+    });
+  }
+
   _status() {
     const $ = (s) => this.shadowRoot.querySelector(s);
     $(".undo").disabled = !this._undo?.length;
     $(".redo").disabled = !this._redo?.length;
     $(".save").disabled = !this._dirty;
     $(".revert").disabled = !this._dirty;
+    const n = this._problems().length;
+    $(".check").textContent = n ? `Kontrola (${n})` : "Kontrola";
     $(".state").textContent = this._dirty ? "Neuložené změny" : "";
   }
 
   // properties of the selected item
   _form() {
     this._status();
+    if (this._sidePage && !this._sel) return; // history / check list stays until closed or an item is picked
     const side = this.shadowRoot.querySelector(".side");
     const sel = this._sel, o = this._get();
     if (!o && this._mode === "rooms") {
-      side.innerHTML = `<h2>Místnosti, okna a dveře</h2><p class="hint">Klepni na místnost: táhnutím ji posuneš celou, za modré body táhneš rohy (přichytí se k rohům sousedních místností), poloprůhledné body mezi rohy přidají nový roh.<br><br>Okno nebo dveře vybereš klepnutím a táhnutím posuneš po stěně. U vybraných dveří přehodí ⇄ panty a ⇅ směr otevírání. Nové přidáš v panelu vybrané místnosti.<br><br>Místnosti mají každá své stěny: když posuneš společnou stěnu, posuň i sousední místnost.</p>`;
+      side.innerHTML = `<h2>Místnosti, okna a dveře</h2><p class="hint">Klepni na místnost: táhnutím ji posuneš celou, za modré body táhneš rohy (přichytí se k rohům sousedních místností), poloprůhledné body mezi rohy přidají nový roh.<br><br>Okno nebo dveře vybereš klepnutím a táhnutím posuneš po stěně. U vybraných dveří přehodí ⇄ panty a ⇅ směr otevírání. Nové přidáš v panelu vybrané místnosti.<br><br>Společný roh sousedních místností se posouvá s oběma místnostmi naráz; s Alt jen ten jeden.</p>`;
+      this._bgUI(side);
       return;
     }
     if (this._multi && this._mode === "items") return this._multiForm(side);
     if (sel?.cat === "rooms") return this._roomForm(side, o);
     if (sel?.cat === "openings") return this._openingForm(side, o);
     if (!o) {
-      side.innerHTML = `<h2>Úpravy půdorysu</h2><p class="hint">Klepni na světlo, spotřebič, senzor, text, nábytek nebo badge místnosti a uprav ho. Táhnutím ji přesuneš (mřížka 5 cm, s Ctrl nebo Shift jen v jedné ose), šipky posouvají vybraný prvek, Delete ho smaže. Ctrl+klik vybere víc prvků najednou (pak je jde táhnout spolu a seskupit), Ctrl+C / Ctrl+V kopíruje. Vybraný nábytek má úchyty na změnu velikosti a kolečko na otáčení.<br><br>Prvky bez entity mají červený přerušovaný okraj, prvky skryté pravidlem jsou bledé.<br><br>Změny se na dashboardu projeví hned po uložení.</p>`;
+      side.innerHTML = `<h2>Úpravy půdorysu</h2><p class="hint">Klepni na světlo, spotřebič, senzor, text, nábytek nebo badge místnosti a uprav ho. Táhnutím ji přesuneš (mřížka 5 cm, s Ctrl nebo Shift jen v jedné ose), šipky posouvají vybraný prvek, Delete ho smaže. Ctrl+klik vybere víc prvků najednou (pak je jde táhnout spolu a seskupit), Ctrl+C / Ctrl+V kopíruje. Vybraný nábytek má úchyty na změnu velikosti a kolečko na otáčení. Při tažení se prvek přichytí k ose jiného prvku, ke středu místnosti nebo ke stěně (růžová čára); Alt přichycení vypne.<br><br>Prvky bez entity mají červený přerušovaný okraj, prvky skryté pravidlem jsou bledé.<br><br>Změny se na dashboardu projeví hned po uložení.</p>`;
       return;
     }
     const field = (label, key, value, type = "text", extra = "") =>
@@ -1551,7 +1791,7 @@ class FnsFloorplanPanel extends HTMLElement {
       e.preventDefault();
       if (this._sel.cat === "rooms") {
         const r = this._plan.rooms[this._sel.i];
-        const pts = this._sel.v != null ? [r.points[this._sel.v]] : r.points;
+        const pts = this._sel.v != null ? [r.points[this._sel.v], ...this._twins(r, r.points[this._sel.v]).map((t) => t.room.points[t.k])] : r.points;
         for (const p of pts) { p[0] = r3(Math.max(0, p[0] + step[0])); p[1] = r3(Math.max(0, p[1] + step[1])); }
       } else {
         const o = this._plan.openings[this._sel.i], r = this._plan.rooms.find((x) => x.id === o.room_id), ed = edgeOf(r, o.edge);
