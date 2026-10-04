@@ -152,6 +152,8 @@ svg { width: 100%; height: 100%; display: block; touch-action: none; user-select
 .outc input[type=text] { flex: 1 1 100%; }
 .side label.chk { display: flex; align-items: center; gap: 6px; margin: 6px 0; color: var(--primary-text-color, #212121); font-size: 14px; }
 .side label.chk input { width: auto; }
+.badge-opts { border: 0; padding: 0 0 0 22px; margin: 0; }
+.badge-opts:disabled { opacity: .45; }
 .icon-row { display: flex; gap: 6px; align-items: center; }
 .icon-row ha-icon { flex: none; color: var(--primary-color, #03a9f4); }
 .icon-row input, .icon-row ha-icon-picker { flex: 1; }
@@ -399,11 +401,13 @@ class FnsFloorplanPanel extends HTMLElement {
       if (o.style !== "passage") {
         el("line", { x1: A[0], y1: A[1], x2: B[0], y2: B[1], class: o.type === "window" ? "win" : "door" }, svg);
         // the leaf and its arc show the hinge side and which way it opens, as on the card
-        const g = this._swing(o, r), ang = o.type === "window" ? 0.62 : Math.PI / 2;
+        // without a contact a window (or glass door) stays shut on the card: drawn shut here too
+        const shut = !o.contact && (o.type === "window" || o.style === "glass");
+        const g = this._swing(o, r), ang = shut ? 0 : o.type === "window" ? 0.62 : Math.PI / 2;
         const tip = [g.H[0] + (g.along[0] * Math.cos(ang) + g.nn[0] * Math.sin(ang)) * g.w, g.H[1] + (g.along[1] * Math.cos(ang) + g.nn[1] * Math.sin(ang)) * g.w];
         const [hx, hz] = P(g.H), [tx, tz] = P(tip), [ex, ez] = P(g.E);
         const cross = g.along[0] * g.nn[1] - g.along[1] * g.nn[0];
-        el("path", { d: `M${ex},${ez} A${g.w * S},${g.w * S} 0 0 ${cross > 0 ? 1 : 0} ${tx},${tz}`, class: "swing-arc" + (selected ? " on" : "") }, svg);
+        if (!shut) el("path", { d: `M${ex},${ez} A${g.w * S},${g.w * S} 0 0 ${cross > 0 ? 1 : 0} ${tx},${tz}`, class: "swing-arc" + (selected ? " on" : "") }, svg);
         el("line", { x1: hx, y1: hz, x2: tx, y2: tz, class: "swing-leaf" + (selected ? " on" : "") }, svg);
         if (selected && this._mode === "rooms") {
           const flip = (cx, cz, glyph, title, fn) => {
@@ -722,7 +726,7 @@ class FnsFloorplanPanel extends HTMLElement {
     if (sel?.cat === "rooms") return this._roomForm(side, o);
     if (sel?.cat === "openings") return this._openingForm(side, o);
     if (!o) {
-      side.innerHTML = `<h2>Úpravy půdorysu</h2><p class="hint">Klepni na světlo, spotřebič, senzor, text, nábytek nebo jmenovku místnosti a uprav ji. Táhnutím ji přesuneš (mřížka 5 cm), šipky posouvají vybraný prvek, Delete ho smaže. Vybraný nábytek má úchyty na změnu velikosti a kolečko na otáčení.<br><br>Prvky bez entity mají červený přerušovaný okraj, prvky skryté pravidlem jsou bledé.<br><br>Změny se na dashboardu projeví hned po uložení.</p>`;
+      side.innerHTML = `<h2>Úpravy půdorysu</h2><p class="hint">Klepni na světlo, spotřebič, senzor, text, nábytek nebo badge místnosti a uprav ho. Táhnutím ji přesuneš (mřížka 5 cm), šipky posouvají vybraný prvek, Delete ho smaže. Vybraný nábytek má úchyty na změnu velikosti a kolečko na otáčení.<br><br>Prvky bez entity mají červený přerušovaný okraj, prvky skryté pravidlem jsou bledé.<br><br>Změny se na dashboardu projeví hned po uložení.</p>`;
       return;
     }
     const field = (label, key, value, type = "text", extra = "") =>
@@ -733,7 +737,7 @@ class FnsFloorplanPanel extends HTMLElement {
         <div class="rot"><button data-a="rot-15">−15°</button><button data-a="rot15">+15°</button><button data-a="rot90">+90°</button></div>`;
     let html = "";
     if (sel.cat === "labels") {
-      html = `<h2>Jmenovka: ${esc(o.room.name)}</h2><p class="hint">Přetáhni ji, kam patří. Co ukazuje, nastavíš u místnosti v režimu Místnosti.</p>
+      html = `<h2>Badge místnosti: ${esc(o.room.name)}</h2><p class="hint">Přetáhni ho, kam patří. Co ukazuje, nastavíš u místnosti v režimu Místnosti.</p>
         ${xz}
         <label>Otočení (°)</label><input data-k="rotation" type="number" step="1" value="${o.room.label_rotation || 0}">
         <div class="rot"><button data-a="rot-15">−15°</button><button data-a="rot15">+15°</button><button data-a="rot90">+90°</button></div>
@@ -994,19 +998,21 @@ class FnsFloorplanPanel extends HTMLElement {
       <label>Název</label><input data-k="name" value="${esc(r.name)}">
       <label>Teplota (entita)</label><input data-k="temperature" value="${esc(r.temperature || "")}" list="ents">
       <label>Vlhkost (entita)</label><input data-k="humidity" value="${esc(r.humidity || "")}" list="ents">
-      <details open><summary>Jmenovka</summary>
-        <label class="chk"><input type="checkbox" data-k="label_show" ${r.label_hidden ? "" : "checked"}> zobrazit jmenovku</label>
+      <details open><summary>Badge místnosti</summary>
+        <label class="chk"><input type="checkbox" data-k="label_show" ${r.label_hidden ? "" : "checked"}> zobrazit badge</label>
+        <fieldset class="badge-opts" ${r.label_hidden ? "disabled" : ""}>
         <label class="chk"><input type="checkbox" data-k="label_name" ${r.label_name === false ? "" : "checked"}> název místnosti</label>
         <label class="chk"><input type="checkbox" data-k="label_t" ${info.includes("temperature") ? "checked" : ""}> teplota</label>
         <label class="chk"><input type="checkbox" data-k="label_h" ${info.includes("humidity") ? "checked" : ""}> vlhkost</label>
         <label>Další údaje pod názvem (entita nebo šablona, každá na řádek)</label>
         <textarea data-k="label_extra" spellcheck="false" style="min-height:60px" placeholder="sensor.co2_obyvak">${esc(extra.join("\n"))}</textarea>
+        </fieldset>
       </details>
       ${v != null ? `<div class="row2"><div><label>Roh ${v + 1}: X (m)</label><input data-k="vx" type="number" step="0.05" value="${r.points[v][0]}"></div><div><label>Z (m)</label><input data-k="vz" type="number" step="0.05" value="${r.points[v][1]}"></div></div>
         <div class="actions"><button data-a="delv" ${r.points.length <= 3 ? "disabled" : ""}>Smazat roh ${v + 1}</button></div>` : `<p class="hint">Rohů: ${r.points.length}. Klepnutím na roh ho vybereš.</p>`}
       <label>Přidat na stěnu</label><select data-k="wall">${walls}</select>
       <div class="actions"><button data-a="adddoor">+ Dveře</button><button data-a="addwin">+ Okno</button></div>
-      ${this._rulesUI(r, ["color", "glow", "hide"]).replace("Pravidla: barvy, skrytí", "Pravidla: podbarvení, skrytí jmenovky")}
+      ${this._rulesUI(r, ["color", "glow", "hide"]).replace("Pravidla: barvy, skrytí", "Pravidla: podbarvení, skrytí badge")}
       <div class="actions"><button data-a="delroom" class="del">Smazat místnost</button></div>`;
     this._bind(side, async (k, val, inp) => {
       if (await this._setShared([r], k, val, inp)) return;
@@ -1054,7 +1060,7 @@ class FnsFloorplanPanel extends HTMLElement {
       <div class="row2"><div><label>Šířka (m)</label><input data-k="width" type="number" step="0.05" value="${o.width}"></div><div><label>Od začátku stěny (m)</label><input data-k="offset" type="number" step="0.05" value="${o.offset}"></div></div>
       ${o.style === "passage" ? "" : `<div class="row2"><div><label>Panty (z místnosti)</label><select data-k="hinge">${opt("left", "Vlevo", o.hinge || "left")}${opt("right", "Vpravo", o.hinge)}</select></div>
         <div><label>Otevírá se</label><select data-k="swing">${opt("in", "Dovnitř", o.swing || "in")}${opt("out", "Ven", o.swing)}</select></div></div>
-      <label>Kontakt (binary_sensor; ${win ? "okno bez něj zůstane zavřené" : "dveře bez něj jsou pootevřené na 45°"})</label><input data-k="contact" value="${esc(o.contact || "")}" list="ents">
+      <label>Kontakt (binary_sensor; ${win || o.style === "glass" ? "bez něj zůstane zavřené" : "dveře bez něj jsou pootevřené na 45°"})</label><input data-k="contact" value="${esc(o.contact || "")}" list="ents">
       <label>Roleta (cover, nepovinné)</label><input data-k="blind" value="${esc(o.blind || "")}" list="ents">
       ${this._actionsUI(o, { tap: o.blind ? "Detail rolety" : o.contact ? "Detail kontaktu" : "" })}`}
       <div class="actions"><button data-a="del" class="del">Smazat</button></div>`;
