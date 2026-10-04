@@ -98,9 +98,13 @@ button, select, input, textarea { font: inherit; }
 .btn { border: 1px solid var(--divider-color, #e0e0e0); border-radius: 18px; padding: 7px 14px; cursor: pointer; background: var(--card-background-color, #fff); color: var(--primary-text-color, #212121); }
 .btn.primary { background: var(--primary-color, #03a9f4); border-color: transparent; color: var(--text-primary-color, #fff); font-weight: 600; }
 .btn:disabled { opacity: .45; cursor: default; }
+.btn.undo, .btn.redo { padding: 7px 11px; font-size: 16px; line-height: 1; }
 .top select { border-radius: 18px; padding: 6px 10px; border: 1px solid var(--divider-color, #e0e0e0); background: var(--card-background-color, #fff); color: var(--primary-text-color, #212121); }
-.main { display: flex; height: calc(100% - 56px); }
-.stage { flex: 1; min-width: 0; padding: 12px; box-sizing: border-box; }
+.main { display: flex; height: calc(100vh - 56px); }
+.stage { flex: 1; min-width: 0; padding: 12px; box-sizing: border-box; position: relative; }
+.zoom { position: absolute; left: 20px; top: 20px; display: flex; flex-direction: column; gap: 6px; z-index: 1; }
+.zoom button { width: 34px; height: 34px; border-radius: 10px; border: 1px solid var(--divider-color, #e0e0e0); cursor: pointer; font-size: 18px; line-height: 1;
+  background: var(--card-background-color, #fff); color: var(--primary-text-color, #212121); box-shadow: 0 1px 3px rgba(0,0,0,.15); }
 svg { width: 100%; height: 100%; display: block; touch-action: none; user-select: none; }
 .floor { fill: var(--card-background-color, #fff); stroke: var(--primary-text-color, #212121); stroke-opacity: .55; stroke-width: 4; }
 .open-line { stroke: var(--card-background-color, #fff); stroke-width: 7; }
@@ -157,6 +161,9 @@ svg { width: 100%; height: 100%; display: block; touch-action: none; user-select
 .icon-row { display: flex; gap: 6px; align-items: center; }
 .icon-row ha-icon { flex: none; color: var(--primary-color, #03a9f4); }
 .icon-row input, .icon-row ha-icon-picker { flex: 1; }
+.place { display: grid; grid-template-columns: repeat(3, 38px); gap: 4px; margin-top: 4px; }
+.place button { height: 30px; border-radius: 6px; border: 1px solid var(--divider-color, #e0e0e0); background: var(--primary-background-color, #fafafa);
+  color: var(--primary-text-color, #212121); cursor: pointer; font-size: 15px; padding: 0; }
 .layers { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 6px; }
 .layers button { padding: 6px 2px; border-radius: 8px; border: 1px solid var(--divider-color, #e0e0e0); background: var(--primary-background-color, #fafafa);
   color: var(--primary-text-color, #212121); cursor: pointer; font-size: 12px; }
@@ -258,6 +265,9 @@ class FnsFloorplanPanel extends HTMLElement {
     this._dirty = false;
     this._sel = null;
     this._mode ||= "items";
+    this._undo = [];
+    this._redo = [];
+    this._last = this._snap();
     this._skeleton();
     this._draw();
     this._form();
@@ -271,11 +281,14 @@ class FnsFloorplanPanel extends HTMLElement {
   <span class="state"></span>
   <div class="modes"><button data-m="items">Vybavení</button><button data-m="rooms">Místnosti</button></div>
   <select class="add"><option value="">+ Přidat</option>${ADD.map(([l], i) => `<option value="${i}">${l}</option>`).join("")}</select>
+  <button class="btn undo" disabled title="Zpět (Ctrl+Z)">↶</button>
+  <button class="btn redo" disabled title="Vpřed (Ctrl+Y)">↷</button>
   <button class="btn revert" disabled>Zahodit</button>
   <button class="btn primary save" disabled>Uložit</button>
 </div>
 <div class="main">
-  <div class="stage"><svg preserveAspectRatio="xMidYMid meet"></svg></div>
+  <div class="stage"><svg preserveAspectRatio="xMidYMin meet"></svg>
+    <div class="zoom"><button data-z="in" title="Přiblížit">+</button><button data-z="out" title="Oddálit">−</button><button data-z="fit" title="Celý plán">⤢</button></div></div>
   <div class="side"></div>
 </div>
 <datalist id="ents"></datalist>`;
@@ -284,6 +297,8 @@ class FnsFloorplanPanel extends HTMLElement {
     menu.hass = this._hass;
     menu.narrow = this._narrow;
     $(".save").addEventListener("click", () => this._save());
+    $(".undo").addEventListener("click", () => this._history(this._undo, this._redo));
+    $(".redo").addEventListener("click", () => this._history(this._redo, this._undo));
     $(".revert").addEventListener("click", () => { if (confirm("Zahodit neuložené změny?")) this._load(); });
     this.shadowRoot.querySelectorAll(".modes button").forEach((b) => b.addEventListener("click", () => {
       this._mode = b.dataset.m;
@@ -310,11 +325,86 @@ class FnsFloorplanPanel extends HTMLElement {
       this._sel = { cat, i: this._plan[cat].length - 1 };
       this._changed();
     });
-    $("#ents").innerHTML = Object.keys(this._hass.states).sort().map((id) => `<option value="${id}">`).join("");
+    // the browser matches typed text in both the id and the friendly name (label)
+    $("#ents").innerHTML = Object.values(this._hass.states).sort((a, b) => a.entity_id.localeCompare(b.entity_id))
+      .map((st) => `<option value="${esc(st.entity_id)}" label="${esc(st.attributes.friendly_name || "")}"></option>`).join("");
     const svg = $("svg");
+    // empty space: a tap deselects, a drag pans, two fingers zoom; the wheel zooms around the pointer
+    const pts = new Map();
+    let pan = null, pinch = null;
     svg.addEventListener("pointerdown", (e) => {
-      if (e.target === svg || (this._mode !== "rooms" && e.target.classList.contains("floor"))) { this._sel = null; this._draw(); this._form(); }
+      if (!(e.target === svg || (this._mode !== "rooms" && e.target.classList.contains("floor")))) return;
+      svg.setPointerCapture(e.pointerId);
+      pts.set(e.pointerId, [e.clientX, e.clientY]);
+      if (pts.size === 2) { const [a, b] = [...pts.values()]; pinch = Math.hypot(a[0] - b[0], a[1] - b[1]); pan = null; }
+      else pan = { x: e.clientX, y: e.clientY, moved: false };
     });
+    svg.addEventListener("pointermove", (e) => {
+      if (!pts.has(e.pointerId)) return;
+      pts.set(e.pointerId, [e.clientX, e.clientY]);
+      if (pinch && pts.size === 2) {
+        const [a, b] = [...pts.values()], d = Math.hypot(a[0] - b[0], a[1] - b[1]);
+        const mid = this._svgPt((a[0] + b[0]) / 2, (a[1] + b[1]) / 2);
+        if (d) this._zoom(pinch / d, mid[0], mid[1]);
+        pinch = d;
+        return;
+      }
+      if (!pan) return;
+      const dx = e.clientX - pan.x, dy = e.clientY - pan.y;
+      if (!pan.moved && Math.hypot(dx, dy) < 4) return;
+      pan.moved = true;
+      const k = 1 / svg.getScreenCTM().a, v = this._view || this._fullView();
+      this._view = { ...v, x: v.x - dx * k, y: v.y - dy * k };
+      pan.x = e.clientX; pan.y = e.clientY;
+      this._applyView();
+    });
+    const end = (e) => {
+      if (!pts.has(e.pointerId)) return;
+      pts.delete(e.pointerId);
+      if (pan && !pan.moved && !pinch) { this._sel = null; this._draw(); this._form(); }
+      if (pts.size < 2) pinch = null;
+      pan = null;
+    };
+    svg.addEventListener("pointerup", end);
+    svg.addEventListener("pointercancel", end);
+    svg.addEventListener("wheel", (e) => {
+      e.preventDefault();
+      const p = this._svgPt(e.clientX, e.clientY);
+      this._zoom(e.deltaY > 0 ? 1.15 : 1 / 1.15, p[0], p[1]);
+    }, { passive: false });
+    this.shadowRoot.querySelectorAll(".zoom button").forEach((b) => b.addEventListener("click", () => {
+      if (b.dataset.z === "fit") { this._view = null; this._applyView(); }
+      else this._zoom(b.dataset.z === "in" ? 1 / 1.4 : 1.4);
+    }));
+  }
+
+  // the whole plan; a zoomed or panned view (this._view) stays until "fit"
+  _fullView() {
+    const b = this._bounds(), extra = this._mode === "rooms" ? S : 0;
+    return { x: 0, y: 0, w: b[2][0] * S + PAD * 2 + extra, h: b[2][1] * S + PAD * 2 + extra };
+  }
+
+  _applyView() {
+    const v = this._view || this._fullView();
+    this.shadowRoot.querySelector("svg").setAttribute("viewBox", `${v.x} ${v.y} ${v.w} ${v.h}`);
+  }
+
+  // svg coordinates of a screen point
+  _svgPt(cx, cy) {
+    const svg = this.shadowRoot.querySelector("svg");
+    const pt = svg.createSVGPoint();
+    pt.x = cx; pt.y = cy;
+    const p = pt.matrixTransform(svg.getScreenCTM().inverse());
+    return [p.x, p.y];
+  }
+
+  // zoom by factor k around an svg point (default: the middle of the view)
+  _zoom(k, px, py) {
+    const full = this._fullView(), v = this._view || full;
+    const w = clamp(v.w * k, 2 * S, full.w * 2), f = w / v.w;
+    if (px == null) { px = v.x + v.w / 2; py = v.y + v.h / 2; }
+    this._view = { x: px - (px - v.x) * f, y: py - (py - v.y) * f, w, h: v.h * f };
+    this._applyView();
   }
 
   _bounds() {
@@ -361,10 +451,7 @@ class FnsFloorplanPanel extends HTMLElement {
   _draw() {
     const svg = this.shadowRoot.querySelector("svg");
     // the view stays put while dragging, so a moved corner does not shift the whole plan under the pointer
-    if (!this._dragging) {
-      const b = this._bounds(), extra = this._mode === "rooms" ? S : 0;
-      svg.setAttribute("viewBox", `0 0 ${b[2][0] * S + PAD * 2 + extra} ${b[2][1] * S + PAD * 2 + extra}`);
-    }
+    if (!this._dragging) this._applyView();
     svg.innerHTML = "";
     svg.setAttribute("class", "mode-" + this._mode);
     this.shadowRoot.querySelectorAll(".modes button").forEach((b) => b.classList.toggle("on", b.dataset.m === this._mode));
@@ -470,7 +557,7 @@ class FnsFloorplanPanel extends HTMLElement {
       } else {
         paint(el("rect", { x: -w / 2, y: -d / 2, width: Math.max(w, 2), height: Math.max(d, 2), rx: 3, class: "furn" }, g), res, true);
         const size = Math.min(w, d) * 0.6;
-        if (size >= 9) el("g", { transform: `rotate(${-(f.rotation || 0)})` }, g).innerHTML = `<g class="ico furn-ico">${iconHtml(f.icon, Math.min(size, 26), FURNITURE[f.type]?.[1] || "mdiShapeOutline")}</g>`;
+        if (size >= 9 && f.icon !== "none") el("g", { transform: `rotate(${-(f.rotation || 0)})` }, g).innerHTML = `<g class="ico furn-ico">${iconHtml(f.icon, Math.min(size, 26), FURNITURE[f.type]?.[1] || "mdiShapeOutline")}</g>`;
       }
     }
     for (const members of groups.values()) {
@@ -703,12 +790,42 @@ class FnsFloorplanPanel extends HTMLElement {
 
   _changed() {
     this._dirty = true;
+    // undo history: one step per finished change (a whole drag is one step)
+    const now = this._snap();
+    if (now !== this._last) {
+      this._undo.push(this._last);
+      if (this._undo.length > 100) this._undo.shift();
+      this._redo = [];
+      this._last = now;
+    }
+    this._draw();
+    this._form();
+  }
+
+  // the plan without its revision, so undo never brings back an old rev (the save would conflict)
+  _snap() {
+    const { rev, ...rest } = this._plan;
+    return JSON.stringify(rest);
+  }
+
+  // undo (from = undo stack) or redo (from = redo stack)
+  _history(from, to) {
+    if (!from.length) return;
+    to.push(this._last);
+    this._last = from.pop();
+    const rev = this._plan.rev;
+    this._plan = JSON.parse(this._last);
+    if (rev != null) this._plan.rev = rev;
+    this._sel = null;
+    this._dirty = true;
     this._draw();
     this._form();
   }
 
   _status() {
     const $ = (s) => this.shadowRoot.querySelector(s);
+    $(".undo").disabled = !this._undo?.length;
+    $(".redo").disabled = !this._redo?.length;
     $(".save").disabled = !this._dirty;
     $(".revert").disabled = !this._dirty;
     $(".state").textContent = this._dirty ? "Neuložené změny" : "";
@@ -732,7 +849,7 @@ class FnsFloorplanPanel extends HTMLElement {
     const field = (label, key, value, type = "text", extra = "") =>
       `<label>${label}</label><input data-k="${key}" type="${type}" value="${esc(value)}" ${extra}>`;
     const num = (label, key, value) => field(label, key, value ?? "", "number", 'step="0.05"');
-    const xz = `<div class="row2"><div>${num("X (m)", "x", o.x)}</div><div>${num("Z (m)", "z", o.z)}</div></div>`;
+    const xz = `<div class="row2"><div>${num("X (m)", "x", o.x)}</div><div>${num("Z (m)", "z", o.z)}</div></div>${this._placeField()}`;
     const rotation = `<label>Otočení (°)</label><input data-k="rotation" type="number" step="1" value="${o.rotation || 0}">
         <div class="rot"><button data-a="rot-15">−15°</button><button data-a="rot15">+15°</button><button data-a="rot90">+90°</button></div>`;
     let html = "";
@@ -834,8 +951,35 @@ class FnsFloorplanPanel extends HTMLElement {
 
   _iconField(o, fallback) {
     const def = fallback ? "mdi:" + fallback.slice(3).replace(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase() : "";
+    if (o.icon === "none") return `<label>Ikona</label><div class="icon-row"><span class="hint" style="flex:1">bez ikony</span><button class="mini" data-a="icon-reset">Vrátit výchozí</button></div>`;
     return `<label>Ikona (prázdná = výchozí)</label><div class="icon-row"><ha-icon icon="${esc(o.icon || def)}"></ha-icon>
-      <input data-k="icon" value="${esc(o.icon || "")}" placeholder="${esc(def || "mdi:…")}">${o.icon ? `<button class="mini" data-a="icon-reset" title="Výchozí ikona">✕</button>` : ""}</div>`;
+      <input data-k="icon" value="${esc(o.icon || "")}" placeholder="${esc(def || "mdi:…")}">${o.icon ? `<button class="mini" data-a="icon-reset" title="Výchozí ikona">✕</button>` : ""}
+      <button class="mini" data-a="icon-none" title="Nezobrazovat žádnou ikonu">Bez ikony</button></div>`;
+  }
+
+  // quick placement inside the item's room: corners, sides, middle
+  _placeField() {
+    const cells = [["tl", "↖"], ["t", "↑"], ["tr", "↗"], ["l", "←"], ["c", "•"], ["r", "→"], ["bl", "↙"], ["b", "↓"], ["br", "↘"]];
+    return `<label>Umístit v místnosti</label><div class="place">${cells.map(([k, g]) => `<button data-a="place:${k}" title="${k === "c" ? "Střed místnosti" : "K okraji místnosti"}">${g}</button>`).join("")}</div>`;
+  }
+
+  _place(where) {
+    const sel = this._sel, o = this._get();
+    const room = sel.cat === "labels" ? o.room : this._plan.rooms.find((r) => inPoly([o.x, o.z], r.points));
+    if (!room) return;
+    const xs = room.points.map((p) => p[0]), zs = room.points.map((p) => p[1]);
+    // keep the whole item inside: half of its turned box, or a fixed gap for point items
+    let hx = 0.3, hz = 0.3;
+    if (sel.cat === "furniture" && !sel.g && !isPoint(o)) {
+      const a = ((o.rotation || 0) * Math.PI) / 180, c = Math.abs(Math.cos(a)), sn = Math.abs(Math.sin(a));
+      const d = o.type === "led_strip" ? 0 : o.d;
+      hx = (o.w * c + d * sn) / 2 + 0.05; hz = (o.w * sn + d * c) / 2 + 0.05;
+    }
+    const x0 = Math.min(...xs) + hx, x1 = Math.max(...xs) - hx, z0 = Math.min(...zs) + hz, z1 = Math.max(...zs) - hz;
+    let x = where.includes("l") ? x0 : where.includes("r") ? x1 : (x0 + x1) / 2;
+    let z = where.includes("t") ? z0 : where.includes("b") ? z1 : (z0 + z1) / 2;
+    if (where === "c") { const c = centroid(room.points); if (inPoly(c, room.points)) [x, z] = c; }
+    this._move(sel, x, z);
   }
 
   _sizeField(o) {
@@ -878,6 +1022,7 @@ class FnsFloorplanPanel extends HTMLElement {
   // colour rules as a form: each rule has conditions (all must hold) and what it changes; YAML for the rest
   _rulesUI(o, fields) {
     const rules = o.rules || [];
+    const own = this._ownEntity(o);
     const opOf = (c) => (c.template != null ? "template" : ["state_not", "above", "below"].find((k) => c[k] != null) || "state");
     const valOf = (c, op) => (op === "template" ? c.template : [].concat(c[op] ?? "").join(", "));
     const out = (i, r) => {
@@ -889,7 +1034,7 @@ class FnsFloorplanPanel extends HTMLElement {
       if (fields.includes("animate")) parts.push(`<select data-k="ro:${i}:animate"><option value="">animace podle stavu</option><option value="true" ${r.animate === true ? "selected" : ""}>animovat</option><option value="false" ${r.animate === false ? "selected" : ""}>neanimovat</option></select>`);
       if (fields.includes("hide")) parts.push(`<label class="chk"><input type="checkbox" data-k="ro:${i}:hide" ${r.hide ? "checked" : ""}> skrýt</label>`);
       if (o.points) parts.push(`<span>Průhlednost</span><input type="number" step="0.05" min="0" max="1" data-k="ro:${i}:opacity" value="${r.opacity ?? ""}" placeholder="0,14" style="width:70px">`);
-      if (fields.includes("icon")) parts.push(`<input type="text" data-k="ro:${i}:icon" value="${esc(r.icon || "")}" placeholder="ikona, např. mdi:timer-sand">`);
+      if (fields.includes("icon")) parts.push(`<input type="text" data-k="ro:${i}:icon" value="${esc(r.icon || "")}" placeholder="ikona, např. mdi:timer-sand (none = bez ikony)">`);
       if (fields.includes("text")) parts.push(`<input type="text" data-k="ro:${i}:text" value="${esc(r.text || "")}" placeholder="text (může být šablona {{ … }})">`);
       return `<div class="outc">${parts.join("")}</div>`;
     };
@@ -901,6 +1046,7 @@ class FnsFloorplanPanel extends HTMLElement {
         ${simple ? conds.map((c, j) => {
           const op = opOf(c);
           return `<div class="cond">${op === "template" ? "" : `<input data-k="rc:${i}:${j}:entity" value="${esc(c.entity || "")}" placeholder="entita" list="ents">
+              ${own && c.entity !== own ? `<button class="mini wide" data-a="ra:self:${i}:${j}" title="${esc(own)}">↳ tato entita</button>` : ""}
               <input data-k="rc:${i}:${j}:attribute" value="${esc(c.attribute || "")}" placeholder="atribut (jinak stav)">`}
             <select data-k="rc:${i}:${j}:op">${Object.entries(OPS).map(([k, v]) => `<option value="${k}" ${k === op ? "selected" : ""}>${v}</option>`).join("")}</select>
             <input data-k="rc:${i}:${j}:value" value="${esc(valOf(c, op))}" placeholder="${op === "template" ? "{{ is_state('timer.x', 'active') }}" : op === "state" || op === "state_not" ? "on, open" : "20"}" ${op === "template" ? 'class="wide"' : ""}>
@@ -973,17 +1119,23 @@ class FnsFloorplanPanel extends HTMLElement {
     return true;
   }
 
+  // the entity a condition most likely refers to: the item's own (a room: its temperature sensor)
+  _ownEntity(o) {
+    return o.entity || o.contact || o.temperature || "";
+  }
+
   // rule list buttons: add, remove, move a rule, add or remove a condition, YAML view
   _ruleAction(targets, a) {
     const [, op, i, j] = a.split(":");
     if (op === "yaml") { this._yaml = !this._yaml; return this._form(); }
     const rules = JSON.parse(JSON.stringify(targets[0].rules || []));
-    const n = Number(i);
-    if (op === "add") rules.push({ if: [{ entity: "", state: "on" }] });
+    const n = Number(i), own = this._ownEntity(targets[0]);
+    if (op === "self") { const c = [].concat(rules[n].if || []); c[Number(j)] = { ...c[Number(j)], entity: own }; rules[n].if = c; }
+    else if (op === "add") rules.push({ if: [{ entity: own, state: "on" }] });
     else if (op === "del") rules.splice(n, 1);
     else if (op === "up" && n > 0) [rules[n - 1], rules[n]] = [rules[n], rules[n - 1]];
     else if (op === "down" && n < rules.length - 1) [rules[n + 1], rules[n]] = [rules[n], rules[n + 1]];
-    else if (op === "cadd") rules[n].if = [...[].concat(rules[n].if || []), { entity: "", state: "on" }];
+    else if (op === "cadd") rules[n].if = [...[].concat(rules[n].if || []), { entity: own, state: "on" }];
     else if (op === "cdel") { const c = [].concat(rules[n].if || []); c.splice(Number(j), 1); if (c.length) rules[n].if = c; else delete rules[n].if; }
     for (const t of targets) if (rules.length) t.rules = JSON.parse(JSON.stringify(rules)); else delete t.rules;
     this._changed();
@@ -1120,8 +1272,10 @@ class FnsFloorplanPanel extends HTMLElement {
   _action(a) {
     const sel = this._sel, o = this._get(), targets = this._targets();
     if (a.startsWith("ra:")) return this._ruleAction(targets, a);
-    if (a === "auto") delete this._plan.labels[sel.id];
+    if (a.startsWith("place:")) this._place(a.slice(6));
+    else if (a === "auto") delete this._plan.labels[sel.id];
     else if (a === "icon-reset") for (const t of targets) delete t.icon;
+    else if (a === "icon-none") for (const t of targets) t.icon = "none";
     else if (a.startsWith("rot") && sel.cat === "labels") {
       const v = (((o.room.label_rotation || 0) + Number(a.slice(3))) % 360 + 360) % 360;
       if (v) o.room.label_rotation = v; else delete o.room.label_rotation;
@@ -1149,7 +1303,14 @@ class FnsFloorplanPanel extends HTMLElement {
   }
 
   _key(e) {
-    if (!this._sel || !this.isConnected) return;
+    if (!this.isConnected || !this._plan) return;
+    const typing = e.composedPath().some((n) => n.tagName === "INPUT" || n.tagName === "TEXTAREA" || n.tagName === "SELECT");
+    if ((e.ctrlKey || e.metaKey) && !typing && /^[zy]$/i.test(e.key)) {
+      e.preventDefault();
+      const redo = e.key.toLowerCase() === "y" || e.shiftKey;
+      return redo ? this._history(this._redo, this._undo) : this._history(this._undo, this._redo);
+    }
+    if (!this._sel) return;
     if (e.composedPath().some((n) => n.tagName === "INPUT" || n.tagName === "TEXTAREA" || n.tagName === "SELECT")) return;
     const step = { ArrowLeft: [-SNAP, 0], ArrowRight: [SNAP, 0], ArrowUp: [0, -SNAP], ArrowDown: [0, SNAP] }[e.key];
     if (this._sel.cat === "rooms" || this._sel.cat === "openings") {
