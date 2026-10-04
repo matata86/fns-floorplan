@@ -292,7 +292,6 @@ svg.plan text { text-rendering: geometricPrecision; }
 .dev .ring { fill: none; stroke: var(--accent); stroke-width: 2; opacity: 0; }
 .dev .icon path { fill: var(--muted); stroke: none; transition: fill .4s; }
 .dev .icon .waves path { fill: none; stroke: #67e8f9; stroke-width: 1.4; stroke-linecap: round; }
-.dev .icon .drops circle { fill: #67e8f9; opacity: 0; }
 .dev .icon .flame { opacity: 0; }
 .dev .icon .flame path { fill: #ff8a3d; }
 .dev .devtext { fill: var(--text); font-size: 10.5px; font-weight: 500; }
@@ -327,12 +326,14 @@ svg.plan text { text-rendering: geometricPrecision; }
 .app[data-mode="day"] .dev.on .icon > path, .app[data-mode="day"] .dev.on .icon .spin path, .app[data-mode="day"] .dev.on .icon .wobble path { fill: var(--accent); }
 .dev .spin, .dev .wobble { transform-box: fill-box; transform-origin: center; }
 .dev .waves { opacity: 0; }
-.dev-dryer.on .wobble { animation: shake .5s steps(1, end) infinite; }
+/* dryer and dishwasher as on the old picture-elements plan: yellow, shaking (dishwasher bouncing), the drum / wash window flickering */
+.dev-dryer.on .icon .glyph, .dev-dishwasher.on .icon .glyph { fill: #ffc107 !important; }
+.dev-dryer.on .wobble { transform-origin: 50% 65%; animation: tdShake .4s ease-in-out infinite; }
+.dev-dishwasher.on .wobble { transform-origin: 50% 75%; animation: dwBounce 1.5s ease-in-out infinite; }
+.dev-dryer.on .glyph, .dev-dishwasher.on .glyph { animation: drum 1s ease-in-out infinite; }
+.dev-dishwasher.err .icon .glyph { fill: var(--alarm) !important; }
 .dev-fan.on .spin { animation: spin .7s linear infinite; }
 .dev-purifier.on .waves { animation: waves 2s ease-out infinite; }
-.dev-dishwasher.on .drops circle { animation: drop 1s ease-in infinite; }
-.dev-dishwasher.on .drops circle:nth-child(2) { animation-delay: .33s; }
-.dev-dishwasher.on .drops circle:nth-child(3) { animation-delay: .66s; }
 .dev .bubbles circle { fill: none; stroke: #67e8f9; stroke-width: .8; opacity: 0; }
 .dev-aquarium.on .bubbles circle { animation: bubble 1.8s ease-in infinite; }
 .dev-aquarium.on .bubbles circle:nth-child(2) { animation-delay: .6s; }
@@ -401,12 +402,12 @@ svg.plan text { text-rendering: geometricPrecision; }
 }
 @keyframes heatwave { 0%, 100% { opacity: .45; transform: translateY(1px); } 50% { opacity: 1; transform: translateY(-1.4px); } }
 @keyframes halo { 50% { opacity: .55; } }
-@keyframes shake { 0% { transform: translateX(-1px); } 50% { transform: translateX(1px); } }
-@keyframes wobble { from { transform: rotate(-4deg); } to { transform: rotate(4deg); } }
+@keyframes tdShake { 0%, 100% { transform: rotate(4deg); } 50% { transform: rotate(-4deg); } }
+@keyframes dwBounce { 0%, 20%, 50%, 80%, 100% { transform: translateY(0); } 40% { transform: translateY(-1.2px) rotate(5deg); } 60% { transform: translateY(-1.1px) rotate(-4deg); } }
+@keyframes drum { 50% { clip-path: polygon(0 0, 0 100%, 35% 100%, 36% 74%, 31% 43%, 61% 40%, 71% 69%, 62% 78%, 36% 73%, 35% 100%, 100% 100%, 100% 0); } }
 @keyframes spin { to { transform: rotate(360deg); } }
 @keyframes devRing { from { r: 17; opacity: .7; } to { r: 30; opacity: 0; } }
 @keyframes waves { 0% { opacity: 0; transform: translateY(3px); } 40% { opacity: 1; } 100% { opacity: 0; transform: translateY(-3px); } }
-@keyframes drop { 0% { transform: translateY(-3px); opacity: 0; } 30% { opacity: 1; } 100% { transform: translateY(4px); opacity: 0; } }
 @keyframes flame { from { transform: scale(.88, .8); } to { transform: scale(1.05, 1.12); } }
 @keyframes ripple { from { r: 6; opacity: .9; } to { r: 70; opacity: 0; } }
 @keyframes winPulse { 50% { opacity: .45; } }
@@ -424,7 +425,7 @@ svg.plan text { text-rendering: geometricPrecision; }
 const ICON = {
   fan: (m) => `<g class="spin">${m("mdiFan")}</g>`,
   purifier: (m) => `${m("mdiAirPurifier")}<g class="waves"><path d="M-9 -13 Q0 -17 9 -13"/><path d="M-11 -16 Q0 -21 11 -16"/></g>`,
-  dishwasher: (m) => `${m("mdiDishwasher")}<g class="drops"><circle cx="-3" cy="2" r="1.3"/><circle cx="1" cy="4" r="1.3"/><circle cx="4" cy="1" r="1.3"/></g>`,
+  dishwasher: (m) => `<g class="wobble">${m("mdiDishwasher")}</g>`,
   dryer: (m) => `<g class="wobble">${m("mdiTumbleDryer")}</g>`,
   radiator: (m) => `<g class="heatwaves">${["rWave1", "rWave2", "rWave3"].map((n) => `<g>${mdiPath(n, 20)}</g>`).join("")}</g>${m("rBody")}`,
   boiler: (m) => `${m("mdiWaterBoiler")}<g class="flame" transform="translate(5 5)">${mdiPath("mdiFire", 9)}</g>`,
@@ -842,6 +843,7 @@ function buildView(card, plan) {
       d.g.toggleAttribute("hidden", !!r.hide);
       devGlyph(d, r.icon);
       if (d.kind === "lock") d.g.dataset.lk = lockState(st(d.entity)?.state);
+      if (d.kind === "dishwasher") d.g.classList.toggle("err", ["error", "actionrequired", "aborting"].includes(String(st(d.entity)?.state).toLowerCase()));
       if (d.kind === "alarm") {
         const s = st(d.entity)?.state;
         const al = s === "triggered" ? "triggered" : s === "arming" || s === "pending" ? "pending" : s && s !== "disarmed" && !OFF_STATES.has(s) ? "armed" : "off";
