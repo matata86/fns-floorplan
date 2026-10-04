@@ -520,7 +520,8 @@ class FnsFloorplanPanel extends HTMLElement {
         const c = centroid(r.points), m = [a[0] + u[0] * o.offset, a[1] + u[1] * o.offset];
         let n = [-u[1], u[0]];
         if ((c[0] - m[0]) * n[0] + (c[1] - m[1]) * n[1] < 0) n = [-n[0], -n[1]];
-        el("line", { x1: A[0] + n[0] * 8, y1: A[1] + n[1] * 8, x2: B[0] + n[0] * 8, y2: B[1] + n[1] * 8, class: "blind" }, svg);
+        const k = o.blind_side === "out" ? -8 : 8;
+        el("line", { x1: A[0] + n[0] * k, y1: A[1] + n[1] * k, x2: B[0] + n[0] * k, y2: B[1] + n[1] * k, class: "blind" }, svg);
       }
       if (o.lock) {
         const c = centroid(r.points), m = [a[0] + u[0] * o.offset, a[1] + u[1] * o.offset];
@@ -1235,12 +1236,16 @@ class FnsFloorplanPanel extends HTMLElement {
         <div><label>Otevírá se</label><select data-k="swing">${opt("in", "Dovnitř", o.swing || "in")}${opt("out", "Ven", o.swing)}</select></div></div>
       <label>Kontakt (binary_sensor; ${win || o.style === "glass" ? "bez něj zůstane zavřené" : "dveře bez něj jsou pootevřené na 45°"})</label><input data-k="contact" value="${esc(o.contact || "")}" list="ents">
       <label>Roleta (cover, nepovinné)</label><input data-k="blind" value="${esc(o.blind || "")}" list="ents">
+      ${o.blind ? `<div class="row2"><div><label>Roleta je</label><select data-k="blind_side">${opt("in", "Uvnitř", o.blind_side || "in")}${opt("out", "Venku", o.blind_side)}</select></div>
+        <div><label class="chk" style="margin-top:30px"><input type="checkbox" data-k="blind_invert" ${o.blind_invert ? "checked" : ""}> pozice obráceně</label></div></div>` : ""}
       ${win ? "" : `<label>Zámek (lock, nepovinné; klepnutí na odznak otevře jeho detail)</label><input data-k="lock" value="${esc(o.lock || "")}" list="ents">`}
       ${this._actionsUI(o, { tap: o.blind ? "Detail rolety" : o.contact ? "Detail kontaktu" : "" })}`}
       <div class="actions"><button data-a="del" class="del">Smazat</button></div>`;
     this._bind(side, async (k, val, inp) => {
       if (await this._setShared([o], k, val, inp)) return;
-      if (k === "width" || k === "offset") o[k] = r3(Math.max(0.1, Number(val)));
+      if (k === "blind_invert") { if (val) o.blind_invert = true; else delete o.blind_invert; }
+      else if (k === "blind_side") { if (val === "out") o.blind_side = "out"; else delete o.blind_side; }
+      else if (k === "width" || k === "offset") o[k] = r3(Math.max(0.1, Number(val)));
       else if (k === "type") { o.type = val; o.style = val === "window" ? null : o.style || "interior"; }
       else o[k] = val || null;
       if (L) { o.width = Math.min(o.width, L); o.offset = r3(clamp(o.offset, o.width / 2, L - o.width / 2)); }

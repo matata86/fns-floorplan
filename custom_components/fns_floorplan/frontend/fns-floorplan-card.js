@@ -260,7 +260,7 @@ svg.plan { width: 100%; height: 100%; display: block; }
 .is-open .door-arc { opacity: .5; }
 .alert-open.fresh .sash, .alert-open.fresh .door-leaf { animation: winPulse .8s ease-in-out infinite; }
 .alert-open .door-leaf, .alert-open .sash { stroke: var(--open); filter: drop-shadow(0 0 3px var(--open)); }
-.blind { stroke: var(--muted); stroke-width: 4; stroke-linecap: butt; pointer-events: none; transition: stroke-opacity .6s; }
+.blind { stroke: var(--muted); stroke-width: 4; stroke-linecap: butt; pointer-events: none; transition: stroke-opacity .6s, stroke-width .6s; }
 .blind.open { stroke-dasharray: 2 4; stroke-width: 2; }
 .blind.moving { stroke: var(--accent); stroke-dasharray: 6 4; animation: blindMove .8s linear infinite; }
 .strip { pointer-events: none; }
@@ -652,7 +652,10 @@ function buildView(card, plan) {
     if (o.style === "passage") continue;
     // tap on a door or window: its contact's detail by default, or the actions set in the editor
     // a blind (cover entity): a band just inside the room, the more closed the stronger
-    if (o.blind) blinds.push({ o, node: el("line", { x1: A[0] + n[0] * 7, y1: A[1] + n[1] * 7, x2: B[0] + n[0] * 7, y2: B[1] + n[1] * 7, class: "blind" }, gOpen) });
+    if (o.blind) {
+      const k = o.blind_side === "out" ? -7 : 7; // inside the room by default, or outside the wall
+      blinds.push({ o, node: el("line", { x1: A[0] + n[0] * k, y1: A[1] + n[1] * k, x2: B[0] + n[0] * k, y2: B[1] + n[1] * k, class: "blind" }, gOpen) });
+    }
     if (o.blind || o.contact || o.tap_action || o.hold_action || o.double_tap_action) {
       const hit = el("line", { x1: A[0], y1: A[1], x2: B[0], y2: B[1], class: "open-hit" }, gHits);
       bindActions(card, hit, o, INFO, o.blind || o.contact);
@@ -1043,9 +1046,12 @@ function buildView(card, plan) {
   function renderBlinds() {
     for (const b of blinds) {
       const s = st(b.o.blind);
-      const pos = Number(s?.attributes.current_position);
-      const closed = isFinite(pos) ? 1 - pos / 100 : s?.state === "closed" ? 1 : 0;
-      b.node.style.strokeOpacity = (0.18 + 0.82 * closed).toFixed(2);
+      const raw = s?.attributes.current_position, pos = raw == null ? NaN : Number(raw);
+      // HA: 100 = fully open; `blind_invert` for blinds that report it the other way round
+      let closed = isFinite(pos) ? 1 - pos / 100 : s?.state === "closed" ? 1 : 0;
+      if (b.o.blind_invert && isFinite(pos)) closed = 1 - closed;
+      b.node.style.strokeOpacity = (0.3 + 0.7 * closed).toFixed(2);
+      b.node.style.strokeWidth = (2 + 4 * closed).toFixed(1);
       b.node.classList.toggle("open", closed < 0.02);
       b.node.classList.toggle("moving", s?.state === "opening" || s?.state === "closing");
     }
