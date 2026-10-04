@@ -1,14 +1,17 @@
 // FNS Floorplan card: an animated 2D floor plan with the home's live state.
 // The plan comes from the fns_floorplan integration (websocket fns_floorplan/plan/get).
 
-const VERSION = "0.1.0";
+const VERSION = "0.2.0";
 // Material Design Icons paths (the icon set HA uses), 24×24
-const MDI = {"mdiFan":"M12,11A1,1 0 0,0 11,12A1,1 0 0,0 12,13A1,1 0 0,0 13,12A1,1 0 0,0 12,11M12.5,2C17,2 17.11,5.57 14.75,6.75C13.76,7.24 13.32,8.29 13.13,9.22C13.61,9.42 14.03,9.73 14.35,10.13C18.05,8.13 22.03,8.92 22.03,12.5C22.03,17 18.46,17.1 17.28,14.73C16.78,13.74 15.72,13.3 14.79,13.11C14.59,13.59 14.28,14 13.88,14.34C15.87,18.03 15.08,22 11.5,22C7,22 6.91,18.42 9.27,17.24C10.25,16.75 10.69,15.71 10.89,14.79C10.4,14.59 9.97,14.27 9.65,13.87C5.96,15.85 2,15.07 2,11.5C2,7 5.56,6.89 6.74,9.26C7.24,10.25 8.29,10.68 9.22,10.87C9.41,10.39 9.73,9.97 10.14,9.65C8.15,5.96 8.94,2 12.5,2Z","mdiAirPurifier":"M11,9A4,4 0 0,1 15,13A4,4 0 0,1 11,17A4,4 0 0,1 7,13A4,4 0 0,1 11,9M11,11A2,2 0 0,0 9,13A2,2 0 0,0 11,15A2,2 0 0,0 13,13A2,2 0 0,0 11,11M7,4H14A4,4 0 0,1 18,8V9H16V8A2,2 0 0,0 14,6H7A2,2 0 0,0 5,8V20H16V18H18V22H3V8A4,4 0 0,1 7,4M16,11C18.5,11 18.5,9 21,9V11C18.5,11 18.5,13 16,13V11M16,15C18.5,15 18.5,13 21,13V15C18.5,15 18.5,17 16,17V15Z","mdiDishwasher":"M18,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V4A2,2 0 0,0 18,2M10,4A1,1 0 0,1 11,5A1,1 0 0,1 10,6A1,1 0 0,1 9,5A1,1 0 0,1 10,4M7,4A1,1 0 0,1 8,5A1,1 0 0,1 7,6A1,1 0 0,1 6,5A1,1 0 0,1 7,4M18,20H6V8H18V20M14.67,15.33C14.69,16.03 14.41,16.71 13.91,17.21C12.86,18.26 11.15,18.27 10.09,17.21C9.59,16.71 9.31,16.03 9.33,15.33C9.4,14.62 9.63,13.94 10,13.33C10.37,12.5 10.81,11.73 11.33,11L12,10C13.79,12.59 14.67,14.36 14.67,15.33","mdiTumbleDryer":"M6,2H18A2,2 0 0,1 20,4V20A2,2 0 0,1 18,22H6A2,2 0 0,1 4,20V4A2,2 0 0,1 6,2M7,4A1,1 0 0,0 6,5A1,1 0 0,0 7,6A1,1 0 0,0 8,5A1,1 0 0,0 7,4M10,4A1,1 0 0,0 9,5A1,1 0 0,0 10,6A1,1 0 0,0 11,5A1,1 0 0,0 10,4M12,8A6,6 0 0,0 6,14A6,6 0 0,0 12,20A6,6 0 0,0 18,14A6,6 0 0,0 12,8M8.11,10.5H10C9.76,11.88 10,12.67 10.58,13.29C11.68,14.36 12.16,15.71 11.89,17.5H10C10.24,16.12 10,15.33 9.42,14.71C8.32,13.64 7.85,12.29 8.11,10.5M12.11,10.5H14C13.76,11.88 14,12.67 14.58,13.29C15.68,14.36 16.16,15.71 15.89,17.5H14C14.24,16.12 14,15.33 13.42,14.71C12.32,13.64 11.85,12.29 12.11,10.5Z","mdiWaterBoiler":"M8 2C6.89 2 6 2.89 6 4V16C6 17.11 6.89 18 8 18H9V20H6V22H9C10.11 22 11 21.11 11 20V18H13V20C13 21.11 13.89 22 15 22H18V20H15V18H16C17.11 18 18 17.11 18 16V4C18 2.89 17.11 2 16 2H8M12 4.97A2 2 0 0 1 14 6.97A2 2 0 0 1 12 8.97A2 2 0 0 1 10 6.97A2 2 0 0 1 12 4.97M10 14.5H14V16H10V14.5Z","mdiFire":"M17.66 11.2C17.43 10.9 17.15 10.64 16.89 10.38C16.22 9.78 15.46 9.35 14.82 8.72C13.33 7.26 13 4.85 13.95 3C13 3.23 12.17 3.75 11.46 4.32C8.87 6.4 7.85 10.07 9.07 13.22C9.11 13.32 9.15 13.42 9.15 13.55C9.15 13.77 9 13.97 8.8 14.05C8.57 14.15 8.33 14.09 8.14 13.93C8.08 13.88 8.04 13.83 8 13.76C6.87 12.33 6.69 10.28 7.45 8.64C5.78 10 4.87 12.3 5 14.47C5.06 14.97 5.12 15.47 5.29 15.97C5.43 16.57 5.7 17.17 6 17.7C7.08 19.43 8.95 20.67 10.96 20.92C13.1 21.19 15.39 20.8 17.03 19.32C18.86 17.66 19.5 15 18.56 12.72L18.43 12.46C18.22 12 17.66 11.2 17.66 11.2M14.5 17.5C14.22 17.74 13.76 18 13.4 18.1C12.28 18.5 11.16 17.94 10.5 17.28C11.69 17 12.4 16.12 12.61 15.23C12.78 14.43 12.46 13.77 12.33 13C12.21 12.26 12.23 11.63 12.5 10.94C12.69 11.32 12.89 11.7 13.13 12C13.9 13 15.11 13.44 15.37 14.8C15.41 14.94 15.43 15.08 15.43 15.23C15.46 16.05 15.1 16.95 14.5 17.5H14.5Z","mdiCeilingLight":"M8,9H11V4H13V9H16L20,17H4L8,9M14,18A2,2 0 0,1 12,20A2,2 0 0,1 10,18H14Z","mdiLamp":"M8,2H16L20,14H4L8,2M11,15H13V20H18V22H6V20H11V15Z","mdiWallSconceFlat":"M5,5V11H19V5H5M5.27,13.32L3.5,15.09L4.91,16.5L6.68,14.73L5.27,13.32M18.73,13.32L17.32,14.73L19.09,16.5L20.5,15.09L18.73,13.32M11,16V19H13V16H11Z","mdiLightbulbOn":"M12,6A6,6 0 0,1 18,12C18,14.22 16.79,16.16 15,17.2V19A1,1 0 0,1 14,20H10A1,1 0 0,1 9,19V17.2C7.21,16.16 6,14.22 6,12A6,6 0 0,1 12,6M14,21V22A1,1 0 0,1 13,23H11A1,1 0 0,1 10,22V21H14M20,11H23V13H20V11M1,11H4V13H1V11M13,1V4H11V1H13M4.92,3.5L7.05,5.64L5.63,7.05L3.5,4.93L4.92,3.5M16.95,5.63L19.07,3.5L20.5,4.93L18.37,7.05L16.95,5.63Z","mdiWindowOpenVariant":"M21 20V2H3V20H1V23H23V20M19 4V11H17V4M5 4H7V11H5M5 20V13H7V20M9 20V4H15V20M17 20V13H19V20Z","mdiWaterAlert":"M10 3.25C10 3.25 16 10 16 14C16 17.31 13.31 20 10 20S4 17.31 4 14C4 10 10 3.25 10 3.25M20 7V13H18V7H20M18 17H20V15H18V17Z","mdiThermometer":"M15 13V5A3 3 0 0 0 9 5V13A5 5 0 1 0 15 13M12 4A1 1 0 0 1 13 5V8H11V5A1 1 0 0 1 12 4Z","mdiRobotVacuum":"M12,2C14.65,2 17.19,3.06 19.07,4.93L17.65,6.35C16.15,4.85 14.12,4 12,4C9.88,4 7.84,4.84 6.35,6.35L4.93,4.93C6.81,3.06 9.35,2 12,2M3.66,6.5L5.11,7.94C4.39,9.17 4,10.57 4,12A8,8 0 0,0 12,20A8,8 0 0,0 20,12C20,10.57 19.61,9.17 18.88,7.94L20.34,6.5C21.42,8.12 22,10.04 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12C2,10.04 2.58,8.12 3.66,6.5M12,6A6,6 0 0,1 18,12C18,13.59 17.37,15.12 16.24,16.24L14.83,14.83C14.08,15.58 13.06,16 12,16C10.94,16 9.92,15.58 9.17,14.83L7.76,16.24C6.63,15.12 6,13.59 6,12A6,6 0 0,1 12,6M12,8A1,1 0 0,0 11,9A1,1 0 0,0 12,10A1,1 0 0,0 13,9A1,1 0 0,0 12,8Z","mdiWeatherNight":"M17.75,4.09L15.22,6.03L16.13,9.09L13.5,7.28L10.87,9.09L11.78,6.03L9.25,4.09L12.44,4L13.5,1L14.56,4L17.75,4.09M21.25,11L19.61,12.25L20.2,14.23L18.5,13.06L16.8,14.23L17.39,12.25L15.75,11L17.81,10.95L18.5,9L19.19,10.95L21.25,11M18.97,15.95C19.8,15.87 20.69,17.05 20.16,17.8C19.84,18.25 19.5,18.67 19.08,19.07C15.17,23 8.84,23 4.94,19.07C1.03,15.17 1.03,8.83 4.94,4.93C5.34,4.53 5.76,4.17 6.21,3.85C6.96,3.32 8.14,4.21 8.06,5.04C7.79,7.9 8.75,10.87 10.95,13.06C13.14,15.26 16.1,16.22 18.97,15.95M17.33,17.97C14.5,17.81 11.7,16.64 9.53,14.5C7.36,12.31 6.2,9.5 6.04,6.68C3.23,9.82 3.34,14.64 6.35,17.66C9.37,20.67 14.19,20.78 17.33,17.97Z","mdiWhiteBalanceSunny":"M3.55 19.09L4.96 20.5L6.76 18.71L5.34 17.29M12 6C8.69 6 6 8.69 6 12S8.69 18 12 18 18 15.31 18 12C18 8.68 15.31 6 12 6M20 13H23V11H20M17.24 18.71L19.04 20.5L20.45 19.09L18.66 17.29M20.45 5L19.04 3.6L17.24 5.39L18.66 6.81M13 1H11V4H13M6.76 5.39L4.96 3.6L3.55 5L5.34 6.81L6.76 5.39M1 13H4V11H1M13 20H11V23H13","mdiClockOutline":"M12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22C6.47,22 2,17.5 2,12A10,10 0 0,1 12,2M12.5,7V12.25L17,14.92L16.25,16.15L11,13V7H12.5Z"};
+const MDI = {"mdiFan":"M12,11A1,1 0 0,0 11,12A1,1 0 0,0 12,13A1,1 0 0,0 13,12A1,1 0 0,0 12,11M12.5,2C17,2 17.11,5.57 14.75,6.75C13.76,7.24 13.32,8.29 13.13,9.22C13.61,9.42 14.03,9.73 14.35,10.13C18.05,8.13 22.03,8.92 22.03,12.5C22.03,17 18.46,17.1 17.28,14.73C16.78,13.74 15.72,13.3 14.79,13.11C14.59,13.59 14.28,14 13.88,14.34C15.87,18.03 15.08,22 11.5,22C7,22 6.91,18.42 9.27,17.24C10.25,16.75 10.69,15.71 10.89,14.79C10.4,14.59 9.97,14.27 9.65,13.87C5.96,15.85 2,15.07 2,11.5C2,7 5.56,6.89 6.74,9.26C7.24,10.25 8.29,10.68 9.22,10.87C9.41,10.39 9.73,9.97 10.14,9.65C8.15,5.96 8.94,2 12.5,2Z","mdiAirPurifier":"M11,9A4,4 0 0,1 15,13A4,4 0 0,1 11,17A4,4 0 0,1 7,13A4,4 0 0,1 11,9M11,11A2,2 0 0,0 9,13A2,2 0 0,0 11,15A2,2 0 0,0 13,13A2,2 0 0,0 11,11M7,4H14A4,4 0 0,1 18,8V9H16V8A2,2 0 0,0 14,6H7A2,2 0 0,0 5,8V20H16V18H18V22H3V8A4,4 0 0,1 7,4M16,11C18.5,11 18.5,9 21,9V11C18.5,11 18.5,13 16,13V11M16,15C18.5,15 18.5,13 21,13V15C18.5,15 18.5,17 16,17V15Z","mdiDishwasher":"M18,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V4A2,2 0 0,0 18,2M10,4A1,1 0 0,1 11,5A1,1 0 0,1 10,6A1,1 0 0,1 9,5A1,1 0 0,1 10,4M7,4A1,1 0 0,1 8,5A1,1 0 0,1 7,6A1,1 0 0,1 6,5A1,1 0 0,1 7,4M18,20H6V8H18V20M14.67,15.33C14.69,16.03 14.41,16.71 13.91,17.21C12.86,18.26 11.15,18.27 10.09,17.21C9.59,16.71 9.31,16.03 9.33,15.33C9.4,14.62 9.63,13.94 10,13.33C10.37,12.5 10.81,11.73 11.33,11L12,10C13.79,12.59 14.67,14.36 14.67,15.33","mdiTumbleDryer":"M6,2H18A2,2 0 0,1 20,4V20A2,2 0 0,1 18,22H6A2,2 0 0,1 4,20V4A2,2 0 0,1 6,2M7,4A1,1 0 0,0 6,5A1,1 0 0,0 7,6A1,1 0 0,0 8,5A1,1 0 0,0 7,4M10,4A1,1 0 0,0 9,5A1,1 0 0,0 10,6A1,1 0 0,0 11,5A1,1 0 0,0 10,4M12,8A6,6 0 0,0 6,14A6,6 0 0,0 12,20A6,6 0 0,0 18,14A6,6 0 0,0 12,8M8.11,10.5H10C9.76,11.88 10,12.67 10.58,13.29C11.68,14.36 12.16,15.71 11.89,17.5H10C10.24,16.12 10,15.33 9.42,14.71C8.32,13.64 7.85,12.29 8.11,10.5M12.11,10.5H14C13.76,11.88 14,12.67 14.58,13.29C15.68,14.36 16.16,15.71 15.89,17.5H14C14.24,16.12 14,15.33 13.42,14.71C12.32,13.64 11.85,12.29 12.11,10.5Z","mdiWaterBoiler":"M8 2C6.89 2 6 2.89 6 4V16C6 17.11 6.89 18 8 18H9V20H6V22H9C10.11 22 11 21.11 11 20V18H13V20C13 21.11 13.89 22 15 22H18V20H15V18H16C17.11 18 18 17.11 18 16V4C18 2.89 17.11 2 16 2H8M12 4.97A2 2 0 0 1 14 6.97A2 2 0 0 1 12 8.97A2 2 0 0 1 10 6.97A2 2 0 0 1 12 4.97M10 14.5H14V16H10V14.5Z","mdiFire":"M17.66 11.2C17.43 10.9 17.15 10.64 16.89 10.38C16.22 9.78 15.46 9.35 14.82 8.72C13.33 7.26 13 4.85 13.95 3C13 3.23 12.17 3.75 11.46 4.32C8.87 6.4 7.85 10.07 9.07 13.22C9.11 13.32 9.15 13.42 9.15 13.55C9.15 13.77 9 13.97 8.8 14.05C8.57 14.15 8.33 14.09 8.14 13.93C8.08 13.88 8.04 13.83 8 13.76C6.87 12.33 6.69 10.28 7.45 8.64C5.78 10 4.87 12.3 5 14.47C5.06 14.97 5.12 15.47 5.29 15.97C5.43 16.57 5.7 17.17 6 17.7C7.08 19.43 8.95 20.67 10.96 20.92C13.1 21.19 15.39 20.8 17.03 19.32C18.86 17.66 19.5 15 18.56 12.72L18.43 12.46C18.22 12 17.66 11.2 17.66 11.2M14.5 17.5C14.22 17.74 13.76 18 13.4 18.1C12.28 18.5 11.16 17.94 10.5 17.28C11.69 17 12.4 16.12 12.61 15.23C12.78 14.43 12.46 13.77 12.33 13C12.21 12.26 12.23 11.63 12.5 10.94C12.69 11.32 12.89 11.7 13.13 12C13.9 13 15.11 13.44 15.37 14.8C15.41 14.94 15.43 15.08 15.43 15.23C15.46 16.05 15.1 16.95 14.5 17.5H14.5Z","mdiCeilingLight":"M8,9H11V4H13V9H16L20,17H4L8,9M14,18A2,2 0 0,1 12,20A2,2 0 0,1 10,18H14Z","mdiLamp":"M8,2H16L20,14H4L8,2M11,15H13V20H18V22H6V20H11V15Z","mdiWallSconceFlat":"M5,5V11H19V5H5M5.27,13.32L3.5,15.09L4.91,16.5L6.68,14.73L5.27,13.32M18.73,13.32L17.32,14.73L19.09,16.5L20.5,15.09L18.73,13.32M11,16V19H13V16H11Z","mdiLightbulbOn":"M12,6A6,6 0 0,1 18,12C18,14.22 16.79,16.16 15,17.2V19A1,1 0 0,1 14,20H10A1,1 0 0,1 9,19V17.2C7.21,16.16 6,14.22 6,12A6,6 0 0,1 12,6M14,21V22A1,1 0 0,1 13,23H11A1,1 0 0,1 10,22V21H14M20,11H23V13H20V11M1,11H4V13H1V11M13,1V4H11V1H13M4.92,3.5L7.05,5.64L5.63,7.05L3.5,4.93L4.92,3.5M16.95,5.63L19.07,3.5L20.5,4.93L18.37,7.05L16.95,5.63Z","mdiWindowOpenVariant":"M21 20V2H3V20H1V23H23V20M19 4V11H17V4M5 4H7V11H5M5 20V13H7V20M9 20V4H15V20M17 20V13H19V20Z","mdiWaterAlert":"M10 3.25C10 3.25 16 10 16 14C16 17.31 13.31 20 10 20S4 17.31 4 14C4 10 10 3.25 10 3.25M20 7V13H18V7H20M18 17H20V15H18V17Z","mdiThermometer":"M15 13V5A3 3 0 0 0 9 5V13A5 5 0 1 0 15 13M12 4A1 1 0 0 1 13 5V8H11V5A1 1 0 0 1 12 4Z","mdiRobotVacuum":"M12,2C14.65,2 17.19,3.06 19.07,4.93L17.65,6.35C16.15,4.85 14.12,4 12,4C9.88,4 7.84,4.84 6.35,6.35L4.93,4.93C6.81,3.06 9.35,2 12,2M3.66,6.5L5.11,7.94C4.39,9.17 4,10.57 4,12A8,8 0 0,0 12,20A8,8 0 0,0 20,12C20,10.57 19.61,9.17 18.88,7.94L20.34,6.5C21.42,8.12 22,10.04 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12C2,10.04 2.58,8.12 3.66,6.5M12,6A6,6 0 0,1 18,12C18,13.59 17.37,15.12 16.24,16.24L14.83,14.83C14.08,15.58 13.06,16 12,16C10.94,16 9.92,15.58 9.17,14.83L7.76,16.24C6.63,15.12 6,13.59 6,12A6,6 0 0,1 12,6M12,8A1,1 0 0,0 11,9A1,1 0 0,0 12,10A1,1 0 0,0 13,9A1,1 0 0,0 12,8Z","mdiWeatherNight":"M17.75,4.09L15.22,6.03L16.13,9.09L13.5,7.28L10.87,9.09L11.78,6.03L9.25,4.09L12.44,4L13.5,1L14.56,4L17.75,4.09M21.25,11L19.61,12.25L20.2,14.23L18.5,13.06L16.8,14.23L17.39,12.25L15.75,11L17.81,10.95L18.5,9L19.19,10.95L21.25,11M18.97,15.95C19.8,15.87 20.69,17.05 20.16,17.8C19.84,18.25 19.5,18.67 19.08,19.07C15.17,23 8.84,23 4.94,19.07C1.03,15.17 1.03,8.83 4.94,4.93C5.34,4.53 5.76,4.17 6.21,3.85C6.96,3.32 8.14,4.21 8.06,5.04C7.79,7.9 8.75,10.87 10.95,13.06C13.14,15.26 16.1,16.22 18.97,15.95M17.33,17.97C14.5,17.81 11.7,16.64 9.53,14.5C7.36,12.31 6.2,9.5 6.04,6.68C3.23,9.82 3.34,14.64 6.35,17.66C9.37,20.67 14.19,20.78 17.33,17.97Z","mdiWhiteBalanceSunny":"M3.55 19.09L4.96 20.5L6.76 18.71L5.34 17.29M12 6C8.69 6 6 8.69 6 12S8.69 18 12 18 18 15.31 18 12C18 8.68 15.31 6 12 6M20 13H23V11H20M17.24 18.71L19.04 20.5L20.45 19.09L18.66 17.29M20.45 5L19.04 3.6L17.24 5.39L18.66 6.81M13 1H11V4H13M6.76 5.39L4.96 3.6L3.55 5L5.34 6.81L6.76 5.39M1 13H4V11H1M13 20H11V23H13","mdiClockOutline":"M12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22C6.47,22 2,17.5 2,12A10,10 0 0,1 12,2M12.5,7V12.25L17,14.92L16.25,16.15L11,13V7H12.5Z","rWave1":"M7.95,3L6.53,5.19L7.95,7.4H7.94L5.95,10.5L4.22,9.6L5.64,7.39L4.22,5.19L6.22,2.09L7.95,3","rWave2":"M13.95,2.89L12.53,5.1L13.95,7.3L13.94,7.31L11.95,10.4L10.22,9.5L11.64,7.3L10.22,5.1L12.22,2L13.95,2.89","rWave3":"M20,2.89L18.56,5.1L20,7.3V7.31L18,10.4L16.25,9.5L17.67,7.3L16.25,5.1L18.25,2L20,2.89","rBody":"M2,22V14A2,2 0 0,1 4,12H20A2,2 0 0,1 22,14V22H20V20H4V22H2M6,14A1,1 0 0,0 5,15V17A1,1 0 0,0 6,18A1,1 0 0,0 7,17V15A1,1 0 0,0 6,14M10,14A1,1 0 0,0 9,15V17A1,1 0 0,0 10,18A1,1 0 0,0 11,17V15A1,1 0 0,0 10,14M14,14A1,1 0 0,0 13,15V17A1,1 0 0,0 14,18A1,1 0 0,0 15,17V15A1,1 0 0,0 14,14M18,14A1,1 0 0,0 17,15V17A1,1 0 0,0 18,18A1,1 0 0,0 19,17V15A1,1 0 0,0 18,14Z"};
 const S = 80; // px per metre
 const PAD = 40;
 const NS = "http://www.w3.org/2000/svg";
 const LIGHT_DEFAULT = "#ffd9a0";
 const OFF_STATES = new Set(["off", "standby", "unavailable", "unknown"]);
+// colour names usable in rules; anything else is taken as a CSS colour
+const COLORS = { red: "#ef4444", orange: "#f59e0b", yellow: "#facc15", green: "#4ade80", blue: "#60a5fa", purple: "#a855f7", pink: "#ec4899", white: "#f8fafc", black: "#000" };
+const color = (c) => COLORS[c] || c;
 const MOTION_CLASSES = new Set(["motion", "occupancy", "presence"]);
 
 const el = (tag, attrs = {}, parent) => {
@@ -103,7 +106,8 @@ svg.plan { width: 100%; height: 100%; display: block; }
 .win { stroke: #67e8f9; stroke-width: 4; stroke-linecap: round; filter: drop-shadow(0 0 2px #67e8f9); }
 .sash { stroke: #67e8f9; stroke-width: 3; stroke-linecap: round; }
 .is-open .door-arc { opacity: .5; }
-.alert-open .win { stroke: var(--open); animation: winPulse 1.6s ease-in-out infinite; }
+.alert-open .win { stroke: var(--open); }
+.alert-open.fresh .win, .alert-open.fresh .sash, .alert-open.fresh .door-leaf { animation: winPulse .8s ease-in-out infinite; }
 .alert-open .door-leaf, .alert-open .sash { stroke: var(--open); filter: drop-shadow(0 0 3px var(--open)); }
 .furn { fill: rgba(139,147,255,.05); stroke: rgba(139,147,255,.28); stroke-width: 1; pointer-events: none; }
 .app[data-mode="day"] .furn { fill: rgba(63,70,200,.04); stroke: rgba(63,70,200,.25); }
@@ -144,6 +148,19 @@ svg.plan { width: 100%; height: 100%; display: block; }
 .dev-boiler.on .flame { opacity: 1; filter: drop-shadow(0 0 2px #ff8a3d); }
 .dev-boiler.on .flame path { transform-box: fill-box; transform-origin: 50% 100%; animation: flame .5s ease-in-out infinite alternate; }
 .dev-boiler.on .badge, .dev-boiler.on .ring { stroke: #ff8a3d; }
+.dev .heatwaves g { opacity: 0; }
+.dev-radiator.on .heatwaves path { fill: var(--wave, #ef4444) !important; }
+.dev-radiator.on .heatwaves g { animation: heatwave 1.6s ease-in-out infinite; }
+.dev-radiator.on .heatwaves g:nth-child(2) { animation-delay: .35s; }
+.dev-radiator.on .heatwaves g:nth-child(3) { animation-delay: .7s; }
+.dev-radiator.on .ring { stroke: var(--wave, #ef4444); }
+.dev.ruled .icon path:not(.heatwaves path) { fill: var(--dev) !important; }
+.dev.ruled .badge { stroke: var(--dev); }
+.dev.glow .badge { filter: drop-shadow(0 0 4px var(--dev)); }
+.furn.ruled { fill: var(--furn); fill-opacity: .25; stroke: var(--furn); stroke-opacity: .8; }
+.furn.glow { filter: drop-shadow(0 0 5px var(--furn)); }
+.tint { pointer-events: none; transition: fill .6s, opacity .6s; }
+.tint.glow { filter: drop-shadow(0 0 8px currentColor); }
 .label { pointer-events: none; }
 .label rect { fill: var(--chip); stroke: var(--line); }
 .label .name { fill: var(--text); font-weight: 600; font-size: 12px; }
@@ -186,6 +203,7 @@ svg.plan { width: 100%; height: 100%; display: block; }
   .chip { font-size: 12px; padding: 4px 8px; }
   .sheet { left: 8px; right: 8px; top: auto; width: auto; max-height: 60%; bottom: 8px; transform: translateY(120%); }
 }
+@keyframes heatwave { 0%, 100% { opacity: .45; transform: translateY(1px); } 50% { opacity: 1; transform: translateY(-1.4px); } }
 @keyframes halo { 50% { opacity: .55; } }
 @keyframes wobble { from { transform: rotate(-4deg); } to { transform: rotate(4deg); } }
 @keyframes spin { to { transform: rotate(360deg); } }
@@ -198,7 +216,7 @@ svg.plan { width: 100%; height: 100%; display: block; }
 @keyframes leak { 50% { opacity: .22; } }
 @keyframes blink { 50% { opacity: .3; } }
 @keyframes tvHue { 0% { fill: #3b2bff; } 33% { fill: #ff2bd1; } 66% { fill: #2bd9ff; } 100% { fill: #3b2bff; } }
-@media (prefers-reduced-motion: reduce) { .ripple, .alert-open .win, .leak, .tv.playing, .mi.alarm svg, .dev *, .lamp * { animation: none !important; } }
+@media (prefers-reduced-motion: reduce) { .ripple, .alert-open.fresh *, .leak, .tv.playing, .mi.alarm svg, .dev *, .lamp * { animation: none !important; } }
 `;
 
 // appliance glyphs: an MDI icon plus the bits that animate
@@ -207,6 +225,7 @@ const ICON = {
   purifier: () => `${mdiPath("mdiAirPurifier", 20)}<g class="waves"><path d="M-9 -13 Q0 -17 9 -13"/><path d="M-11 -16 Q0 -21 11 -16"/></g>`,
   dishwasher: () => `${mdiPath("mdiDishwasher", 20)}<g class="drops"><circle cx="-3" cy="2" r="1.3"/><circle cx="1" cy="4" r="1.3"/><circle cx="4" cy="1" r="1.3"/></g>`,
   dryer: () => `<g class="wobble">${mdiPath("mdiTumbleDryer", 20)}</g>`,
+  radiator: () => `<g class="heatwaves">${["rWave1", "rWave2", "rWave3"].map((n) => `<g>${mdiPath(n, 20)}</g>`).join("")}</g>${mdiPath("rBody", 20)}`,
   boiler: () => `${mdiPath("mdiWaterBoiler", 20)}<g class="flame" transform="translate(5 5)">${mdiPath("mdiFire", 9)}</g>`,
 };
 
@@ -314,6 +333,33 @@ function buildView(card, plan) {
   const toggle = (entityId) => hass().callService("homeassistant", "toggle", { entity_id: entityId });
   const nameOf = (id) => st(id)?.attributes.friendly_name || id;
 
+  // ---- rules: an ordered list, each {if: [conditions], color, glow, animate, wave, text};
+  // for every field the first matching rule that sets it wins. A condition is
+  // {entity, attribute?, state | state_not | above | below}, or {any: [conditions]} for OR.
+  const condOk = (c) => {
+    if (c.any) return c.any.some(condOk);
+    const s = st(c.entity);
+    if (!s) return false;
+    const v = c.attribute ? s.attributes[c.attribute] : s.state;
+    if (c.state != null && ![].concat(c.state).map(String).includes(String(v))) return false;
+    if (c.state_not != null && [].concat(c.state_not).map(String).includes(String(v))) return false;
+    if (c.above != null && !(Number(v) > c.above)) return false;
+    if (c.below != null && !(Number(v) < c.below)) return false;
+    return true;
+  };
+  const applyRules = (rules) => {
+    const out = {};
+    for (const r of rules || []) {
+      if (!(r.if ? [].concat(r.if) : []).every(condOk)) continue;
+      for (const [k, v] of Object.entries(r)) if (k !== "if" && !(k in out)) out[k] = v;
+    }
+    return out;
+  };
+  const ruleEntities = (rules, into) => {
+    const walk = (c) => { if (c.any) c.any.forEach(walk); else if (c.entity) into.add(c.entity); };
+    for (const r of rules || []) [].concat(r.if || []).forEach(walk);
+  };
+
   const rooms = plan.rooms;
   const R = Object.fromEntries(rooms.map((r) => [r.id, r]));
   const roomAt = (x, z) => rooms.find((r) => inPoly([x, z], r.points));
@@ -338,6 +384,7 @@ function buildView(card, plan) {
     el("path", { d }, el("clipPath", { id: "clip_" + r.id }, defs));
     const f = el("path", { d, class: "room-floor", "data-room": r.id }, gFloor);
     f.addEventListener("click", () => openSheet(r.id));
+    if (r.rules) r.tint = el("path", { d, class: "tint", opacity: 0 }, gFloor);
     r.glowLayer = el("g", { "clip-path": `url(#clip_${r.id})` }, gGlow);
     el("path", { d, class: "walls" }, gWalls);
     r.fx = el("g", { "clip-path": `url(#clip_${r.id})` }, gFx);
@@ -355,8 +402,9 @@ function buildView(card, plan) {
       if (f.entity) tvs.push({ entity: f.entity, node });
       continue;
     }
-    el("rect", { x: -w / 2, y: -d / 2, width: w, height: d, rx: Math.min(6, d / 4), class: "furn" }, g);
+    f.node = el("rect", { x: -w / 2, y: -d / 2, width: w, height: d, rx: Math.min(6, d / 4), class: "furn" }, g);
   }
+  const ruledFurniture = furniture.filter((f) => f.rules && f.node);
 
   // openings: doors and windows with a contact swing open and shut (angle eased every frame)
   const swingers = [];
@@ -384,7 +432,7 @@ function buildView(card, plan) {
     const len = Math.hypot(E0[0] - H0[0], E0[1] - H0[1]);
     const along = [(E0[0] - H0[0]) / len, (E0[1] - H0[1]) / len];
     const dir = o.swing === "out" ? -1 : 1;
-    const sw = { o, g, H0, len, along, nn: [n[0] * dir, n[1] * dir], max: isWin ? 0.62 : 1.45, cur: 0, target: 0, isWin };
+    const sw = { o, g, H0, len, along, nn: [n[0] * dir, n[1] * dir], max: isWin ? 0.62 : Math.PI / 2, cur: 0, target: 0, isWin };
     sw.arc = el("path", { class: "door-arc", d: "" }, g);
     sw.leaf = el("line", { class: isWin ? "sash" : "door-leaf", x1: H0[0], y1: H0[1], x2: E0[0], y2: E0[1] }, g);
     swingers.push(sw);
@@ -460,6 +508,7 @@ function buildView(card, plan) {
     if (!s) return false;
     if (Array.isArray(d.active)) return d.active.includes(s.state);
     if (d.active && d.active.above != null) return Number(s.state) > d.active.above;
+    if (d.active && d.active.entity) return condOk(d.active);
     return !OFF_STATES.has(s.state);
   };
   const devText = (d, on) => {
@@ -479,9 +528,31 @@ function buildView(card, plan) {
   };
   function renderDevices() {
     for (const d of devices) {
-      const on = devActive(d);
-      d.g.classList.toggle("on", on);
-      d.label.textContent = devText(d, on);
+      const r = applyRules(d.rules);
+      const on = r.animate ?? devActive(d);
+      d.g.classList.toggle("on", !!on);
+      d.g.classList.toggle("ruled", !!r.color);
+      d.g.classList.toggle("glow", !!(r.glow && r.color));
+      d.g.style.setProperty("--dev", r.color ? color(r.color) : "");
+      d.g.style.setProperty("--wave", r.wave ? color(r.wave) : "");
+      d.label.textContent = r.text ?? devText(d, on);
+    }
+  }
+  function renderRuled() {
+    for (const r of rooms) {
+      if (!r.tint) continue;
+      const res = applyRules(r.rules);
+      const c = res.tint || res.color;
+      r.tint.setAttribute("fill", c ? color(c) : "transparent");
+      r.tint.style.color = c ? color(c) : "";
+      r.tint.setAttribute("opacity", c ? (res.opacity ?? 0.14) : 0);
+      r.tint.classList.toggle("glow", !!(c && res.glow));
+    }
+    for (const f of ruledFurniture) {
+      const res = applyRules(f.rules);
+      f.node.classList.toggle("ruled", !!res.color);
+      f.node.classList.toggle("glow", !!(res.color && res.glow));
+      f.node.style.setProperty("--furn", res.color ? color(res.color) : "");
     }
   }
 
@@ -534,8 +605,12 @@ function buildView(card, plan) {
     const s = st(id);
     if (!s) return { on: false, color: LIGHT_DEFAULT, bri: 1 };
     const a = s.attributes;
-    const color = a.rgb_color ? hex(a.rgb_color) : a.color_temp_kelvin ? kelvinHex(a.color_temp_kelvin) : LIGHT_DEFAULT;
-    return { on: s.state === "on", color, bri: a.brightness != null ? Math.max(0.3, a.brightness / 255) : 1 };
+    const color =
+      a.color_mode === "color_temp" && a.color_temp_kelvin ? kelvinHex(a.color_temp_kelvin)
+      : a.rgb_color ? hex(a.rgb_color)
+      : a.color_temp_kelvin ? kelvinHex(a.color_temp_kelvin)
+      : LIGHT_DEFAULT;
+    return { on: s.state === "on", color, bri: a.brightness != null ? Math.max(0.05, a.brightness / 255) : 1 };
   };
   function renderLights() {
     for (const r of rooms) r.glowLayer.innerHTML = "";
@@ -545,6 +620,10 @@ function buildView(card, plan) {
       const s = lightState(L.id);
       L.node.classList.toggle("on", s.on);
       L.node.style.setProperty("--lamp", s.color);
+      // a dimmed light shows a paler badge or strip
+      const dim = s.on ? (0.35 + 0.65 * s.bri).toFixed(2) : "";
+      if (L.strip) L.node.style.strokeOpacity = dim;
+      else L.node.querySelector(".core").style.fillOpacity = dim;
       if (!s.on || !L.room) continue;
       const f = L.f || L;
       const share = f.room_light === false ? 0.15 : typeof f.room_light === "number" ? f.room_light : L.strip ? 0.45 : 1;
@@ -554,11 +633,11 @@ function buildView(card, plan) {
         el("line", {
           x1: cx - Math.cos(a) * h, y1: cz - Math.sin(a) * h, x2: cx + Math.cos(a) * h, y2: cz + Math.sin(a) * h,
           stroke: s.color, "stroke-width": 26 * (0.5 + share), "stroke-linecap": "round",
-          opacity: (0.55 * s.bri).toFixed(2), filter: "url(#blurBig)", class: "glow",
+          opacity: (0.6 * s.bri).toFixed(2), filter: "url(#blurBig)", class: "glow",
         }, L.room.glowLayer);
         continue;
       }
-      const rad = ((L.small ? 1.1 : 2.3) + L.spread * 0.9) * S * (0.6 + 0.4 * share);
+      const rad = ((L.small ? 1.1 : 2.3) + L.spread * 0.9) * S * (0.6 + 0.4 * share) * (0.55 + 0.45 * s.bri);
       const gid = "g_" + L.fid;
       let grad = defs.querySelector("#" + CSS.escape(gid));
       if (!grad) {
@@ -575,6 +654,7 @@ function buildView(card, plan) {
     $(".sLights").textContent = count;
   }
   const isOpen = (o) => o.contact && st(o.contact)?.state === "on";
+  const FRESH_MS = 6000; // an opening pulses this long after it opened, then stays plain orange
   function renderOpenings() {
     let open = 0;
     for (const sw of swingers) {
@@ -582,6 +662,10 @@ function buildView(card, plan) {
       if (on) open++;
       sw.target = on ? sw.max : 0;
       sw.g.classList.toggle("alert-open", !!on);
+      const age = on ? Date.now() - Date.parse(st(sw.o.contact).last_changed) : Infinity;
+      clearTimeout(sw.freshTimer);
+      sw.g.classList.toggle("fresh", age < FRESH_MS);
+      if (age < FRESH_MS) sw.freshTimer = setTimeout(() => sw.g.classList.remove("fresh"), FRESH_MS - age);
       if (sw.cur === 0 && sw.target === 0) drawSwing(sw);
     }
     $(".sOpen").textContent = open;
@@ -795,7 +879,9 @@ function buildView(card, plan) {
   for (const id of Object.keys(lampGroups)) tracked.add(id);
   for (const o of plan.openings || []) if (o.contact) tracked.add(o.contact);
   for (const s of sensors) tracked.add(s.entity);
-  for (const d of devices) { tracked.add(d.entity); if (d.info) tracked.add(d.info); }
+  for (const d of devices) { tracked.add(d.entity); if (d.info) tracked.add(d.info); ruleEntities(d.rules, tracked); }
+  for (const r of rooms) ruleEntities(r.rules, tracked);
+  for (const f of ruledFurniture) ruleEntities(f.rules, tracked);
   for (const t of tvs) tracked.add(t.entity);
   for (const r of rooms) { if (r.temperature) tracked.add(r.temperature); if (r.humidity) tracked.add(r.humidity); }
   if (vacCfg) { tracked.add(vacCfg.entity); if (vacCfg.room_sensor) tracked.add(vacCfg.room_sensor); }
@@ -811,7 +897,7 @@ function buildView(card, plan) {
         if (seen.get(id) !== s) { seen.set(id, s); changed = true; }
       }
       if (!changed) return;
-      renderMode(); renderLights(); renderOpenings(); renderFx(); renderDevices(); renderLabels(); renderOutdoor(); renderVac();
+      renderMode(); renderLights(); renderOpenings(); renderFx(); renderDevices(); renderRuled(); renderLabels(); renderOutdoor(); renderVac();
       if (sheetRoom) openSheet(sheetRoom);
       kick();
     },

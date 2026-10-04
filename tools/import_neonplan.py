@@ -6,7 +6,8 @@
 building.json  the result of the websocket command `neonplan3d/building/get`
                (either the whole result or just its "building").
 extras.json    optional: things NeonPlan does not know, merged on top:
-               {"devices": [...], "labels": {room_id: [x, z]}, "outdoor": room_id}
+               {"devices": [...], "labels": {room_id: [x, z]}, "outdoor": room_id,
+                "room_rules": {room_id: [rules]}, "furniture_rules": {furniture_id: [rules]}}
 
 Save the plan with the websocket command
     {"type": "fns_floorplan/plan/save", "plan": <plan.json>}
@@ -70,7 +71,13 @@ def convert(building, extras=None):
         "labels": {},
         "outdoor": None,
     }
-    plan.update(extras or {})
+    extras = dict(extras or {})
+    for key, items in (("room_rules", rooms), ("furniture_rules", furniture)):
+        by_id = extras.pop(key, {})
+        for item in items:
+            if item["id"] in by_id:
+                item["rules"] = by_id[item["id"]]
+    plan.update(extras)
     return plan
 
 
@@ -89,7 +96,8 @@ def demo():
             }
         ]
     }
-    p = convert({"building": b}, {"outdoor": "a"})
+    p = convert({"building": b}, {"outdoor": "a", "room_rules": {"a": [{"color": "red"}]}})
+    assert p["rooms"][0]["rules"] == [{"color": "red"}] and "room_rules" not in p
     assert p["rooms"][0]["temperature"] == "sensor.t" and p["rooms"][0]["humidity"] is None
     assert p["openings"][0]["contact"] is None
     assert p["furniture"][0]["entity"] == "light.a" and p["furniture"][0]["room_light"] is False
