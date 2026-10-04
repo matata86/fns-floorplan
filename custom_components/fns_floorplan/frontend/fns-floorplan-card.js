@@ -57,7 +57,6 @@ const kelvinHex = (k) => {
   return hex([r, g, b]);
 };
 const num = (v, d = 1) => Number(v).toFixed(d).replace(".", ",");
-const minutes = (m) => (m >= 60 ? `${Math.floor(m / 60)} h ${Math.round(m % 60)} min` : `${Math.round(m)} min`);
 
 // icon sizes XS–XXL of lights, appliances and the robot; furniture keeps its size in metres
 const SIZES = { xs: 0.6, s: 0.8, m: 1, l: 1.25, xl: 1.5, xxl: 2 };
@@ -857,29 +856,16 @@ function buildView(card, plan) {
     return !OFF_STATES.has(s.state);
   };
   const devText = (d, on) => {
-    // idle: `text`, else the info entity; running: `text_on`, else the info entity / media title, else `text`
+    // idle: `text`; running: `text_on`, else the media title, else `text` (entities go in as templates)
     const base = d.text ? tplText(d.text) : "";
-    if (!on) return base || (d.kind === "media" ? "" : devInfo(d));
+    if (!on) return base;
     if (d.text_on) return tplText(d.text_on);
-    return devInfo(d) || base;
-  };
-  const devInfo = (d) => {
     if (d.kind === "media") {
       const a = st(d.entity)?.attributes || {};
       const t = [a.media_series_title || a.media_artist, a.media_title].filter(Boolean).join(" – ");
-      return t.length > 28 ? t.slice(0, 27) + "…" : t;
+      if (t) return t.length > 28 ? t.slice(0, 27) + "…" : t;
     }
-    const s = st(d.info);
-    if (!s || OFF_STATES.has(s.state)) return "";
-    const a = s.attributes;
-    let out;
-    if (a.device_class === "timestamp") {
-      const left = (new Date(s.state) - Date.now()) / 60000;
-      out = left > 0 ? minutes(left) : "";
-    } else if (a.unit_of_measurement === "min") out = Number(s.state) > 0 ? minutes(Number(s.state)) : "";
-    else if (a.unit_of_measurement === "h") out = Number(s.state) > 0 ? minutes(Number(s.state) * 60) : "";
-    else out = isNaN(s.state) ? s.state : `${Math.round(Number(s.state))}`;
-    return out ? (d.prefix || "") + out : "";
+    return base;
   };
   // the glyph of an alarm, media player or generic item follows its entity (unless it has its own icon)
   function devGlyph(d, ruleIcon) {
@@ -1408,7 +1394,7 @@ function buildView(card, plan) {
   for (const id of Object.keys(lampGroups)) tracked.add(id);
   for (const o of plan.openings || []) { if (o.contact) tracked.add(o.contact); if (o.blind) tracked.add(o.blind); }
   for (const s of sensors) tracked.add(s.entity);
-  for (const d of devices) { tracked.add(d.entity); if (d.info) tracked.add(d.info); ruleEntities(d.rules, tracked); }
+  for (const d of devices) { tracked.add(d.entity); ruleEntities(d.rules, tracked); }
   for (const r of rooms) ruleEntities(r.rules, tracked);
   for (const f of ruledFurniture) ruleEntities(f.rules, tracked);
   for (const t of tvs) tracked.add(t.entity);
