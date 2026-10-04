@@ -1223,6 +1223,33 @@ function buildView(card, plan) {
     }
     return out;
   }
+  // routes between rooms go through doors and passages: each one links its room with the room on the other side
+  const doorLinks = (plan.openings || []).filter((o) => o.type !== "window" && R[o.room_id]).flatMap((o) => {
+    const p = R[o.room_id].points, a = p[o.edge], b = p[(o.edge + 1) % p.length];
+    const L = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1, u = [(b[0] - a[0]) / L, (b[1] - a[1]) / L];
+    const m = [a[0] + u[0] * o.offset, a[1] + u[1] * o.offset], c = centroid(p);
+    let n = [-u[1], u[0]];
+    if ((c[0] - m[0]) * n[0] + (c[1] - m[1]) * n[1] < 0) n = [-n[0], -n[1]]; // n points into the door's room
+    const inner = [m[0] + n[0] * 0.35, m[1] + n[1] * 0.35], outer = [m[0] - n[0] * 0.35, m[1] - n[1] * 0.35];
+    const other = roomAt(...outer);
+    return other ? [{ a: o.room_id, b: other.id, pa: inner, pb: outer }, { a: other.id, b: o.room_id, pa: outer, pb: inner }] : [];
+  });
+  // waypoints (metres) from the point `from` to the room `to`: breadth-first over the door links, [] when no route
+  function route(from, to) {
+    const start = roomAt(...from);
+    if (!start || !to || start.id === to.id) return [];
+    const prev = { [start.id]: null }, queue = [start.id];
+    while (queue.length) {
+      const id = queue.shift();
+      if (id === to.id) break;
+      for (const l of doorLinks) if (l.a === id && !(l.b in prev)) { prev[l.b] = l; queue.push(l.b); }
+    }
+    if (!(to.id in prev)) return [];
+    const out = [];
+    for (let l = prev[to.id]; l; l = prev[l.a]) out.unshift(l.pa, l.pb);
+    return out;
+  }
+  const unP = (q) => [(q[0] - PAD) / S, (q[1] - PAD) / S];
   function renderVac() {
     if (!robot) return;
     const state = st(vacCfg.entity)?.state;
@@ -1232,11 +1259,17 @@ function buildView(card, plan) {
     if (dock.rules) { const res = applyRules(dock.rules); robot.toggleAttribute("hidden", !!res.hide); swapIcon(robot.querySelector(".ricon path"), res.icon); }
     if (state === "cleaning") {
       if (vac.state !== "cleaning" && (vac.state === "docked" || vac.state === null)) vac.pts = [];
-      // ponytail: the robot crosses straight to the new room's first lane, a route through the doors if it looks bad
-      if (room && room !== vac.room) { vac.room = room; vac.path = lanes(room).map(P); vac.pi = 0; }
+      // to a new room through the doors, then lane by lane
+      if (room && room !== vac.room) {
+        vac.room = room;
+        vac.lanes = lanes(room).map(P);
+        vac.path = [...route(unP(vac.rp), room).map(P), ...vac.lanes];
+        vac.pi = 0;
+      }
       vac.on = vac.path.length > 0;
     } else if (state === "returning") {
-      vac.room = null; vac.path = [P([dock.x, dock.z])]; vac.pi = 0; vac.on = true;
+      if (vac.state !== "returning") { vac.path = [...route(unP(vac.rp), roomAt(dock.x, dock.z)).map(P), P([dock.x, dock.z])]; vac.pi = 0; }
+      vac.room = null; vac.on = true;
     } else {
       vac.on = false;
       vac.room = null;
@@ -1252,7 +1285,7 @@ function buildView(card, plan) {
     if (dist < sp) {
       vac.rp = [t[0], t[1]];
       if (vac.pi < vac.path.length - 1) vac.pi++;
-      else if (vac.state === "cleaning") { vac.path.reverse(); vac.pi = 0; } // keeps going over the room until it leaves
+      else if (vac.state === "cleaning" && vac.lanes) { vac.lanes.reverse(); vac.path = vac.lanes; vac.pi = 0; } // keeps going over the room until it leaves
       else vac.on = false;
     } else {
       vac.rp = [vac.rp[0] + (dx / dist) * sp, vac.rp[1] + (dz / dist) * sp];
