@@ -295,7 +295,7 @@ svg.plan text { text-rendering: geometricPrecision; }
 .lamp { cursor: pointer; --lamp: #ffd9a0; }
 .lamp .hit { fill: transparent; }
 .lamp circle.core { fill: var(--chip); stroke: rgba(139,147,255,.45); stroke-width: 1.2; transition: fill .4s, stroke .4s; }
-.lamp .lamp-icon path { fill: var(--muted); transition: fill .4s; }
+.lamp .lamp-icon path { fill: var(--state-light-off-color, var(--state-icon-color, var(--muted))); transition: fill .4s; }
 .lamp.on .lamp-icon path { fill: #2a1a00; }
 .lamp circle.halo { fill: none; stroke: rgba(139,147,255,.35); stroke-width: 1.2; transition: stroke .4s; }
 .lamp.on circle.core { fill: var(--lamp); stroke: #fff; filter: drop-shadow(0 0 3px var(--lamp)); }
