@@ -18,6 +18,7 @@ from homeassistant.components.frontend import add_extra_js_url
 from homeassistant.components.http import StaticPathConfig
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
+from homeassistant.helpers.dispatcher import async_dispatcher_connect, async_dispatcher_send
 from homeassistant.helpers.storage import Store
 
 _LOGGER = logging.getLogger(__name__)
@@ -29,6 +30,7 @@ PANEL_URL = "/fns_floorplan/fns-floorplan-panel.js"
 PANEL_PATH = "fns-floorplan"
 DATA_STORE = "store"
 DATA_PLAN = "plan"
+SIGNAL_PLAN = f"{DOMAIN}_plan"
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
@@ -63,6 +65,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     websocket_api.async_register_command(hass, ws_plan_get)
     websocket_api.async_register_command(hass, ws_plan_save)
+    websocket_api.async_register_command(hass, ws_plan_subscribe)
     return True
 
 
@@ -83,6 +86,21 @@ def ws_plan_get(hass: HomeAssistant, connection: websocket_api.ActiveConnection,
     """Return the stored plan (an empty dict before the first import)."""
     data = hass.data.get(DOMAIN)
     connection.send_result(msg["id"], data[DATA_PLAN] if data else {})
+
+
+@websocket_api.websocket_command({vol.Required("type"): f"{DOMAIN}/plan/subscribe"})
+@callback
+def ws_plan_subscribe(hass: HomeAssistant, connection: websocket_api.ActiveConnection, msg: dict) -> None:
+    """Send the plan now and again after every save, so open cards redraw without a reload."""
+
+    @callback
+    def forward(plan: dict) -> None:
+        connection.send_message(websocket_api.event_message(msg["id"], plan))
+
+    connection.subscriptions[msg["id"]] = async_dispatcher_connect(hass, SIGNAL_PLAN, forward)
+    connection.send_result(msg["id"])
+    data = hass.data.get(DOMAIN)
+    forward(data[DATA_PLAN] if data else {})
 
 
 @websocket_api.websocket_command(
@@ -108,4 +126,5 @@ async def ws_plan_save(hass: HomeAssistant, connection: websocket_api.ActiveConn
     plan = {**msg["plan"], "rev": current + 1}
     data[DATA_PLAN] = plan
     await data[DATA_STORE].async_save(plan)
+    async_dispatcher_send(hass, SIGNAL_PLAN, plan)
     connection.send_result(msg["id"], {"ok": True, "rev": plan["rev"]})

@@ -484,7 +484,7 @@ class FnsFloorplanPanel extends HTMLElement {
     if (sel?.cat === "rooms") return this._roomForm(side, o);
     if (sel?.cat === "openings") return this._openingForm(side, o);
     if (!o) {
-      side.innerHTML = `<h2>Úpravy půdorysu</h2><p class="hint">Klepni na světlo, spotřebič, senzor, nábytek nebo jmenovku místnosti a uprav ji. Táhnutím ji přesuneš (mřížka 5 cm), šipky posouvají vybraný prvek, Delete ho smaže.<br><br>Prvky bez entity mají červený přerušovaný okraj.<br><br>Změny se na dashboardu projeví po uložení a obnovení stránky.</p>`;
+      side.innerHTML = `<h2>Úpravy půdorysu</h2><p class="hint">Klepni na světlo, spotřebič, senzor, nábytek nebo jmenovku místnosti a uprav ji. Táhnutím ji přesuneš (mřížka 5 cm), šipky posouvají vybraný prvek, Delete ho smaže.<br><br>Prvky bez entity mají červený přerušovaný okraj.<br><br>Změny se na dashboardu projeví hned po uložení.</p>`;
       return;
     }
     const field = (label, key, value, type = "text", extra = "") =>
