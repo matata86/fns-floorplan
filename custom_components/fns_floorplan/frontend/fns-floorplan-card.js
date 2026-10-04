@@ -350,7 +350,8 @@ svg.plan text { text-rendering: geometricPrecision; }
 .dev.themed .icon .glyph { fill: var(--dev) !important; }
 .dev.themed.on .badge { stroke: var(--dev); }
 .dev.on.themed .ring, .dev.on.ruled .ring { stroke: var(--dev); }
-.dev.themed.dev-lock .badge, .dev.themed.dev-alarm:not([data-al="off"]) .badge { stroke: var(--dev); }
+/* coloured badge only while running; idle locks and alarms keep the plain grey badge */
+.dev.themed:not(.on) .badge { stroke: var(--line); }
 .dev.dev-dishwasher.err .icon .glyph { fill: var(--alarm) !important; }
 .dev-fan.on .spin { animation: spin .7s linear infinite; }
 .dev-purifier.on .waves { animation: waves 2s ease-out infinite; }
