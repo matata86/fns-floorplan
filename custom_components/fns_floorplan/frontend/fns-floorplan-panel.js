@@ -1,6 +1,6 @@
 // FNS Floorplan editor: the sidebar panel "Půdorys". Lights, appliances, sensors, furniture and
 // room labels can be dragged, assigned an entity, turned, resized, added and removed.
-// Rooms, walls, windows and doors are shown but not edited here yet.
+// In the "Místnosti" mode rooms (corner points, whole rooms), windows and doors are edited.
 
 const S = 80; // px per metre, same as the card
 const PAD = 40;
@@ -49,6 +49,17 @@ const centroid = (pts) => {
   return [cx / (3 * a), cz / (3 * a)];
 };
 
+const DOOR_STYLES = { interior: "Vnitřní", front: "Vchodové", glass: "Prosklené (balkón)", passage: "Jen otvor ve zdi" };
+// edge k of room r: start point, unit vector and length
+const edgeOf = (r, k) => {
+  const a = r.points[k], c = r.points[(k + 1) % r.points.length];
+  const L = Math.hypot(c[0] - a[0], c[1] - a[1]) || 1e-9;
+  return { a, c, L, u: [(c[0] - a[0]) / L, (c[1] - a[1]) / L] };
+};
+const SIDE = (u) => (Math.abs(u[0]) > Math.abs(u[1]) ? (u[0] > 0 ? "horní" : "dolní") : u[1] > 0 ? "pravá" : "levá");
+const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+const uid = (p) => `${p}_${Date.now().toString(36)}`;
+
 const STYLE = `
 :host { display: block; height: 100%; background: var(--primary-background-color, #fafafa); color: var(--primary-text-color, #212121);
   font-family: var(--ha-font-family-body, Roboto, sans-serif); }
@@ -82,6 +93,18 @@ svg { width: 100%; height: 100%; display: block; touch-action: none; user-select
 .noent { stroke: var(--error-color, #db4437) !important; stroke-dasharray: 3 2; }
 .sel .furn, .sel .lamp, .sel .dev, .sel .sensor, .sel rect { stroke: var(--primary-color, #03a9f4) !important; stroke-width: 3 !important; stroke-opacity: 1 !important; }
 .sel .strip { stroke: var(--primary-color, #03a9f4); }
+.modes { display: flex; border: 1px solid var(--divider-color, #e0e0e0); border-radius: 18px; overflow: hidden; }
+.modes button { border: 0; padding: 7px 12px; background: var(--card-background-color, #fff); color: var(--primary-text-color, #212121); cursor: pointer; }
+.modes button.on { background: var(--primary-color, #03a9f4); color: var(--text-primary-color, #fff); }
+.mode-rooms .item { pointer-events: none; opacity: .3; }
+.mode-rooms .floor { cursor: move; }
+.mode-rooms .floor.sel { fill: var(--primary-color, #03a9f4); fill-opacity: .08; stroke: var(--primary-color, #03a9f4); stroke-opacity: 1; }
+.mode-items .open-hit, .mode-items .vtx, .mode-items .mid { display: none; }
+.open-hit { stroke: transparent; stroke-width: 16; cursor: ew-resize; }
+.open-sel { stroke: var(--primary-color, #03a9f4); stroke-width: 6; stroke-linecap: round; pointer-events: none; }
+.vtx { fill: #fff; stroke: var(--primary-color, #03a9f4); stroke-width: 2.5; cursor: grab; }
+.vtx.sel { fill: var(--primary-color, #03a9f4); }
+.mid { fill: var(--primary-color, #03a9f4); fill-opacity: .35; cursor: copy; }
 .side { width: 320px; flex: none; overflow: auto; padding: 16px; box-sizing: border-box; border-left: 1px solid var(--divider-color, #e0e0e0);
   background: var(--card-background-color, #fff); }
 .side h2 { font-size: 17px; margin: 0 0 4px; }
@@ -153,6 +176,7 @@ class FnsFloorplanPanel extends HTMLElement {
     this._plan.labels ||= {};
     this._dirty = false;
     this._sel = null;
+    this._mode ||= "items";
     this._skeleton();
     this._draw();
     this._form();
@@ -164,6 +188,7 @@ class FnsFloorplanPanel extends HTMLElement {
   <ha-menu-button></ha-menu-button>
   <h1>Půdorys</h1>
   <span class="state"></span>
+  <div class="modes"><button data-m="items">Vybavení</button><button data-m="rooms">Místnosti</button></div>
   <select class="add"><option value="">+ Přidat</option>${ADD.map(([l], i) => `<option value="${i}">${l}</option>`).join("")}</select>
   <button class="btn revert" disabled>Zahodit</button>
   <button class="btn primary save" disabled>Uložit</button>
@@ -179,8 +204,22 @@ class FnsFloorplanPanel extends HTMLElement {
     menu.narrow = this._narrow;
     $(".save").addEventListener("click", () => this._save());
     $(".revert").addEventListener("click", () => { if (confirm("Zahodit neuložené změny?")) this._load(); });
+    this.shadowRoot.querySelectorAll(".modes button").forEach((b) => b.addEventListener("click", () => {
+      this._mode = b.dataset.m;
+      this._sel = null;
+      this._draw();
+      this._form();
+    }));
     $(".add").addEventListener("change", (e) => {
       if (e.target.value === "") return;
+      if (e.target.value === "room") {
+        e.target.value = "";
+        const [cx, cz] = centroid(this._bounds()).map((v) => r3(snap(v)));
+        this._plan.rooms.push({ id: uid("room"), name: "Nová místnost", points: [[cx - 1, cz - 1], [cx + 1, cz - 1], [cx + 1, cz + 1], [cx - 1, cz + 1]], temperature: null, humidity: null });
+        this._mode = "rooms";
+        this._sel = { cat: "rooms", i: this._plan.rooms.length - 1 };
+        return this._changed();
+      }
       const { cat, item } = ADD[Number(e.target.value)][1]();
       e.target.value = "";
       const [cx, cz] = centroid(this._bounds());
@@ -192,7 +231,9 @@ class FnsFloorplanPanel extends HTMLElement {
     });
     $("#ents").innerHTML = Object.keys(this._hass.states).sort().map((id) => `<option value="${id}">`).join("");
     const svg = $("svg");
-    svg.addEventListener("pointerdown", (e) => { if (e.target === svg || e.target.classList.contains("floor")) { this._sel = null; this._draw(); this._form(); } });
+    svg.addEventListener("pointerdown", (e) => {
+      if (e.target === svg || (this._mode !== "rooms" && e.target.classList.contains("floor"))) { this._sel = null; this._draw(); this._form(); }
+    });
   }
 
   _bounds() {
@@ -221,28 +262,52 @@ class FnsFloorplanPanel extends HTMLElement {
   }
 
   _move(sel, x, z) {
+    if (sel.cat === "rooms" || sel.cat === "openings") return; // moved by their own handlers
     if (sel.cat === "labels") this._plan.labels[sel.id] = [r3(snap(x)), r3(snap(z))];
     else Object.assign(this._plan[sel.cat][sel.i], { x: r3(snap(x)), z: r3(snap(z)) });
   }
 
   _draw() {
     const svg = this.shadowRoot.querySelector("svg");
-    const b = this._bounds();
-    const W = b[2][0] * S + PAD * 2, H = b[2][1] * S + PAD * 2;
-    svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+    // the view stays put while dragging, so a moved corner does not shift the whole plan under the pointer
+    if (!this._dragging) {
+      const b = this._bounds(), extra = this._mode === "rooms" ? S : 0;
+      svg.setAttribute("viewBox", `0 0 ${b[2][0] * S + PAD * 2 + extra} ${b[2][1] * S + PAD * 2 + extra}`);
+    }
     svg.innerHTML = "";
+    svg.setAttribute("class", "mode-" + this._mode);
+    this.shadowRoot.querySelectorAll(".modes button").forEach((b) => b.classList.toggle("on", b.dataset.m === this._mode));
+    this._fillAdd();
     const plan = this._plan;
-    for (const r of plan.rooms) el("path", { d: "M" + r.points.map(P).map((p) => p.join(",")).join("L") + "Z", class: "floor" }, svg);
-    for (const o of plan.openings || []) {
+    plan.openings ||= [];
+    plan.rooms.forEach((r, i) => {
+      const f = el("path", { d: "M" + r.points.map(P).map((p) => p.join(",")).join("L") + "Z", class: "floor" + (this._sel?.cat === "rooms" && this._sel.i === i ? " sel" : "") }, svg);
+      if (this._mode !== "rooms") return;
+      f.addEventListener("pointerdown", (e) => {
+        const base = r.points.map((p) => [...p]);
+        this._press(e, { cat: "rooms", i }, (dx, dz) => {
+          const sx = snap(dx), sz = snap(dz);
+          r.points = base.map(([x, z]) => [r3(Math.max(0, x + sx)), r3(Math.max(0, z + sz))]);
+        });
+      });
+    });
+    plan.openings.forEach((o, oi) => {
       const r = plan.rooms.find((x) => x.id === o.room_id);
-      if (!r) continue;
-      const a = r.points[o.edge], c = r.points[(o.edge + 1) % r.points.length];
-      const L = Math.hypot(c[0] - a[0], c[1] - a[1]), u = [(c[0] - a[0]) / L, (c[1] - a[1]) / L];
+      if (!r) return;
+      const { a, u, L } = edgeOf(r, o.edge);
       const A = P([a[0] + u[0] * (o.offset - o.width / 2), a[1] + u[1] * (o.offset - o.width / 2)]);
       const B = P([a[0] + u[0] * (o.offset + o.width / 2), a[1] + u[1] * (o.offset + o.width / 2)]);
       el("line", { x1: A[0], y1: A[1], x2: B[0], y2: B[1], class: "open-line" }, svg);
       if (o.style !== "passage") el("line", { x1: A[0], y1: A[1], x2: B[0], y2: B[1], class: o.type === "window" ? "win" : "door" }, svg);
-    }
+      if (this._sel?.cat === "openings" && this._sel.i === oi) el("line", { x1: A[0], y1: A[1], x2: B[0], y2: B[1], class: "open-sel" }, svg);
+      // dragging slides the opening along its wall
+      el("line", { x1: A[0], y1: A[1], x2: B[0], y2: B[1], class: "open-hit" }, svg).addEventListener("pointerdown", (e) => {
+        const base = o.offset;
+        this._press(e, { cat: "openings", i: oi }, (dx, dz) => {
+          o.offset = r3(clamp(snap(base + dx * u[0] + dz * u[1]), o.width / 2, L - o.width / 2));
+        });
+      });
+    });
     const same = (sel) => this._sel && this._sel.cat === sel.cat && (sel.cat === "labels" ? this._sel.id === sel.id : this._sel.i === sel.i);
     const group = (sel, x, z, rot = 0) => {
       const [cx, cz] = P([x, z]);
@@ -281,14 +346,92 @@ class FnsFloorplanPanel extends HTMLElement {
       const bb = t.getBBox();
       Object.entries({ x: bb.x - 8, y: bb.y - 4, width: bb.width + 16, height: bb.height + 8 }).forEach(([k, v]) => rect.setAttribute(k, v));
     }
+    if (this._sel?.cat === "rooms") this._handles(svg, this._sel.i);
+  }
+
+  // corners of the selected room: drag to move (snaps to other rooms' corners), "+" between two adds one
+  _handles(svg, ri) {
+    const r = this._plan.rooms[ri];
+    r.points.forEach((p, k) => {
+      const q = r.points[(k + 1) % r.points.length];
+      const [mx, mz] = P([(p[0] + q[0]) / 2, (p[1] + q[1]) / 2]);
+      el("circle", { cx: mx, cy: mz, r: 6, class: "mid" }, svg).addEventListener("pointerdown", (e) => {
+        e.stopPropagation();
+        this._insertCorner(r, k, [r3(snap((p[0] + q[0]) / 2)), r3(snap((p[1] + q[1]) / 2))]);
+        this._sel = { cat: "rooms", i: ri, v: k + 1 };
+        this._changed();
+      });
+    });
+    const others = this._plan.rooms.filter((x) => x !== r).flatMap((x) => x.points);
+    r.points.forEach((p, k) => {
+      const [cx, cz] = P(p);
+      el("circle", { cx, cy: cz, r: 8, class: "vtx" + (this._sel.v === k ? " sel" : "") }, svg).addEventListener("pointerdown", (e) => {
+        const base = [...p];
+        this._press(e, { cat: "rooms", i: ri, v: k }, (dx, dz) => {
+          let x = base[0] + dx, z = base[1] + dz;
+          const near = others.find((o) => Math.hypot(o[0] - x, o[1] - z) < 0.15);
+          [x, z] = near || [snap(x), snap(z)];
+          r.points[k] = [r3(Math.max(0, x)), r3(Math.max(0, z))];
+        });
+      });
+    });
+  }
+
+  // a new corner splits edge k; openings further along that wall move to the second half
+  _insertCorner(r, k, pt) {
+    const split = Math.hypot(pt[0] - r.points[k][0], pt[1] - r.points[k][1]);
+    for (const o of this._plan.openings) {
+      if (o.room_id !== r.id) continue;
+      if (o.edge > k) o.edge++;
+      else if (o.edge === k && o.offset > split) { o.edge = k + 1; o.offset = r3(o.offset - split); }
+    }
+    r.points.splice(k + 1, 0, pt);
+  }
+
+  // removing corner k joins edges k-1 and k; their openings stay on the joined wall
+  _removeCorner(r, k) {
+    const n = r.points.length, prev = (k - 1 + n) % n, before = edgeOf(r, prev).L;
+    for (const o of this._plan.openings) {
+      if (o.room_id !== r.id) continue;
+      let e = o.edge;
+      if (e === k) { e = prev; o.offset = r3(o.offset + before); }
+      // indices after the removed corner shift down by one (for corner 0 all of them)
+      o.edge = k === 0 ? e - 1 : e > k ? e - 1 : e;
+    }
+    r.points.splice(k, 1);
+    // the joined wall can be shorter than the two old ones: keep openings on it
+    for (const o of this._plan.openings) {
+      if (o.room_id !== r.id) continue;
+      const L = edgeOf(r, o.edge).L;
+      o.width = Math.min(o.width ?? 0.8, L);
+      o.offset = r3(clamp(o.offset, o.width / 2, L - o.width / 2));
+    }
+  }
+
+  _fillAdd() {
+    const sel = this.shadowRoot.querySelector(".add");
+    const want = this._mode === "rooms" ? "rooms" : "items";
+    if (sel.dataset.for === want) return;
+    sel.dataset.for = want;
+    sel.innerHTML = want === "rooms"
+      ? '<option value="">+ Přidat</option><option value="room">Místnost</option>'
+      : `<option value="">+ Přidat</option>${ADD.map(([l], i) => `<option value="${i}">${l}</option>`).join("")}`;
   }
 
   _drag(g, sel) {
     g.addEventListener("pointerdown", (e) => {
+      const o = this._get(sel), base = [o.x, o.z];
+      this._press(e, sel, (dx, dz) => this._move(sel, base[0] + dx, base[1] + dz));
+    });
+  }
+
+  // select `sel` on press; while the pointer moves, onMove(dx, dz, point) gets the offset in metres
+  _press(e, sel, onMove) {
+    {
       e.stopPropagation();
-      const changedSel = !this._sel || this._sel.cat !== sel.cat || this._sel.i !== sel.i || this._sel.id !== sel.id;
+      const changedSel = JSON.stringify(this._sel) !== JSON.stringify(sel);
       this._sel = sel;
-      const start = this._toPlan(e), o = this._get(sel), base = [o.x, o.z];
+      const start = this._toPlan(e);
       let moved = false;
       const svg = this.shadowRoot.querySelector("svg");
       svg.setPointerCapture(e.pointerId);
@@ -297,11 +440,13 @@ class FnsFloorplanPanel extends HTMLElement {
         const dx = p[0] - start[0], dz = p[1] - start[1];
         if (!moved && Math.hypot(dx, dz) < 0.03) return;
         moved = true;
-        this._move(sel, base[0] + dx, base[1] + dz);
+        this._dragging = true;
+        onMove(dx, dz, p);
         this._dirty = true;
         this._draw();
       };
       const up = () => {
+        this._dragging = false;
         svg.removeEventListener("pointermove", move);
         svg.removeEventListener("pointerup", up);
         svg.removeEventListener("pointercancel", up);
@@ -311,7 +456,7 @@ class FnsFloorplanPanel extends HTMLElement {
       svg.addEventListener("pointermove", move);
       svg.addEventListener("pointerup", up);
       svg.addEventListener("pointercancel", up);
-    });
+    }
   }
 
   _changed() {
@@ -332,6 +477,12 @@ class FnsFloorplanPanel extends HTMLElement {
     this._status();
     const side = this.shadowRoot.querySelector(".side");
     const sel = this._sel, o = this._get();
+    if (!o && this._mode === "rooms") {
+      side.innerHTML = `<h2>Místnosti, okna a dveře</h2><p class="hint">Klepni na místnost: táhnutím ji posuneš celou, za modré body táhneš rohy (přichytí se k rohům sousedních místností), poloprůhledné body mezi rohy přidají nový roh.<br><br>Okno nebo dveře vybereš klepnutím a táhnutím posuneš po stěně. Nové přidáš v panelu vybrané místnosti.<br><br>Místnosti mají každá své stěny: když posuneš společnou stěnu, posuň i sousední místnost.</p>`;
+      return;
+    }
+    if (sel?.cat === "rooms") return this._roomForm(side, o);
+    if (sel?.cat === "openings") return this._openingForm(side, o);
     if (!o) {
       side.innerHTML = `<h2>Úpravy půdorysu</h2><p class="hint">Klepni na světlo, spotřebič, senzor, nábytek nebo jmenovku místnosti a uprav ji. Táhnutím ji přesuneš (mřížka 5 cm), šipky posouvají vybraný prvek, Delete ho smaže.<br><br>Prvky bez entity mají červený přerušovaný okraj.<br><br>Změny se na dashboardu projeví po uložení a obnovení stránky.</p>`;
       return;
@@ -380,6 +531,77 @@ class FnsFloorplanPanel extends HTMLElement {
 
     side.querySelectorAll("[data-k]").forEach((inp) => inp.addEventListener("change", () => this._set(inp.dataset.k, inp.value, inp)));
     side.querySelectorAll("[data-a]").forEach((btn) => btn.addEventListener("click", () => this._action(btn.dataset.a)));
+  }
+
+  _bind(side, set, act) {
+    side.querySelectorAll("[data-k]").forEach((inp) => inp.addEventListener("change", () => set(inp.dataset.k, inp.value, inp)));
+    side.querySelectorAll("[data-a]").forEach((btn) => btn.addEventListener("click", () => act(btn.dataset.a)));
+  }
+
+  _roomForm(side, r) {
+    const v = this._sel.v;
+    const walls = r.points.map((_, k) => { const e = edgeOf(r, k); return `<option value="${k}">Stěna ${k + 1} – ${SIDE(e.u)}, ${e.L.toFixed(2).replace(".", ",")} m</option>`; }).join("");
+    side.innerHTML = `<h2>Místnost</h2>
+      <label>Název</label><input data-k="name" value="${esc(r.name)}">
+      <label>Teplota (entita)</label><input data-k="temperature" value="${esc(r.temperature || "")}" list="ents">
+      <label>Vlhkost (entita)</label><input data-k="humidity" value="${esc(r.humidity || "")}" list="ents">
+      ${v != null ? `<div class="row2"><div><label>Roh ${v + 1}: X (m)</label><input data-k="vx" type="number" step="0.05" value="${r.points[v][0]}"></div><div><label>Z (m)</label><input data-k="vz" type="number" step="0.05" value="${r.points[v][1]}"></div></div>
+        <div class="actions"><button data-a="delv" ${r.points.length <= 3 ? "disabled" : ""}>Smazat roh ${v + 1}</button></div>` : `<p class="hint">Rohů: ${r.points.length}. Klepnutím na roh ho vybereš.</p>`}
+      <label>Přidat na stěnu</label><select data-k="wall">${walls}</select>
+      <div class="actions"><button data-a="adddoor">+ Dveře</button><button data-a="addwin">+ Okno</button></div>
+      ${this._rulesField(r).replace("Pravidla barev", "Pravidla podbarvení (tint)")}
+      <div class="actions"><button data-a="delroom" class="del">Smazat místnost</button></div>`;
+    this._bind(side, (k, val, inp) => {
+      if (k === "wall") return (this._wall = Number(val));
+      if (k === "vx" || k === "vz") r.points[v][k === "vx" ? 0 : 1] = r3(Math.max(0, Number(val)));
+      else if (k === "rules") {
+        if (!val.trim()) delete r.rules;
+        else try { r.rules = JSON.parse(val); } catch { inp.classList.add("bad"); return; }
+      } else r[k] = k === "name" ? val : val || null;
+      this._changed();
+    }, (a) => {
+      if (a === "delv") { this._removeCorner(r, v); this._sel = { cat: "rooms", i: this._sel.i }; }
+      else if (a === "delroom") {
+        if (!confirm(`Smazat místnost ${r.name} i s jejími okny a dveřmi?`)) return;
+        this._plan.openings = this._plan.openings.filter((o) => o.room_id !== r.id);
+        delete this._plan.labels[r.id];
+        this._plan.rooms.splice(this._sel.i, 1);
+        this._sel = null;
+      } else {
+        const k = clamp(this._wall ?? 0, 0, r.points.length - 1), e = edgeOf(r, k), win = a === "addwin";
+        const width = Math.min(win ? 1.2 : 0.8, e.L);
+        this._plan.openings.push({ id: uid(win ? "w" : "d"), room_id: r.id, edge: k, offset: r3(snap(e.L / 2)), width,
+          type: win ? "window" : "door", style: win ? null : "interior", hinge: "left", swing: "in", contact: null });
+        this._sel = { cat: "openings", i: this._plan.openings.length - 1 };
+      }
+      this._changed();
+    });
+    const wall = side.querySelector('[data-k="wall"]');
+    wall.value = String(clamp(this._wall ?? 0, 0, r.points.length - 1));
+  }
+
+  _openingForm(side, o) {
+    const r = this._plan.rooms.find((x) => x.id === o.room_id), L = r ? edgeOf(r, o.edge).L : 0;
+    const win = o.type === "window";
+    const opt = (k, val, cur) => `<option value="${k}" ${k === cur ? "selected" : ""}>${val}</option>`;
+    side.innerHTML = `<h2>${win ? "Okno" : "Dveře"}</h2><p class="hint">${esc(r?.name || "")}, stěna ${o.edge + 1} (${L.toFixed(2).replace(".", ",")} m). Táhnutím ho posuneš po stěně.</p>
+      <label>Druh</label><select data-k="type">${opt("door", "Dveře", o.type)}${opt("window", "Okno", o.type)}</select>
+      ${win ? "" : `<label>Provedení</label><select data-k="style">${Object.entries(DOOR_STYLES).map(([k, val]) => opt(k, val, o.style || "interior")).join("")}</select>`}
+      <div class="row2"><div><label>Šířka (m)</label><input data-k="width" type="number" step="0.05" value="${o.width}"></div><div><label>Od začátku stěny (m)</label><input data-k="offset" type="number" step="0.05" value="${o.offset}"></div></div>
+      ${o.style === "passage" ? "" : `<div class="row2"><div><label>Panty (z místnosti)</label><select data-k="hinge">${opt("left", "Vlevo", o.hinge || "left")}${opt("right", "Vpravo", o.hinge)}</select></div>
+        <div><label>Otevírá se</label><select data-k="swing">${opt("in", "Dovnitř", o.swing || "in")}${opt("out", "Ven", o.swing)}</select></div></div>
+      <label>Kontakt (binary_sensor, bez něj se ${win ? "okno" : "dveře"} neotevírá${win ? "" : "jí"})</label><input data-k="contact" value="${esc(o.contact || "")}" list="ents">`}
+      <div class="actions"><button data-a="del" class="del">Smazat</button></div>`;
+    this._bind(side, (k, val) => {
+      if (k === "width" || k === "offset") o[k] = r3(Math.max(0.1, Number(val)));
+      else if (k === "type") { o.type = val; o.style = val === "window" ? null : o.style || "interior"; }
+      else o[k] = val || null;
+      if (L) { o.width = Math.min(o.width, L); o.offset = r3(clamp(o.offset, o.width / 2, L - o.width / 2)); }
+      this._changed();
+    }, (a) => {
+      if (a === "del") { this._plan.openings.splice(this._sel.i, 1); this._sel = null; }
+      this._changed();
+    });
   }
 
   _rulesField(o) {
@@ -431,6 +653,28 @@ class FnsFloorplanPanel extends HTMLElement {
     if (!this._sel || !this.isConnected) return;
     if (e.composedPath().some((n) => n.tagName === "INPUT" || n.tagName === "TEXTAREA" || n.tagName === "SELECT")) return;
     const step = { ArrowLeft: [-SNAP, 0], ArrowRight: [SNAP, 0], ArrowUp: [0, -SNAP], ArrowDown: [0, SNAP] }[e.key];
+    if (this._sel.cat === "rooms" || this._sel.cat === "openings") {
+      if (e.key === "Delete" || e.key === "Backspace") {
+        e.preventDefault();
+        if (this._sel.cat === "openings") { this._plan.openings.splice(this._sel.i, 1); this._sel = null; }
+        else if (this._sel.v != null && this._plan.rooms[this._sel.i].points.length > 3) {
+          this._removeCorner(this._plan.rooms[this._sel.i], this._sel.v);
+          this._sel = { cat: "rooms", i: this._sel.i };
+        } else return;
+        return this._changed();
+      }
+      if (!step) return;
+      e.preventDefault();
+      if (this._sel.cat === "rooms") {
+        const r = this._plan.rooms[this._sel.i];
+        const pts = this._sel.v != null ? [r.points[this._sel.v]] : r.points;
+        for (const p of pts) { p[0] = r3(Math.max(0, p[0] + step[0])); p[1] = r3(Math.max(0, p[1] + step[1])); }
+      } else {
+        const o = this._plan.openings[this._sel.i], r = this._plan.rooms.find((x) => x.id === o.room_id), ed = edgeOf(r, o.edge);
+        o.offset = r3(clamp(o.offset + step[0] * ed.u[0] + step[1] * ed.u[1], o.width / 2, ed.L - o.width / 2));
+      }
+      return this._changed();
+    }
     if (step) {
       e.preventDefault();
       const o = this._get();

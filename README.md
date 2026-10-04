@@ -15,7 +15,7 @@ rotate: auto       # auto | true | false — narrow cards turn a wide plan by 90
 ```
 
 ## Editing
-The integration adds a **Půdorys** (floor plan) panel to the sidebar for admins. Drag lights, LED strips, appliances, sensors, furniture and room labels; select one to set its entity, size, rotation and colour rules; add, duplicate or delete items and save. Rooms, walls, windows and doors are not editable there yet.
+The integration adds a **Půdorys** (floor plan) panel to the sidebar for admins. Drag lights, LED strips, appliances, sensors, furniture and room labels; select one to set its entity, size, rotation and colour rules; add, duplicate or delete items and save. In the **Místnosti** (rooms) mode drag room corners (they snap to neighbouring corners), add or remove corners, move whole rooms, and add, slide and configure windows and doors.
 
 ## The plan
 The plan lives in the integration's storage and is saved over the websocket API:
