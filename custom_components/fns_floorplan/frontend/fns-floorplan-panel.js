@@ -16,12 +16,12 @@ const LIGHT_TYPES = { lamp_ceiling: "Stropní světlo", lamp_pendant: "Závěsn�
 const DEVICE_KINDS = {
   fan: "Větrák", purifier: "Čistička", dishwasher: "Myčka", dryer: "Sušička", boiler: "Kotel", radiator: "Radiátor",
   alarm: "Alarm (zabezpečení)", media: "TV / přehrávač", aquarium: "Akvárium (filtrace)", camera: "Kamera", fridge: "Lednice",
-  fireplace: "Krb", generic: "Jiné zařízení (ikona entity)",
+  fireplace: "Krb", lock: "Zámek", generic: "Jiné zařízení (ikona entity)",
 };
 const DEVICE_ICON = {
   fan: "mdiFan", purifier: "mdiAirPurifier", dishwasher: "mdiDishwasher", dryer: "mdiTumbleDryer", boiler: "mdiWaterBoiler",
   radiator: "mdiRadiator", alarm: "mdiShieldOutline", media: "mdiCastVariant", generic: "mdiShapeOutline",
-  aquarium: "mdiFishbowlOutline", camera: "mdiCctv", fridge: "mdiFridgeOutline", fireplace: "mdiFireplace",
+  aquarium: "mdiFishbowlOutline", camera: "mdiCctv", fridge: "mdiFridgeOutline", fireplace: "mdiFireplace", lock: "mdiLock",
 };
 const SIZE_NAMES = { xs: "XS", s: "S", "": "M (výchozí)", l: "L", xl: "XL", xxl: "XXL" };
 const COLOR_NAMES = { red: "Červená", orange: "Oranžová", yellow: "Žlutá", green: "Zelená", blue: "Modrá", purple: "Fialová", pink: "Růžová", white: "Bílá", black: "Černá" };
@@ -42,6 +42,7 @@ const ADD = [
   ["Alarm", () => ({ cat: "devices", item: { kind: "alarm", name: "", entity: "" } })],
   ["TV / přehrávač", () => ({ cat: "devices", item: { kind: "media", name: "", entity: "" } })],
   ["Kamera", () => ({ cat: "devices", item: { kind: "camera", name: "", entity: "" } })],
+  ["Zámek", () => ({ cat: "devices", item: { kind: "lock", name: "", entity: "" } })],
   ["Jiné zařízení", () => ({ cat: "devices", item: { kind: "generic", name: "", entity: "" } })],
   ["Text (stav entity)", () => ({ cat: "texts", item: { entity: "" } })],
   ["Senzor (pohyb, voda)", () => ({ cat: "sensors", item: { entity: "" } })],
@@ -139,6 +140,7 @@ svg { width: 100%; height: 100%; display: block; touch-action: none; user-select
 .flip circle { fill: var(--primary-color, #03a9f4); stroke: #fff; stroke-width: 2; }
 .flip text { fill: #fff; font-size: 13px; font-weight: 700; pointer-events: none; }
 .blind { stroke: var(--secondary-text-color, #727272); stroke-width: 4; stroke-dasharray: 5 3; pointer-events: none; }
+.door-lock { pointer-events: none; }
 .rsz { fill: #fff; stroke: var(--primary-color, #03a9f4); stroke-width: 2; cursor: nwse-resize; }
 .rot-line { stroke: var(--primary-color, #03a9f4); stroke-width: 1.5; stroke-dasharray: 3 2; pointer-events: none; }
 .rot-h { fill: var(--primary-color, #03a9f4); stroke: #fff; stroke-width: 2; cursor: grab; }
@@ -514,6 +516,15 @@ class FnsFloorplanPanel extends HTMLElement {
         let n = [-u[1], u[0]];
         if ((c[0] - m[0]) * n[0] + (c[1] - m[1]) * n[1] < 0) n = [-n[0], -n[1]];
         el("line", { x1: A[0] + n[0] * 8, y1: A[1] + n[1] * 8, x2: B[0] + n[0] * 8, y2: B[1] + n[1] * 8, class: "blind" }, svg);
+      }
+      if (o.lock) {
+        const c = centroid(r.points), m = [a[0] + u[0] * o.offset, a[1] + u[1] * o.offset];
+        let n = [-u[1], u[0]];
+        if ((c[0] - m[0]) * n[0] + (c[1] - m[1]) * n[1] < 0) n = [-n[0], -n[1]];
+        const [lx, lz] = P([m[0] + n[0] * 0.3, m[1] + n[1] * 0.3]);
+        const g = el("g", { transform: `translate(${lx} ${lz})`, class: "door-lock" }, svg);
+        el("circle", { r: 9, class: "dev" }, g);
+        el("g", { class: "ico" }, g).innerHTML = iconHtml(null, 12, "mdiLock");
       }
       if (selected) el("line", { x1: A[0], y1: A[1], x2: B[0], y2: B[1], class: "open-sel" }, svg);
       // dragging slides the opening along its wall
@@ -1214,6 +1225,7 @@ class FnsFloorplanPanel extends HTMLElement {
         <div><label>Otevírá se</label><select data-k="swing">${opt("in", "Dovnitř", o.swing || "in")}${opt("out", "Ven", o.swing)}</select></div></div>
       <label>Kontakt (binary_sensor; ${win || o.style === "glass" ? "bez něj zůstane zavřené" : "dveře bez něj jsou pootevřené na 45°"})</label><input data-k="contact" value="${esc(o.contact || "")}" list="ents">
       <label>Roleta (cover, nepovinné)</label><input data-k="blind" value="${esc(o.blind || "")}" list="ents">
+      ${win ? "" : `<label>Zámek (lock, nepovinné; klepnutí na odznak otevře jeho detail)</label><input data-k="lock" value="${esc(o.lock || "")}" list="ents">`}
       ${this._actionsUI(o, { tap: o.blind ? "Detail rolety" : o.contact ? "Detail kontaktu" : "" })}`}
       <div class="actions"><button data-a="del" class="del">Smazat</button></div>`;
     this._bind(side, async (k, val, inp) => {
