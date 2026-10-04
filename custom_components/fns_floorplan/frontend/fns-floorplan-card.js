@@ -179,9 +179,26 @@ function runAction(card, a, entity) {
     window.dispatchEvent(new CustomEvent("location-changed", { detail: { replace: false } }));
   } else if (a.action === "url" && a.url_path) window.open(a.url_path, "_blank", "noopener");
 }
+// what an action does, for the hover title
+const ACTION_TEXT = { toggle: "přepnout", "more-info": "detail", "perform-action": "akce", "call-service": "akce", navigate: "otevřít stránku", url: "otevřít odkaz" };
+const actionText = (a) => {
+  const t = ACTION_TEXT[a?.action];
+  if (!t) return "";
+  if (t === "akce") return `akce ${a.perform_action || a.service || ""}`.trim();
+  return a.action === "navigate" && a.navigation_path ? `${t} ${a.navigation_path}` : t;
+};
 // a tap waits for a possible second tap only when the item has a double tap action
 function bindActions(card, node, item, defaults, entity = item.entity) {
   const pick = (k) => item[k + "_action"] || defaults[k];
+  // hover title: the entity's name and what tap, double tap and hold do
+  const parts = [["klepnutí", "tap"], ["dvojklik", "double_tap"], ["podržení", "hold"]]
+    .map(([label, k]) => [label, actionText(pick(k))]).filter(([, t]) => t).map(([label, t]) => `${label}: ${t}`);
+  const name = item.name || card._hass?.states[entity]?.attributes.friendly_name || entity || "";
+  if (name || parts.length) {
+    const title = document.createElementNS(NS, "title");
+    title.textContent = [name, parts.join(" · ")].filter(Boolean).join(" – ");
+    node.prepend(title);
+  }
   let timer = 0, held = false, tapTimer = 0;
   node.addEventListener("pointerdown", () => {
     held = false;
@@ -245,6 +262,8 @@ svg.plan { width: 100%; height: 100%; display: block; }
 .blind { stroke: var(--muted); stroke-width: 4; stroke-linecap: butt; pointer-events: none; transition: stroke-opacity .6s; }
 .blind.open { stroke-dasharray: 2 4; stroke-width: 2; }
 .blind.moving { stroke: var(--accent); stroke-dasharray: 6 4; animation: blindMove .8s linear infinite; }
+.strip { pointer-events: none; }
+.strip-hit { stroke: transparent; stroke-width: 16; stroke-linecap: round; cursor: pointer; }
 .open-hit { stroke: transparent; stroke-width: 16; cursor: pointer; }
 .furn { fill: rgba(139,147,255,.05); stroke: rgba(139,147,255,.28); stroke-width: 1; pointer-events: none; }
 .app[data-mode="day"] .furn { fill: rgba(63,70,200,.04); stroke: rgba(63,70,200,.25); }
@@ -673,8 +692,10 @@ function buildView(card, plan) {
     for (const f of list.filter((f) => f.type === "led_strip")) {
       const [cx, cz] = P([f.x, f.z]);
       const a = ((f.rotation || 0) * Math.PI) / 180, h = (f.w * S) / 2;
-      const ln = el("line", { x1: cx - Math.cos(a) * h, y1: cz - Math.sin(a) * h, x2: cx + Math.cos(a) * h, y2: cz + Math.sin(a) * h, class: "strip lamp", "data-layer": f.layer || 0 }, gLamps);
-      bindActions(card, ln, f, TOGGLE, id);
+      const ends = { x1: cx - Math.cos(a) * h, y1: cz - Math.sin(a) * h, x2: cx + Math.cos(a) * h, y2: cz + Math.sin(a) * h };
+      const ln = el("line", { ...ends, class: "strip lamp", "data-layer": f.layer || 0 }, gLamps);
+      // the strip is a thin line: a wide invisible one on top takes the taps
+      bindActions(card, el("line", { ...ends, class: "strip-hit" }, gHits), f, TOGGLE, id);
       lampNodes.push({ id, node: ln, strip: true, f, room: roomAt(f.x, f.z), rules: f.rules });
     }
     const byRoom = new Map();
