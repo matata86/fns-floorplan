@@ -33,8 +33,7 @@ const isPoint = (f) => (isLight(f) && f.type !== "led_strip") || f.type === "rob
 // what "+" can add: [label, factory]
 // the add menu stays short: the light type and the device kind are picked in the item's form
 const ADD = [
-  ["Světlo (typ zvolíš v detailu)", () => ({ cat: "furniture", item: { type: "lamp_ceiling", w: 0.3, d: 0.3, rotation: 0, entity: "" } })],
-  ["LED pásek", () => ({ cat: "furniture", item: { type: "led_strip", w: 1, d: 0.04, rotation: 0, entity: "" } })],
+  ["Světlo (stropní, lampička, bodové, LED pásek…)", () => ({ cat: "furniture", item: { type: "lamp_ceiling", w: 0.3, d: 0.3, rotation: 0, entity: "" } })],
   ["Zařízení (spotřebič, TV, alarm, zámek, kamera…)", () => ({ cat: "devices", item: { kind: "generic", name: "", entity: "" } })],
   ["Senzor (pohyb, voda)", () => ({ cat: "sensors", item: { entity: "" } })],
   ["Nábytek", () => ({ cat: "furniture", item: { type: "table", w: 1, d: 0.6, rotation: 0 } })],
@@ -1442,6 +1441,7 @@ class FnsFloorplanPanel extends HTMLElement {
       else if (key === "rotation") t.rotation = ((Number(value) % 360) + 360) % 360;
       else if (key === "cover") { if (value) delete t.cover; else t.cover = false; }
       else if (key === "glow_side") { if (value) t.glow_side = Number(value); else delete t.glow_side; }
+      else if (key === "type" && value === "led_strip" && !(t.w >= 0.5)) Object.assign(t, { type: value, w: 1, d: 0.04 }); // a lamp turned into a strip gets a usable length
       else if (key === "beam") { if (value === "") delete t.beam; else t.beam = Math.min(180, Math.max(5, Number(value))); }
       else if (key === "sheet_hide") { if (value) t.sheet_hide = true; else delete t.sheet_hide; }
       else if (key === "room_light") { if (value === "") delete t.room_light; else t.room_light = Math.max(0, Number(value)) / 100; }
