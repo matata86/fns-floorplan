@@ -842,7 +842,7 @@ class FnsFloorplanPanel extends HTMLElement {
       let bases = null;
       this._press(e, sel, (dx, dz) => {
         // a dragged member of the multi-selection moves all of it by the same snapped offset
-        bases ??= (this._multi?.some((m) => selEq(m, sel)) ? this._multi : [sel]).map((s) => [s, this._get(s)]);
+        bases ??= (this._multi?.some((m) => selEq(m, sel)) ? this._multi : [sel]).map((s) => { const o = this._get(s); return [s, { x: o.x, z: o.z }]; }); // start positions, not the live objects
         if (bases.length === 1) return this._move(sel, bases[0][1].x + dx, bases[0][1].z + dz);
         const sx = snap(dx), sz = snap(dz);
         for (const [s, o] of bases) {
