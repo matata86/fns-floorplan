@@ -20,6 +20,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.dispatcher import async_dispatcher_connect, async_dispatcher_send
 from homeassistant.helpers.storage import Store
+from homeassistant.util import yaml as yaml_util
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -66,6 +67,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     websocket_api.async_register_command(hass, ws_plan_get)
     websocket_api.async_register_command(hass, ws_plan_save)
     websocket_api.async_register_command(hass, ws_plan_subscribe)
+    websocket_api.async_register_command(hass, ws_yaml_parse)
+    websocket_api.async_register_command(hass, ws_yaml_dump)
     return True
 
 
@@ -128,3 +131,27 @@ async def ws_plan_save(hass: HomeAssistant, connection: websocket_api.ActiveConn
     await data[DATA_STORE].async_save(plan)
     async_dispatcher_send(hass, SIGNAL_PLAN, plan)
     connection.send_result(msg["id"], {"ok": True, "rev": plan["rev"]})
+
+
+# the editor shows rules and action data as YAML; HA's own loader and dumper do the conversion
+
+
+@websocket_api.websocket_command({vol.Required("type"): f"{DOMAIN}/yaml/parse", vol.Required("text"): str})
+@websocket_api.require_admin
+@callback
+def ws_yaml_parse(hass: HomeAssistant, connection: websocket_api.ActiveConnection, msg: dict) -> None:
+    """Parse YAML typed in the editor."""
+    try:
+        data = yaml_util.parse_yaml(msg["text"])
+    except Exception as err:  # noqa: BLE001 - any parse error goes back to the editor
+        connection.send_error(msg["id"], "invalid_yaml", str(err))
+        return
+    connection.send_result(msg["id"], {"data": json.loads(json.dumps(data))})
+
+
+@websocket_api.websocket_command({vol.Required("type"): f"{DOMAIN}/yaml/dump", vol.Required("data"): vol.Any(dict, list)})
+@websocket_api.require_admin
+@callback
+def ws_yaml_dump(hass: HomeAssistant, connection: websocket_api.ActiveConnection, msg: dict) -> None:
+    """Turn plan data into YAML for the editor."""
+    connection.send_result(msg["id"], {"text": yaml_util.dump(msg["data"])})
