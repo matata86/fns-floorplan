@@ -683,7 +683,7 @@ function buildView(card, plan) {
     f.node = el("rect", { x: -w / 2, y: -d / 2, width: w, height: d, rx: Math.min(6, d / 4), class: "furn" }, g);
     // the icon stays upright and is left out where it would not fit
     const size = Math.min(w, d) * 0.6;
-    if (size >= 9 && f.icon !== "none") el("g", { class: "ficon", transform: `rotate(${-(f.rotation || 0)})` }, g).innerHTML =
+    if (size >= 9 && f.icon !== "none") el("g", { class: "ficon" }, g).innerHTML =
       iconHtml(f.icon, Math.min(size, 26), FURNITURE[f.type]?.[1] || "mdiShapeOutline");
     if (f.entity || hasActions(f)) { g.classList.add("act"); bindActions(card, g, f, INFO); }
   }

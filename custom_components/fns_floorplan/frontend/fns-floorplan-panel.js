@@ -643,7 +643,7 @@ class FnsFloorplanPanel extends HTMLElement {
       } else {
         paint(el("rect", { x: -w / 2, y: -d / 2, width: Math.max(w, 2), height: Math.max(d, 2), rx: 3, class: "furn" }, g), res, true);
         const size = Math.min(w, d) * 0.6;
-        if (size >= 9 && f.icon !== "none") el("g", { transform: `rotate(${-(f.rotation || 0)})` }, g).innerHTML = `<g class="ico furn-ico">${iconHtml(f.icon, Math.min(size, 26), FURNITURE[f.type]?.[1] || "mdiShapeOutline")}</g>`;
+        if (size >= 9 && f.icon !== "none") el("g", {}, g).innerHTML = `<g class="ico furn-ico">${iconHtml(f.icon, Math.min(size, 26), FURNITURE[f.type]?.[1] || "mdiShapeOutline")}</g>`;
       }
     }
     for (const members of groups.values()) {
