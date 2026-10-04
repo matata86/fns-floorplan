@@ -688,7 +688,7 @@ function buildView(card, plan) {
     if (f.entity || hasActions(f)) { g.classList.add("act"); bindActions(card, g, f, INFO); }
   }
   sortLayer(gFurn);
-  const ruledFurniture = furniture.filter((f) => f.rules && f.g);
+  const ruledFurniture = furniture.filter((f) => (f.rules || f.color) && f.g);
 
   // openings: doors and windows with a contact swing open and shut (angle eased every frame)
   const swingers = [], blinds = [];
@@ -957,9 +957,10 @@ function buildView(card, plan) {
       f.g.toggleAttribute("hidden", !!res.hide);
       swapIcon(f.g.querySelector(".ficon path"), res.icon);
       if (!f.node) continue;
-      f.node.classList.toggle("ruled", !!res.color);
-      f.node.classList.toggle("glow", !!(res.color && res.glow));
-      f.node.style.setProperty("--furn", res.color ? color(res.color) : "");
+      const fc = res.color || f.color; // a rule, else the item's own colour
+      f.node.classList.toggle("ruled", !!fc);
+      f.node.classList.toggle("glow", !!(fc && res.glow));
+      f.node.style.setProperty("--furn", fc ? color(fc) : "");
     }
   }
 

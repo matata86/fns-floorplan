@@ -641,7 +641,7 @@ class FnsFloorplanPanel extends HTMLElement {
         el("circle", { r: 12, class: "dev" }, g);
         icon(g, f, 16, "mdiRobotVacuum");
       } else {
-        paint(el("rect", { x: -w / 2, y: -d / 2, width: Math.max(w, 2), height: Math.max(d, 2), rx: 3, class: "furn" }, g), res, true);
+        paint(el("rect", { x: -w / 2, y: -d / 2, width: Math.max(w, 2), height: Math.max(d, 2), rx: 3, class: "furn" }, g), { ...res, color: res.color || f.color }, true);
         const size = Math.min(w, d) * 0.6;
         if (size >= 9 && f.icon !== "none") el("g", {}, g).innerHTML = `<g class="ico furn-ico">${iconHtml(f.icon, Math.min(size, 26), FURNITURE[f.type]?.[1] || "mdiShapeOutline")}</g>`;
       }
@@ -1016,6 +1016,7 @@ class FnsFloorplanPanel extends HTMLElement {
         ${light ? `<label class="chk"><input type="checkbox" data-k="sheet_hide" ${o.sheet_hide ? "checked" : ""}> nezobrazovat v panelu místnosti</label>` : ""}
         ${xz}
         ${point ? "" : o.type === "led_strip" ? num("Délka (m)", "w", o.w) : `<div class="row2"><div>${num("Šířka (m)", "w", o.w)}</div><div>${num("Hloubka (m)", "d", o.d)}</div></div>`}
+        ${point || light ? "" : `<label>Barva</label>${this._colorPick("color", o.color)}`}
         ${point ? "" : rotation}
         ${o.type === "led_strip" ? "" : this._iconField(o, light ? lightIcon(o.type) : FURNITURE[o.type]?.[1])}
         ${point ? this._sizeField(o) : ""}
