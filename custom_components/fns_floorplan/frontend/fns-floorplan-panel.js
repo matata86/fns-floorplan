@@ -782,8 +782,10 @@ class FnsFloorplanPanel extends HTMLElement {
       svg.setPointerCapture(e.pointerId);
       const move = (ev) => {
         const p = this._toPlan(ev);
-        const dx = p[0] - start[0], dz = p[1] - start[1];
+        let dx = p[0] - start[0], dz = p[1] - start[1];
         if (!moved && Math.hypot(dx, dz) < 0.03) return;
+        // Ctrl held: only along the axis the pointer moved more
+        if (ev.ctrlKey || ev.metaKey) { if (Math.abs(dx) > Math.abs(dz)) dz = 0; else dx = 0; }
         moved = true;
         this._dragging = true;
         onMove(dx, dz, p);
@@ -859,7 +861,7 @@ class FnsFloorplanPanel extends HTMLElement {
     if (sel?.cat === "rooms") return this._roomForm(side, o);
     if (sel?.cat === "openings") return this._openingForm(side, o);
     if (!o) {
-      side.innerHTML = `<h2>Úpravy půdorysu</h2><p class="hint">Klepni na světlo, spotřebič, senzor, text, nábytek nebo badge místnosti a uprav ho. Táhnutím ji přesuneš (mřížka 5 cm), šipky posouvají vybraný prvek, Delete ho smaže. Vybraný nábytek má úchyty na změnu velikosti a kolečko na otáčení.<br><br>Prvky bez entity mají červený přerušovaný okraj, prvky skryté pravidlem jsou bledé.<br><br>Změny se na dashboardu projeví hned po uložení.</p>`;
+      side.innerHTML = `<h2>Úpravy půdorysu</h2><p class="hint">Klepni na světlo, spotřebič, senzor, text, nábytek nebo badge místnosti a uprav ho. Táhnutím ji přesuneš (mřížka 5 cm, s Ctrl jen v jedné ose), šipky posouvají vybraný prvek, Delete ho smaže. Vybraný nábytek má úchyty na změnu velikosti a kolečko na otáčení.<br><br>Prvky bez entity mají červený přerušovaný okraj, prvky skryté pravidlem jsou bledé.<br><br>Změny se na dashboardu projeví hned po uložení.</p>`;
       return;
     }
     const field = (label, key, value, type = "text", extra = "") =>
