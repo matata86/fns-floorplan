@@ -14,12 +14,17 @@ mode: auto         # auto (follows sun.sun) | day | night
 rotate: auto       # auto | true | false — narrow cards turn a wide plan by 90°
 ```
 
+## Editing
+The integration adds a **Půdorys** (floor plan) panel to the sidebar for admins. Drag lights, LED strips, appliances, sensors, furniture and room labels; select one to set its entity, size, rotation and colour rules; add, duplicate or delete items and save. Rooms, walls, windows and doors are not editable there yet.
+
 ## The plan
 The plan lives in the integration's storage and is saved over the websocket API:
 
 ```json
-{"type": "fns_floorplan/plan/save", "plan": { ... }}
+{"type": "fns_floorplan/plan/save", "plan": { ... }, "rev": 3}
 ```
+
+With `rev` the save only succeeds when it matches the stored revision (otherwise error `conflict`); every save increments it.
 
 Coordinates are metres, `x` to the right and `z` down.
 

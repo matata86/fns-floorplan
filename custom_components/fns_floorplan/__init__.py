@@ -1,7 +1,8 @@
 """FNS Floorplan: an animated 2D floor plan card that shows the home's live state.
 
 The plan (rooms, openings, furniture, lights, devices) is kept in the integration's
-own storage and read by the card over the websocket API.
+own storage, read by the card over the websocket API and edited in the sidebar
+panel "Půdorys".
 """
 
 from __future__ import annotations
@@ -12,7 +13,7 @@ import os
 
 import voluptuous as vol
 
-from homeassistant.components import websocket_api
+from homeassistant.components import frontend, panel_custom, websocket_api
 from homeassistant.components.frontend import add_extra_js_url
 from homeassistant.components.http import StaticPathConfig
 from homeassistant.config_entries import ConfigEntry
@@ -24,6 +25,8 @@ _LOGGER = logging.getLogger(__name__)
 DOMAIN = "fns_floorplan"
 STORAGE_VERSION = 1
 CARD_URL = "/fns_floorplan/fns-floorplan-card.js"
+PANEL_URL = "/fns_floorplan/fns-floorplan-panel.js"
+PANEL_PATH = "fns-floorplan"
 DATA_STORE = "store"
 DATA_PLAN = "plan"
 
@@ -35,13 +38,28 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     hass.data[DOMAIN] = {DATA_STORE: store, DATA_PLAN: plan}
 
     manifest = await hass.async_add_executor_job(_read_manifest)
-    path = os.path.join(os.path.dirname(__file__), "frontend", "fns-floorplan-card.js")
+    version = manifest.get("version", "0")
+    base = os.path.join(os.path.dirname(__file__), "frontend")
     try:
-        await hass.http.async_register_static_paths([StaticPathConfig(CARD_URL, path, True)])
+        await hass.http.async_register_static_paths(
+            [
+                StaticPathConfig(CARD_URL, os.path.join(base, "fns-floorplan-card.js"), True),
+                StaticPathConfig(PANEL_URL, os.path.join(base, "fns-floorplan-panel.js"), True),
+            ]
+        )
+        # the version in the query drops the browser cache whenever the integration updates
+        add_extra_js_url(hass, f"{CARD_URL}?v={version}")
     except RuntimeError:  # already registered after a reload of the entry
         pass
-    # the version in the query drops the browser cache whenever the integration updates
-    add_extra_js_url(hass, f"{CARD_URL}?v={manifest.get('version', '0')}")
+    await panel_custom.async_register_panel(
+        hass,
+        frontend_url_path=PANEL_PATH,
+        webcomponent_name="fns-floorplan-panel",
+        sidebar_title="Půdorys",
+        sidebar_icon="mdi:floor-plan",
+        module_url=f"{PANEL_URL}?v={version}",
+        require_admin=True,
+    )
 
     websocket_api.async_register_command(hass, ws_plan_get)
     websocket_api.async_register_command(hass, ws_plan_save)
@@ -49,7 +67,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    """Nothing to tear down: the card's static path and commands live until restart."""
+    """Remove the sidebar panel; static paths and commands live until restart."""
+    frontend.async_remove_panel(hass, PANEL_PATH)
     return True
 
 
@@ -67,7 +86,11 @@ def ws_plan_get(hass: HomeAssistant, connection: websocket_api.ActiveConnection,
 
 
 @websocket_api.websocket_command(
-    {vol.Required("type"): f"{DOMAIN}/plan/save", vol.Required("plan"): dict}
+    {
+        vol.Required("type"): f"{DOMAIN}/plan/save",
+        vol.Required("plan"): dict,
+        vol.Optional("rev"): int,
+    }
 )
 @websocket_api.require_admin
 @websocket_api.async_response
@@ -77,6 +100,12 @@ async def ws_plan_save(hass: HomeAssistant, connection: websocket_api.ActiveConn
     if not data:
         connection.send_error(msg["id"], "not_loaded", "FNS Floorplan is not set up")
         return
-    data[DATA_PLAN] = msg["plan"]
-    await data[DATA_STORE].async_save(msg["plan"])
-    connection.send_result(msg["id"], {"ok": True})
+    # the editor sends the revision it loaded; a newer plan saved meanwhile is not overwritten
+    current = data[DATA_PLAN].get("rev", 0)
+    if "rev" in msg and msg["rev"] != current:
+        connection.send_error(msg["id"], "conflict", f"The plan changed meanwhile (revision {current})")
+        return
+    plan = {**msg["plan"], "rev": current + 1}
+    data[DATA_PLAN] = plan
+    await data[DATA_STORE].async_save(plan)
+    connection.send_result(msg["id"], {"ok": True, "rev": plan["rev"]})

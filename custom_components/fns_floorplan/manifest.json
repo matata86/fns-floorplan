@@ -3,11 +3,11 @@
   "name": "FNS Floorplan",
   "codeowners": ["@matata86"],
   "config_flow": true,
-  "dependencies": ["frontend", "http", "websocket_api"],
+  "dependencies": ["frontend", "http", "panel_custom", "websocket_api"],
   "documentation": "https://github.com/matata86/fns-floorplan",
   "integration_type": "service",
   "iot_class": "local_push",
   "issue_tracker": "https://github.com/matata86/fns-floorplan/issues",
   "single_config_entry": true,
-  "version": "0.2.2"
+  "version": "0.3.1"
 }
