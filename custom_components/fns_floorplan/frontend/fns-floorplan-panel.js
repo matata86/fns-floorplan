@@ -1008,11 +1008,8 @@ class FnsFloorplanPanel extends HTMLElement {
         ${sel.g ? `<p class="hint">Svítidla jednoho světla v jedné místnosti jsou na kartě jeden prvek. Táhnutím posuneš všechna, změny platí pro všechna.</p>` : ""}
         <label>Typ</label><select data-k="type">${types.map((t) => `<option value="${t}" ${t === o.type ? "selected" : ""}>${esc(label(t))}</option>`).join("")}</select>
         ${field(light ? "Entita (světlo nebo spínač)" : o.type === "tv_wall" ? "Entita (media_player)" : dock ? "Entita (vacuum)" : "Entita (nepovinná, klepnutí otevře její detail)", "entity", o.entity || "", "text", 'list="ents"')}
-        ${light ? `<label>Osvětlení místnosti</label><select data-k="room_light">
-          <option value="" ${o.room_light == null ? "selected" : ""}>Výchozí</option>
-          <option value="false" ${o.room_light === false ? "selected" : ""}>Jen slabě (akvárium, dekorace)</option>
-          ${[0.3, 0.5, 0.75, 1.25, 1.5, 2].map((v) => `<option value="${v}" ${o.room_light === v ? "selected" : ""}>${Math.round(v * 100)} %</option>`).join("")}
-        </select>` : ""}
+        ${light ? `<label>Osvětlení místnosti (%, prázdné = výchozí 100, LED pásek 45; 15 = jen slabě)</label><input data-k="room_light" type="number" min="0" step="5" placeholder="100"
+          value="${o.room_light === false ? 15 : typeof o.room_light === "number" ? Math.round(o.room_light * 100) : ""}">` : ""}
         ${light ? `<label class="chk"><input type="checkbox" data-k="sheet_hide" ${o.sheet_hide ? "checked" : ""}> nezobrazovat v panelu místnosti</label>` : ""}
         ${xz}
         ${point ? "" : o.type === "led_strip" ? num("Délka (m)", "w", o.w) : `<div class="row2"><div>${num("Šířka (m)", "w", o.w)}</div><div>${num("Hloubka (m)", "d", o.d)}</div></div>`}
@@ -1440,7 +1437,7 @@ class FnsFloorplanPanel extends HTMLElement {
       else if (key === "rotation") t.rotation = ((Number(value) % 360) + 360) % 360;
       else if (key === "cover") { if (value) delete t.cover; else t.cover = false; }
       else if (key === "sheet_hide") { if (value) t.sheet_hide = true; else delete t.sheet_hide; }
-      else if (key === "room_light") { if (value === "") delete t.room_light; else t.room_light = value === "false" ? false : Number(value); }
+      else if (key === "room_light") { if (value === "") delete t.room_light; else t.room_light = Math.max(0, Number(value)) / 100; }
       else if (key === "color" || key === "color_on" || key === "background") {
         const v = value === "custom" ? inp.nextElementSibling.value : value;
         if (v) t[key] = v; else delete t[key];
