@@ -17,7 +17,7 @@ rotate: auto       # auto | true | false — narrow cards turn a wide plan by 90
 ## Editing
 The integration adds a **Půdorys** (floor plan) panel to the sidebar for admins. Drag lights, LED strips, appliances, sensors, text items, furniture and room labels; select one to set its entity, icon, size, stacking order, tap / double tap / hold actions and rules (a form, or YAML); resize and rotate furniture with handles; add, duplicate or delete items and save. Fixtures of one light in one room are edited as one item. In the **Místnosti** (rooms) mode drag room corners (they snap to neighbouring corners), add or remove corners, move whole rooms, and add, slide and configure windows and doors (flip the hinge side and the swing direction right on the plan).
 
-Ctrl+click selects several items to drag, nudge, copy (Ctrl+C / Ctrl+V) or delete together; **Seskupit** stores a `group` so the items are always picked together. The editor opens from the sidebar (optional, see the integration's options) or from the integration's **Configure** button.
+Ctrl+click selects several items to drag, nudge, copy (Ctrl+C / Ctrl+V) or delete together; **Seskupit** stores a `group` so the items are always picked together. The editor keeps the last 20 saved plans (**Historie**), lists missing or unavailable entities (**Kontrola**), shows snap guides while dragging (Alt turns them off), moves a corner shared by neighbouring rooms with both rooms, and can show a tracing image under each floor. The editor opens from the sidebar (optional, see the integration's options) or from the integration's **Configure** button.
 
 The editor exchanges YAML with Home Assistant over `fns_floorplan/yaml/parse` and `fns_floorplan/yaml/dump`.
 
@@ -76,4 +76,5 @@ On a device `color` tints the icon, `animate` overrides `active`, `wave` colours
 - LED strips glow in the light's real colour.
 - Tap a room for a panel with its lights, windows, doors and appliances.
 - With more floors the card shows floor tabs; the card option `level` picks the default floor.
+- Card tools (top right): tint rooms by temperature or humidity, and ⏱ replay of the last 24 hours from the Home Assistant history. Card option `tools: false` hides them.
 - Card option `mode`: `auto` (by the sun), `day`, `night` or `ha` (follows the Home Assistant light/dark theme).
