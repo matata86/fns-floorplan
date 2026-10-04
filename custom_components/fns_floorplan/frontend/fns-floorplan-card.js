@@ -820,7 +820,9 @@ function buildView(card, plan) {
       d.coverImg = el("image", { x: -15, y: -15, width: 30, height: 30, preserveAspectRatio: "xMidYMid slice", "clip-path": `url(#${id})`, class: "cover", hidden: "" }, d.g);
       d.coverImg.addEventListener("error", () => { d.coverImg.setAttribute("hidden", ""); d.g.classList.remove("has-cover"); });
     }
-    d.tag = el("g", { class: "devtag", transform: "translate(0 33)", hidden: "" }, d.g);
+    // the tag keeps the default text size whatever the item's size: undo the pin's scale, keep the gap under the badge
+    const k = sizeK(d);
+    d.tag = el("g", { class: "devtag", transform: `translate(0 ${17 + 16 / k}) scale(${1 / k})`, hidden: "" }, d.g);
     d.tagBg = el("rect", { rx: 10 }, d.tag);
     d.label = el("text", { class: "devtext", "text-anchor": "middle", y: 3.5 }, d.tag);
     bindActions(card, d.g, d, INFO);
