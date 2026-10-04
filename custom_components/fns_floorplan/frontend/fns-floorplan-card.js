@@ -876,8 +876,8 @@ function buildView(card, plan) {
     if (a.device_class === "timestamp") {
       const left = (new Date(s.state) - Date.now()) / 60000;
       out = left > 0 ? minutes(left) : "";
-    } else if (a.unit_of_measurement === "min") out = minutes(Number(s.state));
-    else if (a.unit_of_measurement === "h") out = minutes(Number(s.state) * 60);
+    } else if (a.unit_of_measurement === "min") out = Number(s.state) > 0 ? minutes(Number(s.state)) : "";
+    else if (a.unit_of_measurement === "h") out = Number(s.state) > 0 ? minutes(Number(s.state) * 60) : "";
     else out = isNaN(s.state) ? s.state : `${Math.round(Number(s.state))}`;
     return out ? (d.prefix || "") + out : "";
   };
