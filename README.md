@@ -17,6 +17,8 @@ rotate: auto       # auto | true | false — narrow cards turn a wide plan by 90
 ## Editing
 The integration adds a **Půdorys** (floor plan) panel to the sidebar for admins. Drag lights, LED strips, appliances, sensors, text items, furniture and room labels; select one to set its entity, icon, size, stacking order, tap / double tap / hold actions and rules (a form, or YAML); resize and rotate furniture with handles; add, duplicate or delete items and save. Fixtures of one light in one room are edited as one item. In the **Místnosti** (rooms) mode drag room corners (they snap to neighbouring corners), add or remove corners, move whole rooms, and add, slide and configure windows and doors (flip the hinge side and the swing direction right on the plan).
 
+Ctrl+click selects several items to drag, nudge, copy (Ctrl+C / Ctrl+V) or delete together; **Seskupit** stores a `group` so the items are always picked together. The editor opens from the sidebar (optional, see the integration's options) or from the integration's **Configure** button.
+
 The editor exchanges YAML with Home Assistant over `fns_floorplan/yaml/parse` and `fns_floorplan/yaml/dump`.
 
 ## The plan
@@ -37,7 +39,7 @@ Coordinates are metres, `x` to the right and `z` down.
 | `furniture` | `id`, `type`, `x`, `z`, `rotation`, `w`, `d`; lights (`lamp_*`, `led_strip`) carry `entity` and optional `room_light`; `tv_wall` with a media player; `robot_vacuum` marks the dock |
 | `sensors` | binary sensors with `entity`, `x`, `z` — motion/occupancy/presence ripple, moisture pulses red |
 | `vacuum` | `entity`, `room_sensor` (a sensor whose state is the room name) |
-| `devices` | `kind`, `name`, `entity`, `x`, `z`, `active` (list of states or `{"above": n}`), `info`, `prefix`, `text` |
+| `devices` | `kind`, `name`, `entity`, `x`, `z`, `active` (list of states or `{"above": n}`), `info`, `prefix`, `text`, `color` / `color_on` (idle / running; without them the entity's state colour from the Home Assistant theme) |
 | `texts` | `entity` or `text` (plain or a `{{ }}` template), `x`, `z`, `rotation`, `size`, `color`, `background` (`none` for no background) |
 | `rules` | on every item: conditional colours, hiding and icons, see below |
 | `labels` | `{room_id: [x, z]}` to place a room label by hand |

@@ -1031,6 +1031,8 @@ class FnsFloorplanPanel extends HTMLElement {
         ${field("Text pod ikonou z entity", "info", o.info || "", "text", 'list="ents"')}
         ${field("Předpona textu", "prefix", o.prefix || "")}
         ${field("Vlastní text (může být šablona {{ … }})", "text", o.text || "")}
+        <div class="row2"><div><label>Barva</label>${this._colorPick("color", o.color)}</div><div><label>Barva, když běží</label>${this._colorPick("color_on", o.color_on)}</div></div>
+        <p class="hint">Výchozí = barva stavu entity z motivu HA.</p>
         <label class="chk"><input type="checkbox" data-k="sheet_hide" ${o.sheet_hide ? "checked" : ""}> nezobrazovat v panelu místnosti</label>
         ${o.kind === "media" ? `<label class="chk"><input type="checkbox" data-k="cover" ${o.cover === false ? "" : "checked"}> obal alba nebo pořadu v odznaku (při přehrávání a pauze)</label>` : ""}
         ${xz}
@@ -1437,7 +1439,7 @@ class FnsFloorplanPanel extends HTMLElement {
       else if (key === "cover") { if (value) delete t.cover; else t.cover = false; }
       else if (key === "sheet_hide") { if (value) t.sheet_hide = true; else delete t.sheet_hide; }
       else if (key === "room_light") { if (value === "") delete t.room_light; else t.room_light = value === "false" ? false : Number(value); }
-      else if (key === "color" || key === "background") {
+      else if (key === "color" || key === "color_on" || key === "background") {
         const v = value === "custom" ? inp.nextElementSibling.value : value;
         if (v) t[key] = v; else delete t[key];
       } else if (value === "") delete t[key];

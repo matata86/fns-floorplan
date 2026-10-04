@@ -347,7 +347,9 @@ svg.plan text { text-rendering: geometricPrecision; }
 .dev-dryer.on .wobble { transform-origin: 50% 65%; animation: tdShake .4s ease-in-out infinite; }
 .dev-dishwasher.on .wobble { transform-origin: 50% 75%; animation: dwBounce 1.5s ease-in-out infinite; }
 .dev-dryer.on .glyph, .dev-dishwasher.on .glyph { animation: drum 1s ease-in-out infinite; }
-.dev-dishwasher.err .icon .glyph { fill: var(--alarm) !important; }
+.dev.themed .icon .glyph { fill: var(--dev) !important; }
+.dev.themed.on .badge { stroke: var(--dev); }
+.dev.dev-dishwasher.err .icon .glyph { fill: var(--alarm) !important; }
 .dev-fan.on .spin { animation: spin .7s linear infinite; }
 .dev-purifier.on .waves { animation: waves 2s ease-out infinite; }
 .dev .bubbles circle { fill: none; stroke: #67e8f9; stroke-width: .8; opacity: 0; }
@@ -439,6 +441,19 @@ svg.plan text { text-rendering: geometricPrecision; }
 @keyframes tvHue { 0% { fill: #3b2bff; } 33% { fill: #ff2bd1; } 66% { fill: #2bd9ff; } 100% { fill: #3b2bff; } }
 @media (prefers-reduced-motion: reduce) { .ripple, .alert-open.fresh *, .leak, .alarm-fx, .tv.playing, .dev *, .lamp * { animation: none !important; } }
 `;
+
+// HA's state colour for an entity, as the frontend picks it: device class + state, state, then active / inactive
+const cssName = (v) => /^[a-z0-9_]+$/.test(v || "");
+function themeColor(entity, s, on) {
+  const domain = entity.split(".")[0], state = s?.state, dc = s?.attributes.device_class;
+  const act = on ? "active" : "inactive";
+  let c = `var(--state-${act}-color, ${on ? "var(--accent)" : "var(--muted)"})`;
+  if (!cssName(domain)) return c;
+  c = `var(--state-${domain}-${act}-color, ${c})`;
+  if (cssName(state)) c = `var(--state-${domain}-${state}-color, ${c})`;
+  if (cssName(state) && cssName(dc)) c = `var(--state-${domain}-${dc}-${state}-color, ${c})`;
+  return c;
+}
 
 // appliance glyphs: an MDI icon plus the bits that animate; m(fallback) is the main icon (a custom one if set)
 const ICON = {
@@ -910,9 +925,12 @@ function buildView(card, plan) {
       }
       const on = r.animate ?? devActive(d);
       d.g.classList.toggle("on", !!on);
-      d.g.classList.toggle("ruled", !!r.color);
-      d.g.classList.toggle("glow", !!(r.glow && r.color));
-      d.g.style.setProperty("--dev", r.color ? color(r.color) : "");
+      // colour: a rule, then the item's own colour (idle / running), else the entity's state colour from the HA theme
+      const own = r.color || (on ? d.color_on : d.color);
+      d.g.classList.toggle("ruled", !!own);
+      d.g.classList.toggle("themed", !own && !!d.entity);
+      d.g.classList.toggle("glow", !!(r.glow && own));
+      d.g.style.setProperty("--dev", own ? color(own) : d.entity ? themeColor(d.entity, st(d.entity), on) : "");
       d.g.style.setProperty("--wave", r.wave ? color(r.wave) : "");
       setTag(d, r.text ?? devText(d, on));
     }
