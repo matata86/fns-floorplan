@@ -350,6 +350,7 @@ svg.plan text { text-rendering: geometricPrecision; }
 .dev.themed .icon .glyph { fill: var(--dev) !important; }
 .dev.themed.on .badge { stroke: var(--dev); }
 .dev.on.themed .ring, .dev.on.ruled .ring { stroke: var(--dev); }
+.dev.unavail { opacity: .55; }
 /* coloured badge only while running; idle locks and alarms keep the plain grey badge */
 .dev.themed:not(.on) .badge { stroke: var(--line); }
 .dev.dev-dishwasher.err .icon .glyph { fill: var(--alarm) !important; }
@@ -445,14 +446,15 @@ svg.plan text { text-rendering: geometricPrecision; }
 @media (prefers-reduced-motion: reduce) { .ripple, .alert-open.fresh *, .leak, .alarm-fx, .tv.playing, .dev *, .lamp * { animation: none !important; } }
 `;
 
-// HA's state colour for an entity, as the frontend picks it: device class + state, state, then active / inactive
+// HA's state colour for an entity, as the frontend picks it: device class + state, state, then active (idle: icon colour)
 const cssName = (v) => /^[a-z0-9_]+$/.test(v || "");
 function themeColor(entity, s, on) {
   const domain = entity.split(".")[0], state = s?.state, dc = s?.attributes.device_class;
-  const act = on ? "active" : "inactive";
-  let c = `var(--state-${act}-color, ${on ? "var(--accent)" : "var(--muted)"})`;
+  if (!s || state === "unavailable" || state === "unknown") return "var(--state-unavailable-color, var(--disabled-text-color, #9e9e9e))";
+  // idle: the theme's plain icon colour (as HA draws off entities), unless the theme colours that exact state
+  let c = on ? "var(--state-active-color, var(--accent))" : "var(--state-icon-color, var(--muted))";
   if (!cssName(domain)) return c;
-  c = `var(--state-${domain}-${act}-color, ${c})`;
+  if (on) c = `var(--state-${domain}-active-color, ${c})`;
   if (cssName(state)) c = `var(--state-${domain}-${state}-color, ${c})`;
   if (cssName(state) && cssName(dc)) c = `var(--state-${domain}-${dc}-${state}-color, ${c})`;
   return c;
@@ -941,6 +943,7 @@ function buildView(card, plan) {
       const own = r.color || (on ? d.color_on : d.color);
       d.g.classList.toggle("ruled", !!own);
       d.g.classList.toggle("themed", !own && !!d.entity);
+      d.g.classList.toggle("unavail", !st(d.entity) || ["unavailable", "unknown"].includes(st(d.entity).state));
       d.g.classList.toggle("glow", !!(r.glow && own));
       d.g.style.setProperty("--dev", own ? color(own) : d.entity ? themeColor(d.entity, st(d.entity), on) : "");
       d.g.style.setProperty("--wave", r.wave ? color(r.wave) : "");
