@@ -634,6 +634,8 @@ class FnsFloorplanPanel extends HTMLElement {
       const w = f.w * S, d = f.d * S;
       const missing = isLight(f) && !f.entity;
       if (f.type === "led_strip") {
+        // one-sided glow: a dashed band on that side (the group is turned with the strip)
+        if (f.glow_side === 1 || f.glow_side === -1) el("rect", { x: -w / 2, y: f.glow_side === 1 ? 0 : -20, width: w, height: 20, class: "spot-cone" }, g);
         el("line", { x1: -w / 2, y1: 0, x2: w / 2, y2: 0, class: "strip-hit" }, g);
         el("line", { x1: -w / 2, y1: 0, x2: w / 2, y2: 0, class: "strip" + (missing ? " noent" : "") }, g);
       } else if (isLight(f)) {
@@ -1020,6 +1022,10 @@ class FnsFloorplanPanel extends HTMLElement {
           value="${o.room_light === false ? 15 : typeof o.room_light === "number" ? Math.round(o.room_light * 100) : ""}">` : ""}
         ${light ? `<label class="chk"><input type="checkbox" data-k="sheet_hide" ${o.sheet_hide ? "checked" : ""}> nezobrazovat v panelu místnosti</label>` : ""}
         ${xz}
+        ${o.type === "led_strip" ? `<label>Směr světla</label><select data-k="glow_side">
+          <option value="" ${!o.glow_side ? "selected" : ""}>Všemi směry</option>
+          <option value="1" ${o.glow_side === 1 ? "selected" : ""}>Na jednu stranu (podle náhledu)</option>
+          <option value="-1" ${o.glow_side === -1 ? "selected" : ""}>Na druhou stranu</option></select>` : ""}
         ${point ? "" : o.type === "led_strip" ? num("Délka (m)", "w", o.w) : `<div class="row2"><div>${num("Šířka (m)", "w", o.w)}</div><div>${num("Hloubka (m)", "d", o.d)}</div></div>`}
         ${point || light ? "" : `<label>Barva</label>${this._colorPick("color", o.color)}`}
         ${point ? "" : rotation}
@@ -1445,6 +1451,7 @@ class FnsFloorplanPanel extends HTMLElement {
       if (["x", "z", "w", "d"].includes(key)) t[key] = r3(Number(value));
       else if (key === "rotation") t.rotation = ((Number(value) % 360) + 360) % 360;
       else if (key === "cover") { if (value) delete t.cover; else t.cover = false; }
+      else if (key === "glow_side") { if (value) t.glow_side = Number(value); else delete t.glow_side; }
       else if (key === "beam") { if (value === "") delete t.beam; else t.beam = Math.min(180, Math.max(5, Number(value))); }
       else if (key === "sheet_hide") { if (value) t.sheet_hide = true; else delete t.sheet_hide; }
       else if (key === "room_light") { if (value === "") delete t.room_light; else t.room_light = Math.max(0, Number(value)) / 100; }

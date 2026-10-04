@@ -1103,8 +1103,21 @@ function buildView(card, plan) {
       if (L.strip) {
         const [cx, cz] = P([f.x, f.z]);
         const a = ((f.rotation || 0) * Math.PI) / 180, h = (f.w * S) / 2;
+        const x1 = cx - Math.cos(a) * h, y1 = cz - Math.sin(a) * h, x2 = cx + Math.cos(a) * h, y2 = cz + Math.sin(a) * h;
+        if (f.glow_side === 1 || f.glow_side === -1) {
+          // one side only: a band fading away from the strip (side 1 = to the right of its direction)
+          const depth = 60 * (0.5 + share), nx = -Math.sin(a) * f.glow_side * depth, nz = Math.cos(a) * f.glow_side * depth;
+          const gid = "gs_" + f.id;
+          let grad = defs.querySelector("#" + CSS.escape(gid));
+          if (!grad) { grad = el("linearGradient", { id: gid, gradientUnits: "userSpaceOnUse" }, defs); el("stop", { offset: "0" }, grad); el("stop", { offset: "1" }, grad); }
+          Object.entries({ x1: cx, y1: cz, x2: cx + nx, y2: cz + nz }).forEach(([k, v]) => grad.setAttribute(k, v));
+          grad.children[0].setAttribute("stop-color", s.color); grad.children[0].setAttribute("stop-opacity", (0.85 * s.bri).toFixed(2));
+          grad.children[1].setAttribute("stop-color", s.color); grad.children[1].setAttribute("stop-opacity", "0");
+          el("path", { d: `M${x1} ${y1} L${x2} ${y2} L${x2 + nx} ${y2 + nz} L${x1 + nx} ${y1 + nz} Z`, fill: `url(#${gid})`, filter: "url(#blurBig)", class: "glow" }, L.room.glowLayer);
+          continue;
+        }
         el("line", {
-          x1: cx - Math.cos(a) * h, y1: cz - Math.sin(a) * h, x2: cx + Math.cos(a) * h, y2: cz + Math.sin(a) * h,
+          x1, y1, x2, y2,
           stroke: s.color, "stroke-width": 26 * (0.5 + share), "stroke-linecap": "round",
           opacity: (0.6 * s.bri).toFixed(2), filter: "url(#blurBig)", class: "glow",
         }, L.room.glowLayer);
