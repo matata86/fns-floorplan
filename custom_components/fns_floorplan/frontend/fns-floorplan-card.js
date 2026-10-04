@@ -857,9 +857,9 @@ function buildView(card, plan) {
     return !OFF_STATES.has(s.state);
   };
   const devText = (d, on) => {
-    // `text` shows always, `text_on` replaces it while running; then the media title or the info entity
+    // idle: `text`, else the info entity; running: `text_on`, else the info entity / media title, else `text`
     const base = d.text ? tplText(d.text) : "";
-    if (!on) return base;
+    if (!on) return base || (d.kind === "media" ? "" : devInfo(d));
     if (d.text_on) return tplText(d.text_on);
     return devInfo(d) || base;
   };
