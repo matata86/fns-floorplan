@@ -351,11 +351,13 @@ svg.plan text { text-rendering: geometricPrecision; }
 .dev.ruled .icon path:not(.heatwaves path) { fill: var(--dev) !important; }
 .dev.ruled .icon .bubbles circle, .dev.ruled .icon .sound path { stroke: var(--dev); }
 .dev.ruled .badge { stroke: var(--dev); }
-.dev.glow .badge { filter: drop-shadow(0 0 4px var(--dev)); }
+.dev.glow .badge { filter: drop-shadow(0 0 3px var(--dev)) drop-shadow(0 0 9px var(--dev)); }
 .furn.ruled, .app[data-mode="day"] .furn.ruled { fill: var(--furn); fill-opacity: .6; stroke: var(--furn); stroke-opacity: .9; }
-.furn.glow { filter: drop-shadow(0 0 5px var(--furn)); }
+/* glow: two shadows, sized in screen pixels so it stays visible on a scaled-down plan */
+.furn.glow { filter: drop-shadow(0 0 3px var(--furn)) drop-shadow(0 0 9px var(--furn)); }
+.app[data-mode="day"] .furn.glow { filter: drop-shadow(0 0 2px var(--furn)) drop-shadow(0 0 7px var(--furn)) drop-shadow(0 0 7px var(--furn)); }
 .tint { pointer-events: none; transition: fill .6s, opacity .6s; }
-.tint.glow { filter: drop-shadow(0 0 8px currentColor); }
+.tint.glow { filter: drop-shadow(0 0 4px currentColor) drop-shadow(0 0 12px currentColor); }
 .label { pointer-events: none; }
 .label rect { fill: var(--chip); stroke: var(--line); }
 .tlabel text { fill: var(--text); font-size: 11px; font-weight: 600; }

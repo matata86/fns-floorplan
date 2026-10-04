@@ -463,7 +463,12 @@ class FnsFloorplanPanel extends HTMLElement {
     // colour rules are previewed with the current states (templates are left out here)
     const ruled = (o) => (o.rules ? evalRules(o.rules, states) : {});
     const paint = (node, res, fill) => {
-      if (res.color) { const c = COLORS[res.color] || res.color; node.style.stroke = c; if (fill) { node.style.fill = c; node.style.fillOpacity = ".3"; } }
+      if (res.color) {
+        const c = COLORS[res.color] || res.color;
+        node.style.stroke = c;
+        if (fill) { node.style.fill = c; node.style.fillOpacity = ".45"; }
+        if (res.glow) node.style.filter = `drop-shadow(0 0 3px ${c}) drop-shadow(0 0 8px ${c})`;
+      }
     };
     plan.openings ||= [];
     plan.rooms.forEach((r, i) => {
