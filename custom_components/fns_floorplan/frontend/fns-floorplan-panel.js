@@ -3,7 +3,7 @@
 // In the "Místnosti" mode rooms (corner points, whole rooms), windows and doors are edited.
 
 // icons, furniture types and the rules engine come from the card module (same URL, so loaded once)
-const { MDI, COLORS, FURNITURE, lightIcon, SIZES, evalRules, resolveIcon, iconHtml } =
+const { MDI, COLORS, UI_COLORS, color, FURNITURE, lightIcon, SIZES, evalRules, resolveIcon, iconHtml, FX_SVG, STYLE: CARD_STYLE } =
   await import(new URL("./fns-floorplan-card.js", import.meta.url).href + new URL(import.meta.url).search);
 
 const S = 80; // px per metre, same as the card
@@ -41,6 +41,8 @@ const ADD = [
   ["Nábytek", () => ({ cat: "furniture", item: { type: "table", w: 1, d: 0.6, rotation: 0 } })],
   ["Text", () => ({ cat: "texts", item: { entity: "" } })],
 ];
+
+const ADD_ICONS = ["mdi:lightbulb", "mdi:devices", "mdi:motion-sensor", "mdi:sofa", "mdi:format-text"];
 
 const el = (tag, attrs = {}, parent) => {
   const e = document.createElementNS(NS, tag);
@@ -83,29 +85,48 @@ const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 const uid = (p) => `${p}_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 5)}`;
 const selEq = (a, b) => !!a && !!b && a.cat === b.cat && (a.cat === "labels" ? a.id === b.id : a.i === b.i);
 const GROUPABLE = ["furniture", "devices", "sensors", "texts"];
+// the native select treats "" as "nothing chosen" and shows an empty field, so the default option gets this value in the UI
+const DEF = "__default";
+// card CSS for the animation preview tiles: only the .dev rules and keyframes, scoped under .fxapp so they cannot hit the panel's own .dev circles
+const scopeFx = (css) => css.split("\n").filter((l) => /^@keyframes|^[^{]*\.dev[^{]*\{/.test(l)).map((l) => {
+  if (l.startsWith("@keyframes")) return l;
+  const i = l.indexOf("{");
+  return l.slice(0, i).split(",").map((s) => (s = s.trim(), s.startsWith(".app") ? ".fxapp" + s : ".fxapp " + s)).join(", ") + " " + l.slice(i);
+}).join("\n");
 
 const STYLE = `
+.fxapp { background: none; display: block; color: var(--primary-text-color); --accent: var(--primary-color); --chip: var(--card-background-color); --line: var(--divider-color); --muted: var(--secondary-text-color); --text: var(--primary-text-color); }
+.fxapp .dev { fill: none; stroke: none; }
+.fxpick { display: grid; grid-template-columns: repeat(auto-fill, minmax(64px, 1fr)); gap: 6px; margin-top: 4px; }
+.fxt { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 4px 2px; border: 1px solid var(--divider-color); border-radius: 12px; background: none; color: inherit; cursor: pointer; font-size: 11px; }
+.fxt.on { border-color: var(--primary-color); background: color-mix(in srgb, var(--primary-color) 12%, transparent); }
 :host { display: block; height: 100%; background: var(--primary-background-color, #fafafa); color: var(--primary-text-color, #212121);
   font-family: var(--ha-font-family-body, Roboto, sans-serif); }
 .top { display: flex; align-items: center; gap: 8px; height: 56px; padding: 0 12px; box-sizing: border-box;
-  background: var(--app-header-background-color, var(--primary-color, #03a9f4)); color: var(--app-header-text-color, #fff); }
-.top h1 { font-size: 20px; font-weight: 400; margin: 0 8px 0 0; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  background: var(--app-header-background-color); color: var(--app-header-text-color, var(--primary-text-color));
+  border-bottom: var(--app-header-border-bottom, none); }
+.top h1 { font-size: var(--ha-font-size-xl, 20px); font-weight: var(--ha-font-weight-normal, 400); margin: 0 8px 0 0; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .top .state { font-size: 13px; opacity: .85; }
 button, select, input, textarea { font: inherit; }
-.top ha-button, .top ha-icon-button { --mdc-theme-primary: var(--app-header-text-color, #fff); color: var(--app-header-text-color, #fff); }
-.top ha-button.save { --mdc-theme-primary: initial; }
 /* fallback while HA's own elements are not defined yet (or never are) */
 ha-button:not(:defined) { border: 1px solid var(--divider-color, #e0e0e0); border-radius: 18px; padding: 7px 14px; cursor: pointer; background: var(--card-background-color, #fff); color: var(--primary-text-color, #212121); }
 ha-button.save:not(:defined) { background: var(--primary-color, #03a9f4); border-color: transparent; color: var(--text-primary-color, #fff); font-weight: 600; }
 ha-icon-button:not(:defined) { display: inline-block; padding: 4px; cursor: pointer; }
 ha-button[disabled], ha-icon-button[disabled] { opacity: .45; }
 .top select.level { max-width: 150px; }
+.top ha-selector.level { width: 170px; flex: none; margin: 0; }
+ha-dropdown-item[hidden] { display: none; }
+.more { position: relative; }
+.more ha-icon-button { position: relative; }
+.more.warn ha-icon-button::after { content: ""; position: absolute; top: 8px; right: 8px; width: 8px; height: 8px; border-radius: 50%; background: var(--warning-color, #ffa600); }
 .top select { height: 36px; border-radius: 8px; padding: 6px 10px; border: 1px solid var(--divider-color, #e0e0e0); background: var(--card-background-color, #fff); color: var(--primary-text-color, #212121); }
 .main { display: flex; height: calc(100vh - 56px); }
 .stage { flex: 1; min-width: 0; padding: 12px; box-sizing: border-box; position: relative; }
-.zoom { position: absolute; left: 20px; top: 20px; display: flex; flex-direction: column; gap: 6px; z-index: 1; }
-.zoom [data-z] { width: 40px; height: 40px; border-radius: 10px; border: 1px solid var(--divider-color, #e0e0e0);
-  background: var(--card-background-color, #fff); color: var(--primary-text-color, #212121); box-shadow: 0 1px 3px rgba(0,0,0,.15); }
+.zoom { position: absolute; left: 20px; top: 20px; z-index: 1; display: flex; flex-direction: column; overflow: hidden;
+  background: var(--ha-card-background, var(--card-background-color)); border-radius: var(--ha-card-border-radius, 12px);
+  box-shadow: var(--ha-card-box-shadow, 0 2px 6px rgba(0,0,0,.18));
+  border: var(--ha-card-border-width, 1px) solid var(--ha-card-border-color, var(--divider-color)); }
+.zoom [data-z] { color: var(--primary-text-color); }
 svg { width: 100%; height: 100%; display: block; touch-action: none; user-select: none; }
 .floor { fill: var(--card-background-color, #fff); stroke: var(--primary-text-color, #212121); stroke-opacity: .55; stroke-width: 4; }
 .open-line { stroke: var(--card-background-color, #fff); stroke-width: 7; }
@@ -144,13 +165,13 @@ svg { width: 100%; height: 100%; display: block; touch-action: none; user-select
 .rsz { fill: #fff; stroke: var(--primary-color, #03a9f4); stroke-width: 2; cursor: nwse-resize; }
 .rot-line { stroke: var(--primary-color, #03a9f4); stroke-width: 1.5; stroke-dasharray: 3 2; pointer-events: none; }
 .rot-h { fill: var(--primary-color, #03a9f4); stroke: #fff; stroke-width: 2; cursor: grab; }
-.rule { border: 1px solid var(--divider-color, #e0e0e0); border-radius: 10px; padding: 8px; margin-top: 8px; }
+.rule { border: 1px solid var(--divider-color, #e0e0e0); border-radius: var(--ha-card-border-radius, 12px); padding: 8px 12px; margin-top: 8px; }
 .rule-h { display: flex; align-items: center; gap: 4px; font-weight: 600; font-size: 13px; }
 .rule-h span { flex: 1; }
-.rule button, .mini { border: 1px solid var(--divider-color, #e0e0e0); background: var(--primary-background-color, #fafafa); color: var(--primary-text-color, #212121);
+.mini { border: 1px solid var(--divider-color, #e0e0e0); background: var(--primary-background-color, #fafafa); color: var(--primary-text-color, #212121);
   border-radius: 6px; padding: 3px 8px; cursor: pointer; }
-.cond { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-top: 6px; padding-top: 6px; border-top: 1px dashed var(--divider-color, #e0e0e0); }
-.cond .wide { grid-column: 1 / -1; }
+.cond { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; padding-top: 6px; border-top: 1px dashed var(--divider-color, #e0e0e0); }
+.cond .wide { flex: 1 1 100%; }
 .side .cond input, .side .cond select, .side .outc input, .side .outc select { padding: 5px; font-size: 13px; }
 .outc { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 8px; font-size: 13px; }
 .outc select { width: auto; flex: 1; }
@@ -160,24 +181,21 @@ svg { width: 100%; height: 100%; display: block; touch-action: none; user-select
 .side label.chk input { width: auto; }
 .badge-opts { border: 0; padding: 0 0 0 22px; margin: 0; }
 .badge-opts:disabled { opacity: .45; }
-.icon-row { display: flex; gap: 6px; align-items: center; }
+.icon-row { display: flex; align-items: center; gap: 8px; }
 .icon-row ha-icon { flex: none; color: var(--primary-color, #03a9f4); }
 .icon-row input, .icon-row ha-icon-picker { flex: 1; }
-.place { display: grid; grid-template-columns: repeat(3, 38px); gap: 4px; margin-top: 4px; }
-.place button { height: 30px; border-radius: 6px; border: 1px solid var(--divider-color, #e0e0e0); background: var(--primary-background-color, #fafafa);
-  color: var(--primary-text-color, #212121); cursor: pointer; font-size: 15px; padding: 0; }
-.layers { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 6px; }
-.layers button { padding: 6px 2px; border-radius: 8px; border: 1px solid var(--divider-color, #e0e0e0); background: var(--primary-background-color, #fafafa);
-  color: var(--primary-text-color, #212121); cursor: pointer; font-size: 12px; }
+.place { display: grid; grid-template-columns: repeat(3, 40px); gap: 0; margin-top: 4px; }
+.layers { display: flex; gap: 4px; margin-top: 6px; }
 .side ha-selector { display: block; margin-top: 12px; }
+.outc ha-selector, .cond ha-selector { flex: 1 1 100%; margin-top: 4px; }
 .side .bad { --mdc-theme-error: var(--error-color); outline: 1px solid var(--error-color); border-radius: 4px; }
 .side ha-expansion-panel { margin-top: 12px; display: block; }
 .sec { padding: 0 4px 12px; }
 details { margin-top: 14px; }
 details summary { cursor: pointer; font-weight: 600; font-size: 14px; }
-.modes { display: flex; border: 1px solid var(--divider-color, #e0e0e0); border-radius: 18px; overflow: hidden; }
-.modes button { border: 0; padding: 7px 12px; background: var(--card-background-color, #fff); color: var(--primary-text-color, #212121); cursor: pointer; }
-.modes button.on { background: var(--primary-color, #03a9f4); color: var(--text-primary-color, #fff); }
+div.modes { display: flex; border: 1px solid var(--divider-color, #e0e0e0); border-radius: 18px; overflow: hidden; }
+div.modes button { border: 0; padding: 7px 12px; background: var(--card-background-color, #fff); color: var(--primary-text-color, #212121); cursor: pointer; }
+div.modes button.on { background: var(--primary-color, #03a9f4); color: var(--text-primary-color, #fff); }
 .spot-cone { fill: var(--primary-color, #03a9f4); fill-opacity: .1; stroke: var(--primary-color, #03a9f4); stroke-opacity: .35; stroke-dasharray: 3 3; pointer-events: none; }
 .mode-rooms .item { pointer-events: none; opacity: .3; }
 .mode-rooms .floor { cursor: move; }
@@ -201,10 +219,10 @@ details summary { cursor: pointer; font-weight: 600; font-size: 14px; }
 .side textarea.bad { border-color: var(--error-color, #db4437); }
 .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .row2 label { margin-top: 12px; }
-.rot { display: flex; gap: 6px; margin-top: 6px; }
-.rot button, .actions button { flex: 1; padding: 7px; border-radius: 8px; border: 1px solid var(--divider-color, #e0e0e0);
+.rot { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
+.actions button { flex: 1; padding: 7px; border-radius: 8px; border: 1px solid var(--divider-color, #e0e0e0);
   background: var(--primary-background-color, #fafafa); color: var(--primary-text-color, #212121); cursor: pointer; }
-.actions { display: flex; gap: 8px; margin-top: 18px; }
+.actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 18px; }
 .actions .del { color: var(--error-color, #db4437); }
 .err { color: var(--error-color, #db4437); margin: 12px 16px; }
 .prob { display: block; width: 100%; text-align: left; border: 0; border-bottom: 1px solid var(--divider-color, #e0e0e0); background: none; color: inherit; padding: 8px 4px; cursor: pointer; }
@@ -306,20 +324,30 @@ class FnsFloorplanPanel extends HTMLElement {
   }
 
   _skeleton() {
-    this.shadowRoot.innerHTML = `<style>${STYLE}</style>
+    const nd = (n) => !!customElements.get(n);
+    this.shadowRoot.innerHTML = `<style>${STYLE}</style><style>${scopeFx(CARD_STYLE)}</style>
 <div class="top">
   <ha-menu-button></ha-menu-button>
   <h1>Půdorys</h1>
   <span class="state"></span>
-  <div class="modes"><button data-m="items">Vybavení</button><button data-m="rooms">Místnosti</button></div>
-  <select class="level" title="Patro"></select>
-  <select class="add"><option value="">+ Přidat</option>${ADD.map(([l], i) => `<option value="${i}">${l}</option>`).join("")}</select>
+  ${nd("ha-button-toggle-group") ? '<ha-button-toggle-group class="modes"></ha-button-toggle-group>' : '<div class="modes"><button data-m="items">Vybavení</button><button data-m="rooms">Místnosti</button></div>'}
+  ${nd("ha-selector") ? '<ha-selector class="level"></ha-selector>' : '<select class="level" title="Patro"></select>'}
+  ${nd("ha-dropdown") ? `<ha-dropdown class="add"><ha-button slot="trigger" appearance="filled" size="small" with-caret><ha-icon slot="start" icon="mdi:plus"></ha-icon>Přidat</ha-button></ha-dropdown>` : '<select class="add"><option value="">+ Přidat</option></select>'}
   <ha-icon-button class="undo" label="Zpět (Ctrl+Z)" disabled><ha-icon icon="mdi:undo"></ha-icon></ha-icon-button>
   <ha-icon-button class="redo" label="Vpřed (Ctrl+Y)" disabled><ha-icon icon="mdi:redo"></ha-icon></ha-icon-button>
-  <ha-button class="hist" appearance="plain" title="Historie uložení">Historie</ha-button>
+  ${nd("ha-dropdown") ? `<ha-dropdown class="more" placement="bottom-end">
+    <ha-icon-button slot="trigger" label="Další akce"><ha-icon icon="mdi:dots-vertical"></ha-icon></ha-icon-button>
+    <ha-dropdown-item class="hist"><ha-icon slot="icon" icon="mdi:history"></ha-icon><span>Historie uložení</span></ha-dropdown-item>
+    <ha-dropdown-item class="check"><ha-icon slot="icon" icon="mdi:check-decagram-outline"></ha-icon><span>Kontrola entit</span></ha-dropdown-item>
+    <ha-dropdown-item class="revert" disabled><ha-icon slot="icon" icon="mdi:restore"></ha-icon><span>Zahodit změny</span></ha-dropdown-item>
+    <wa-divider></wa-divider>
+    <ha-dropdown-item class="lvl-new"><ha-icon slot="icon" icon="mdi:plus"></ha-icon><span>Nové patro…</span></ha-dropdown-item>
+    <ha-dropdown-item class="lvl-ren"><ha-icon slot="icon" icon="mdi:rename"></ha-icon><span>Přejmenovat patro…</span></ha-dropdown-item>
+    <ha-dropdown-item class="lvl-del" variant="danger" hidden><ha-icon slot="icon" icon="mdi:delete"></ha-icon><span>Smazat patro…</span></ha-dropdown-item>
+  </ha-dropdown>` : `<ha-button class="hist" appearance="plain" title="Historie uložení">Historie</ha-button>
   <ha-button class="check" appearance="plain" title="Kontrola entit">Kontrola</ha-button>
-  <ha-button class="revert" appearance="plain" disabled>Zahodit</ha-button>
-  <ha-button class="save" disabled>Uložit</ha-button>
+  <ha-button class="revert" appearance="plain" disabled>Zahodit</ha-button>`}
+  <ha-button class="save" appearance="accent" disabled><ha-icon slot="start" icon="mdi:content-save"></ha-icon>Uložit</ha-button>
 </div>
 <div class="main">
   <div class="stage"><svg preserveAspectRatio="xMidYMin meet"></svg>
@@ -335,9 +363,20 @@ class FnsFloorplanPanel extends HTMLElement {
     $(".save").addEventListener("click", () => this._save());
     $(".undo").addEventListener("click", () => this._history(this._undo, this._redo));
     $(".redo").addEventListener("click", () => this._history(this._redo, this._undo));
-    $(".hist").addEventListener("click", () => this._showHistory());
-    $(".check").addEventListener("click", () => this._showCheck());
-    $(".revert").addEventListener("click", () => { if (confirm("Zahodit neuložené změny?")) this._load(); });
+    // menu items (or the plain buttons without ha-dropdown): the click closes the menu and runs the action
+    const more = $(".more");
+    const acts = {
+      hist: () => this._showHistory(),
+      check: () => this._showCheck(),
+      revert: () => { if (confirm("Zahodit neuložené změny?")) this._load(); },
+      "lvl-new": () => this._levelAction("+new"),
+      "lvl-ren": () => this._levelAction("+rename"),
+      "lvl-del": () => this._levelAction("+delete"),
+    };
+    for (const [c, fn] of Object.entries(acts)) {
+      const it = $("." + c);
+      it?.addEventListener("click", () => { if (it.disabled) return; if (more) more.open = false; fn(); });
+    }
     // drag the grip to resize the side panel; the width is remembered
     const side = $(".side"), grip = $(".grip"), main = $(".main");
     try { const w = Number(localStorage.getItem("fns-floorplan-side-w")); if (w > 0) side.style.width = w + "px"; } catch (err) { /* storage blocked */ }
@@ -354,32 +393,22 @@ class FnsFloorplanPanel extends HTMLElement {
     };
     grip.addEventListener("pointerup", gripEnd);
     grip.addEventListener("pointercancel", gripEnd);
-    this.shadowRoot.querySelectorAll(".modes button").forEach((b) => b.addEventListener("click", () => {
-      this._mode = b.dataset.m;
-      this._sel = null;
-      this._draw();
-      this._form();
-    }));
-    $(".level").addEventListener("change", (e) => this._levelAction(e.target.value));
-    $(".add").addEventListener("change", (e) => {
-      if (e.target.value === "") return;
-      if (e.target.value === "room") {
-        e.target.value = "";
-        const [cx, cz] = centroid(this._bounds()).map((v) => r3(snap(v)));
-        this._plan.rooms.push(this._stamp({ id: uid("room"), name: "Nová místnost", points: [[cx - 1, cz - 1], [cx + 1, cz - 1], [cx + 1, cz + 1], [cx - 1, cz + 1]], temperature: null, humidity: null }));
-        this._mode = "rooms";
-        this._sel = { cat: "rooms", i: this._plan.rooms.length - 1 };
-        return this._changed();
-      }
-      const { cat, item } = ADD[Number(e.target.value)][1]();
-      e.target.value = "";
-      const [cx, cz] = centroid(this._bounds());
-      Object.assign(this._stamp(item), { x: r3(snap(cx)), z: r3(snap(cz)) });
-      if (cat === "furniture") item.id = `f_${Date.now().toString(36)}`;
-      this._plan[cat].push(item);
-      this._sel = { cat, i: this._plan[cat].length - 1 };
-      this._changed();
-    });
+    const modes = $(".modes");
+    if (modes.localName === "ha-button-toggle-group") {
+      modes.buttons = [{ label: "Vybavení", value: "items" }, { label: "Místnosti", value: "rooms" }];
+      modes.active = this._mode;
+      modes.addEventListener("value-changed", (e) => { e.stopPropagation(); this._setMode(e.detail.value); });
+    } else modes.querySelectorAll("button").forEach((b) => b.addEventListener("click", () => this._setMode(b.dataset.m)));
+    const level = $(".level");
+    if (level.localName === "ha-selector") {
+      level.addEventListener("value-changed", (e) => {
+        e.stopPropagation();
+        const v = e.detail.value;
+        if (v != null && String(v) !== String(this._level)) this._levelAction(String(v));
+      });
+    } else level.addEventListener("change", (e) => this._levelAction(e.target.value));
+    const add = $(".add");
+    if (add.localName === "select") add.addEventListener("change", (e) => { const v = e.target.value; e.target.value = ""; if (v) this._addItem(v); });
     // the browser matches typed text in both the id and the friendly name (label)
     $("#ents").innerHTML = Object.values(this._hass.states).sort((a, b) => a.entity_id.localeCompare(b.entity_id))
       .map((st) => `<option value="${esc(st.entity_id)}" label="${esc(st.attributes.friendly_name || "")}"></option>`).join("");
@@ -431,6 +460,32 @@ class FnsFloorplanPanel extends HTMLElement {
       if (b.dataset.z === "fit") { this._view = null; this._applyView(); }
       else this._zoom(b.dataset.z === "in" ? 1 / 1.4 : 1.4);
     }));
+  }
+
+  _setMode(m) {
+    if (!m || m === this._mode) return; // the toggle group may report no value or the current one
+    this._mode = m;
+    this._sel = null;
+    this._draw();
+    this._form();
+  }
+
+  // v: "room" or the index into ADD
+  _addItem(v) {
+    if (v === "room") {
+      const [cx, cz] = centroid(this._bounds()).map((v) => r3(snap(v)));
+      this._plan.rooms.push(this._stamp({ id: uid("room"), name: "Nová místnost", points: [[cx - 1, cz - 1], [cx + 1, cz - 1], [cx + 1, cz + 1], [cx - 1, cz + 1]], temperature: null, humidity: null }));
+      this._mode = "rooms";
+      this._sel = { cat: "rooms", i: this._plan.rooms.length - 1 };
+      return this._changed();
+    }
+    const { cat, item } = ADD[Number(v)][1]();
+    const [cx, cz] = centroid(this._bounds());
+    Object.assign(this._stamp(item), { x: r3(snap(cx)), z: r3(snap(cz)) });
+    if (cat === "furniture") item.id = `f_${Date.now().toString(36)}`;
+    this._plan[cat].push(item);
+    this._sel = { cat, i: this._plan[cat].length - 1 };
+    this._changed();
   }
 
   // the whole plan; a zoomed or panned view (this._view) stays until "fit"
@@ -485,6 +540,12 @@ class FnsFloorplanPanel extends HTMLElement {
     const sel = this.shadowRoot.querySelector(".level");
     const levels = this._levels();
     if (!levels.some((l) => String(l.id) === String(this._level))) this._level = levels[0].id;
+    // the floor actions live in the ⋮ menu; "Smazat patro" only for a non-first floor
+    this.shadowRoot.querySelector(".lvl-del")?.toggleAttribute("hidden", !(levels.length > 1 && String(this._level) !== String(levels[0].id)));
+    if (sel.localName === "ha-selector") {
+      Object.assign(sel, { hass: this._hass, selector: { select: { mode: "dropdown", options: levels.map((l) => ({ value: String(l.id), label: l.name })) } }, label: "Patro", required: true, value: String(this._level) });
+      return;
+    }
     sel.innerHTML = levels.map((l) => `<option value="${esc(l.id)}">${esc(l.name)}</option>`).join("") +
       '<option value="+new">＋ Nové patro…</option><option value="+rename">Přejmenovat patro…</option>' +
       (levels.length > 1 && String(this._level) !== String(levels[0].id) ? '<option value="+delete">Smazat patro…</option>' : "");
@@ -579,7 +640,9 @@ class FnsFloorplanPanel extends HTMLElement {
     }
     svg.setAttribute("class", "mode-" + this._mode);
     if (this._multi && !this._multi.some((m) => selEq(m, this._sel))) this._multi = null;
-    this.shadowRoot.querySelectorAll(".modes button").forEach((b) => b.classList.toggle("on", b.dataset.m === this._mode));
+    const modes = this.shadowRoot.querySelector(".modes");
+    if (modes.localName === "ha-button-toggle-group") modes.active = this._mode;
+    else modes.querySelectorAll("button").forEach((b) => b.classList.toggle("on", b.dataset.m === this._mode));
     this._fillAdd();
     const plan = this._plan;
     const states = this._hass.states;
@@ -587,7 +650,7 @@ class FnsFloorplanPanel extends HTMLElement {
     const ruled = (o) => (o.rules ? evalRules(o.rules, states) : {});
     const paint = (node, res, fill) => {
       if (res.color) {
-        const c = COLORS[res.color] || res.color;
+        const c = color(res.color);
         node.style.stroke = c;
         if (fill) { node.style.fill = c; node.style.fillOpacity = ".45"; }
         if (res.glow) node.style.filter = `drop-shadow(0 0 3px ${c}) drop-shadow(0 0 8px ${c})`;
@@ -599,7 +662,7 @@ class FnsFloorplanPanel extends HTMLElement {
       if (!this._on(r)) return;
       const f = el("path", { d: "M" + r.points.map(P).map((p) => p.join(",")).join("L") + "Z", class: "floor" + (this._sel?.cat === "rooms" && this._sel.i === i ? " sel" : "") }, svg);
       const res = ruled(r), tint = res.tint || res.color;
-      if (tint) el("path", { d: f.getAttribute("d"), class: "tint", fill: COLORS[tint] || tint, "fill-opacity": res.opacity ?? 0.14 }, svg);
+      if (tint) el("path", { d: f.getAttribute("d"), class: "tint", "fill-opacity": res.opacity ?? 0.14 }, svg).style.fill = color(tint);
       if (this._mode !== "rooms") return;
       f.addEventListener("pointerdown", (e) => {
         const base = r.points.map((p) => [...p]);
@@ -745,8 +808,8 @@ class FnsFloorplanPanel extends HTMLElement {
       const s = states[t.entity];
       tx.textContent = t.text || (s ? s.state + (s.attributes.unit_of_measurement ? " " + s.attributes.unit_of_measurement : "") : t.entity || "Text");
       const fg = res.color || t.color, bg = res.background || t.background;
-      if (fg) tx.style.fill = COLORS[fg] || fg;
-      if (bg) rect.style.fill = bg === "none" ? "transparent" : COLORS[bg] || bg;
+      if (fg) tx.style.fill = color(fg);
+      if (bg) rect.style.fill = bg === "none" ? "transparent" : color(bg);
       const bb = tx.getBBox();
       Object.entries({ x: bb.x - 6, y: bb.y - 3, width: bb.width + 12, height: bb.height + 6 }).forEach(([k, v]) => rect.setAttribute(k, v));
     });
@@ -919,13 +982,23 @@ class FnsFloorplanPanel extends HTMLElement {
   }
 
   _fillAdd() {
-    const sel = this.shadowRoot.querySelector(".add");
+    const dd = this.shadowRoot.querySelector(".add");
     const want = this._mode === "rooms" ? "rooms" : "items";
-    if (sel.dataset.for === want) return;
-    sel.dataset.for = want;
-    sel.innerHTML = want === "rooms"
-      ? '<option value="">+ Přidat</option><option value="room">Místnost</option>'
-      : `<option value="">+ Přidat</option>${ADD.map(([l], i) => `<option value="${i}">${l}</option>`).join("")}`;
+    if (dd.dataset.for === want) return;
+    dd.dataset.for = want;
+    const entries = want === "rooms" ? [["room", "Místnost", ""]] : ADD.map(([l], i) => [String(i), l, ADD_ICONS[i]]);
+    if (dd.localName === "select") {
+      dd.innerHTML = '<option value="">+ Přidat</option>' + entries.map(([v, l]) => `<option value="${v}">${l}</option>`).join("");
+      return;
+    }
+    dd.querySelectorAll("ha-dropdown-item").forEach((i) => i.remove());
+    for (const [v, l, ic] of entries) {
+      const it = document.createElement("ha-dropdown-item");
+      it.dataset.add = v;
+      it.innerHTML = (ic ? `<ha-icon slot="icon" icon="${ic}"></ha-icon>` : "") + esc(l);
+      it.addEventListener("click", () => { dd.open = false; this._addItem(v); });
+      dd.appendChild(it);
+    }
   }
 
   _drag(g, sel) {
@@ -1250,7 +1323,10 @@ class FnsFloorplanPanel extends HTMLElement {
     $(".save").disabled = !this._dirty;
     $(".revert").disabled = !this._dirty;
     const n = this._problems().length;
-    $(".check").textContent = n ? `Kontrola (${n})` : "Kontrola";
+    const ct = $(".check span"); // menu item text, or the plain button
+    if (ct) ct.textContent = n ? `Kontrola entit (${n})` : "Kontrola entit";
+    else $(".check").textContent = n ? `Kontrola (${n})` : "Kontrola";
+    $(".more")?.classList.toggle("warn", n > 0);
     $(".state").textContent = this._dirty ? "Neuložené změny" : "";
   }
 
@@ -1323,7 +1399,7 @@ class FnsFloorplanPanel extends HTMLElement {
         ${field("Text, když běží", "text_on", o.text_on || "")}
         <label>Barva, když běží</label>${this._colorPick("color_on", o.color_on)}
         <p class="hint">Výchozí = stejná jako Barva; obě výchozí = barva stavu z motivu.</p>
-        <label>Animace kruhu, když běží</label><select data-k="fx">${fxOptions(o.fx, o.kind === "alarm" ? "výchozí (střeženo radar, zabezpečování načítání, poplach blikání)" : "výchozí (rozbíhající kruh)")}</select>`, true)}
+        ${this._fxPicker("fx", o.fx, o.kind === "alarm" ? "výchozí (střeženo radar, zabezpečování načítání, poplach blikání)" : "výchozí (rozbíhající kruh)", o.kind === "alarm" ? "radar" : "ring", DEVICE_ICON[o.kind] || "mdiShapeOutline")}`, true)}
         ${this._sec("Vzhled", `${field("Text pod ikonou", "text", o.text || "")}
         <p class="hint">Může být šablona, např. {{ states('sensor.x') }} °C.</p>
         <label>Barva</label>${this._colorPick("color", o.color)}
@@ -1362,20 +1438,48 @@ class FnsFloorplanPanel extends HTMLElement {
   }
 
   // swaps plain inputs and selects for HA's ha-selector (same data-k, same set callback)
+  // tile picker of the circle animations, each tile plays its animation with the card's own CSS
+  _fxPicker(key, value, defLabel, defFx, iconName) {
+    const tile = (v, anim, text, title) => `<button class="fxt${(value || "") === v ? " on" : ""}" data-fx="${v}" title="${esc(title)}">
+      <svg viewBox="-34 -34 68 68" width="56" height="56"><g class="dev on dev-generic" data-fx="${anim}"><circle r="17" class="badge"/><circle r="17" class="ring"/><g class="fx">${FX_SVG[anim] || ""}</g><g class="icon">${iconHtml(null, 20, iconName, "glyph")}</g></g></svg>
+      <span>${text}</span></button>`;
+    return `<label>Animace kruhu, když běží</label><div class="app fxapp" data-mode="day"><div class="fxpick" data-fx-key="${key}">${tile("", defFx, "výchozí", defLabel)}${Object.entries(DEVICE_FX).map(([k, t]) => tile(k, k, t.split(" ")[0], t)).join("")}</div></div>`;
+  }
+
   _nativize(side, set) {
     if (!customElements.get("ha-selector")) return;
+    // colour pickers: a known value (theme colour name, default, none) becomes HA's ui_color selector; others keep the select
+    side.querySelectorAll(".colorpick").forEach((box) => {
+      const raw = box.dataset.value, key = box.dataset.color;
+      const v = raw === "" ? "state" : raw === "none" ? "none" : raw.match(/^var\(--([a-z-]+)-color\)$/)?.[1] ?? raw;
+      if (v !== "state" && v !== "none" && !UI_COLORS.has(v)) return;
+      const prev = box.previousElementSibling;
+      let label = "Barva";
+      if (prev && (prev.tagName === "LABEL" || prev.tagName === "SPAN")) { label = prev.textContent.trim(); prev.remove(); }
+      const h = document.createElement("ha-selector");
+      Object.assign(h, { hass: this._hass, selector: { ui_color: { include_state: true, include_none: box.hasAttribute("data-none"), default_color: "state" } }, label, value: v, required: true }); // "state" is the default, so no clear ✕
+      h.dataset.k = key;
+      h.addEventListener("value-changed", (e) => {
+        e.stopPropagation();
+        const nv = e.detail.value, same = nv === h.value;
+        h.value = nv;
+        if (!same) set(key, !nv || nv === "state" ? "" : nv, h);
+      });
+      box.replaceWith(h);
+    });
     side.querySelectorAll("[data-k]").forEach((el) => {
       const tag = el.tagName, type = tag === "INPUT" ? el.getAttribute("type") || "text" : "";
       if (tag !== "SELECT" && !(tag === "INPUT" && ["text", "number", "checkbox"].includes(type))) return;
-      if (el.closest(".outc, .cond, .rule, .icon-row")) return;
+      if (el.closest(".icon-row, .colorpick")) return;
       const k = el.dataset.k;
       let label = el.placeholder || "", selector, value, typed = false;
       const chk = type === "checkbox" ? el.closest("label.chk") : null, prev = el.previousElementSibling;
       if (chk) label = chk.textContent.trim();
-      else if (prev?.tagName === "LABEL" && !prev.classList.contains("chk")) { label = prev.textContent.trim(); prev.remove(); }
+      else if ((prev?.tagName === "LABEL" && !prev.classList.contains("chk")) || (prev?.tagName === "SPAN" && el.closest(".outc"))) { label = prev.textContent.trim(); prev.remove(); }
+      if (el.dataset.label) label = el.dataset.label;
       if (tag === "SELECT") {
-        selector = { select: { mode: "dropdown", options: [...el.options].map((o) => ({ value: o.value, label: o.textContent.trim() })) } };
-        value = el.value;
+        selector = { select: { mode: "dropdown", options: [...el.options].map((o) => ({ value: o.value === "" ? DEF : o.value, label: o.textContent.trim() })) } };
+        value = el.value === "" ? DEF : el.value;
       } else if (el.getAttribute("list") === "ents") { selector = { entity: {} }; value = el.value || undefined; }
       else if (type === "number") {
         const n = { mode: "box", step: Number(el.step) || "any" };
@@ -1385,12 +1489,12 @@ class FnsFloorplanPanel extends HTMLElement {
       } else if (type === "checkbox") { selector = { boolean: {} }; value = el.checked; }
       else { selector = { text: {} }; value = el.value; typed = true; }
       const h = document.createElement("ha-selector");
-      // a select without an empty option must not offer the clear ✕ (Druh, Typ…)
-      Object.assign(h, { hass: this._hass, selector, value, label, required: tag === "SELECT" && ![...el.options].some((o) => o.value === "") });
+      // a select never offers the clear ✕; the empty choice ("Výchozí") stays in the list
+      Object.assign(h, { hass: this._hass, selector, value, label, required: tag === "SELECT" });
       if (tag === "INPUT" && type === "text") h.placeholder = el.placeholder;
       h.dataset.k = k;
       if (el.closest("fieldset[disabled]")) h.disabled = true;
-      const norm = (v) => (type === "checkbox" ? !!v : String(v ?? ""));
+      const norm = (v) => (type === "checkbox" ? !!v : v === DEF ? "" : String(v ?? ""));
       let last = norm(value), pending; // last: what the typed field committed
       if (typed) {
         // a re-render after every keystroke would steal the focus: commit on blur or Enter
@@ -1404,10 +1508,36 @@ class FnsFloorplanPanel extends HTMLElement {
       }
       (chk || el).replaceWith(h);
     });
+    // buttons: icon buttons for data-icon, otherwise ha-button; data-a clicks are bound by _bind afterwards
+    if (!customElements.get("ha-button")) return;
+    side.querySelectorAll("button").forEach((b) => {
+      if (b.closest(".fxpick")) return;
+      const text = b.textContent.trim(), icon = b.dataset.icon;
+      let n;
+      if (icon) {
+        if (!customElements.get("ha-icon-button")) return;
+        n = document.createElement("ha-icon-button");
+        n.label = b.title || text;
+        n.innerHTML = `<ha-icon icon="${esc(icon)}"></ha-icon>`;
+      } else {
+        n = document.createElement("ha-button");
+        n.setAttribute("appearance", b.classList.contains("mini") ? "plain" : "filled");
+        n.setAttribute("size", "small");
+        if (b.classList.contains("del")) n.setAttribute("variant", "danger");
+        n.textContent = text;
+      }
+      if (b.dataset.a) n.dataset.a = b.dataset.a;
+      if (b.title) n.title = b.title;
+      if (b.className) n.className = b.className;
+      if (b.getAttribute("style")) n.setAttribute("style", b.getAttribute("style"));
+      n.toggleAttribute("disabled", b.disabled);
+      b.replaceWith(n);
+    });
   }
 
   _bind(side, set, act) {
     this._nativize(side, set);
+    side.querySelectorAll(".fxpick .fxt").forEach((b) => b.addEventListener("click", () => set(b.closest(".fxpick").dataset.fxKey, b.dataset.fx, b)));
     side.querySelectorAll("[data-sec]").forEach((el) => {
       const rec = (open) => ((this._secOpen ||= {})[el.dataset.sec] = open);
       if (el.localName === "details") el.addEventListener("toggle", () => rec(el.open));
@@ -1424,8 +1554,13 @@ class FnsFloorplanPanel extends HTMLElement {
       const pick = document.createElement("ha-icon-picker");
       pick.hass = this._hass;
       pick.value = inp.value;
-      pick.placeholder = inp.placeholder;
+      Object.assign(pick, { label: "Ikona", placeholder: inp.placeholder, helper: "prázdné = výchozí" });
       pick.addEventListener("value-changed", (e) => this._set("icon", e.detail.value || ""));
+      // the picker has its own label, preview and clear button
+      const row = inp.closest(".icon-row"), lab = row?.previousElementSibling;
+      if (lab?.tagName === "LABEL") lab.remove();
+      row?.querySelector(":scope > ha-icon")?.remove();
+      row?.querySelector('[data-a="icon-reset"]')?.remove();
       inp.replaceWith(pick);
     }
     const ta = side.querySelector('[data-k="rules_yaml"]');
@@ -1478,8 +1613,9 @@ class FnsFloorplanPanel extends HTMLElement {
 
   // quick placement inside the item's room: corners, sides, middle
   _placeField() {
+    const PLACE_ICONS = { tl: "mdi:arrow-top-left", t: "mdi:arrow-up", tr: "mdi:arrow-top-right", l: "mdi:arrow-left", c: "mdi:circle-small", r: "mdi:arrow-right", bl: "mdi:arrow-bottom-left", b: "mdi:arrow-down", br: "mdi:arrow-bottom-right" };
     const cells = [["tl", "↖"], ["t", "↑"], ["tr", "↗"], ["l", "←"], ["c", "•"], ["r", "→"], ["bl", "↙"], ["b", "↓"], ["br", "↘"]];
-    return `<label>Umístit v místnosti</label><div class="place">${cells.map(([k, g]) => `<button data-a="place:${k}" title="${k === "c" ? "Střed místnosti" : "K okraji místnosti"}">${g}</button>`).join("")}</div>`;
+    return `<label>Umístit v místnosti</label><div class="place">${cells.map(([k, g]) => `<button data-a="place:${k}" data-icon="${PLACE_ICONS[k]}" title="${k === "c" ? "Střed místnosti" : "K okraji místnosti"}">${g}</button>`).join("")}</div>`;
   }
 
   _place(where) {
@@ -1505,15 +1641,15 @@ class FnsFloorplanPanel extends HTMLElement {
     return `<label>Velikost</label><select data-k="size">${Object.entries(SIZE_NAMES).map(([k, v]) => `<option value="${k}" ${(o.size || "") === k ? "selected" : ""}>${v}</option>`).join("")}</select>`;
   }
 
-  _layerField(o) {
-    return `<label>Pořadí při překrytí (vrstva ${o.layer || 0})</label><div class="layers">
-      <button data-a="layer:top">Úplně nahoru</button><button data-a="layer:up">Dopředu</button><button data-a="layer:down">Dozadu</button><button data-a="layer:bottom">Úplně dolů</button></div>`;
+  _layerField() {
+    return `<label>Pořadí při překrytí</label><div class="layers">
+      <button data-a="layer:top" data-icon="mdi:arrange-bring-to-front" title="Do popředí">Do popředí</button><button data-a="layer:bottom" data-icon="mdi:arrange-send-to-back" title="Do pozadí">Do pozadí</button></div>`;
   }
 
   // a colour: one of the named colours or any picked one; `none` offers a transparent background
   _colorPick(key, value, none = false) {
     const custom = value && !COLORS[value] && value !== "none";
-    return `<div class="outc" style="margin-top:0"><select data-k="${key}">
+    return `<div class="outc colorpick" style="margin-top:0" data-color="${key}" data-value="${esc(value || "")}" ${none ? "data-none" : ""}><select data-k="${key}">
       <option value="">Výchozí</option>${none ? `<option value="none" ${value === "none" ? "selected" : ""}>Žádné</option>` : ""}
       ${Object.entries(COLOR_NAMES).map(([k, v]) => `<option value="${k}" ${value === k ? "selected" : ""}>${v}</option>`).join("")}
       <option value="custom" ${custom ? "selected" : ""}>Vlastní…</option></select>
@@ -1546,12 +1682,12 @@ class FnsFloorplanPanel extends HTMLElement {
     const valOf = (c, op) => (op === "template" ? c.template : [].concat(c[op] ?? "").join(", "));
     const out = (i, r) => {
       const parts = [];
-      if (fields.includes("color")) parts.push(`<span>${fields.includes("background") ? "Text" : "Barva"}</span>${this._colorPick(`ro:${i}:color`, r.color).replace(/^<div class="outc" style="margin-top:0">|<\/div>$/g, "")}`);
-      if (fields.includes("background")) parts.push(`<span>Pozadí</span>${this._colorPick(`ro:${i}:background`, r.background, true).replace(/^<div class="outc" style="margin-top:0">|<\/div>$/g, "")}`);
-      if (fields.includes("wave") && o.kind === "radiator") parts.push(`<span>Vlny</span>${this._colorPick(`ro:${i}:wave`, r.wave).replace(/^<div class="outc" style="margin-top:0">|<\/div>$/g, "")}`);
+      if (fields.includes("color")) parts.push(`<span>${fields.includes("background") ? "Text" : "Barva"}</span>${this._colorPick(`ro:${i}:color`, r.color)}`);
+      if (fields.includes("background")) parts.push(`<span>Pozadí</span>${this._colorPick(`ro:${i}:background`, r.background, true)}`);
+      if (fields.includes("wave") && o.kind === "radiator") parts.push(`<span>Vlny</span>${this._colorPick(`ro:${i}:wave`, r.wave)}`);
       if (fields.includes("glow")) parts.push(`<label class="chk"><input type="checkbox" data-k="ro:${i}:glow" ${r.glow ? "checked" : ""}> záře</label>`);
-      if (fields.includes("animate")) parts.push(`<select data-k="ro:${i}:animate"><option value="">animace podle stavu</option><option value="true" ${r.animate === true ? "selected" : ""}>animovat</option><option value="false" ${r.animate === false ? "selected" : ""}>neanimovat</option></select>`);
-      if (fields.includes("fx")) parts.push(`<select data-k="ro:${i}:fx">${fxOptions(r.fx, "kruh podle prvku")}</select>`);
+      if (fields.includes("animate")) parts.push(`<select data-k="ro:${i}:animate" data-label="Animace"><option value="">animace podle stavu</option><option value="true" ${r.animate === true ? "selected" : ""}>animovat</option><option value="false" ${r.animate === false ? "selected" : ""}>neanimovat</option></select>`);
+      if (fields.includes("fx")) parts.push(`<select data-k="ro:${i}:fx" data-label="Kruh">${fxOptions(r.fx, "kruh podle prvku")}</select>`);
       if (fields.includes("hide")) parts.push(`<label class="chk"><input type="checkbox" data-k="ro:${i}:hide" ${r.hide ? "checked" : ""}> skrýt</label>`);
       if (o.points) parts.push(`<span>Průhlednost</span><input type="number" step="0.05" min="0" max="1" data-k="ro:${i}:opacity" value="${r.opacity ?? ""}" placeholder="0,14" style="width:70px">`);
       if (fields.includes("icon")) parts.push(`<input type="text" data-k="ro:${i}:icon" value="${esc(r.icon || "")}" placeholder="ikona, např. mdi:timer-sand (none = bez ikony)">`);
@@ -1562,15 +1698,15 @@ class FnsFloorplanPanel extends HTMLElement {
       const conds = [].concat(r.if || []);
       const simple = conds.every((c) => !c.any);
       return `<div class="rule"><div class="rule-h"><span>Pravidlo ${i + 1}</span>
-          <button data-a="ra:up:${i}" ${i ? "" : "disabled"}>↑</button><button data-a="ra:down:${i}" ${i < rules.length - 1 ? "" : "disabled"}>↓</button><button data-a="ra:del:${i}">✕</button></div>
+          <button data-a="ra:up:${i}" data-icon="mdi:arrow-up" title="Posunout výš" ${i ? "" : "disabled"}>↑</button><button data-a="ra:down:${i}" data-icon="mdi:arrow-down" title="Posunout níž" ${i < rules.length - 1 ? "" : "disabled"}>↓</button><button data-a="ra:del:${i}" data-icon="mdi:delete" title="Smazat pravidlo">✕</button></div>
         ${simple ? conds.map((c, j) => {
           const op = opOf(c);
           return `<div class="cond">${op === "template" ? "" : `<input data-k="rc:${i}:${j}:entity" value="${esc(c.entity || "")}" placeholder="entita" list="ents">
               ${own && c.entity !== own ? `<button class="mini wide" data-a="ra:self:${i}:${j}" title="${esc(own)}">↳ tato entita</button>` : ""}
               <input data-k="rc:${i}:${j}:attribute" value="${esc(c.attribute || "")}" placeholder="atribut (jinak stav)">`}
-            <select data-k="rc:${i}:${j}:op">${Object.entries(OPS).map(([k, v]) => `<option value="${k}" ${k === op ? "selected" : ""}>${v}</option>`).join("")}</select>
+            <select data-k="rc:${i}:${j}:op" data-label="Podmínka">${Object.entries(OPS).map(([k, v]) => `<option value="${k}" ${k === op ? "selected" : ""}>${v}</option>`).join("")}</select>
             <input data-k="rc:${i}:${j}:value" value="${esc(valOf(c, op))}" placeholder="${op === "template" ? "{{ is_state('timer.x', 'active') }}" : op === "state" || op === "state_not" ? "on, open" : "20"}" ${op === "template" ? 'class="wide"' : ""}>
-            <button data-a="ra:cdel:${i}:${j}" class="mini">✕ podmínka</button></div>`;
+            <button data-a="ra:cdel:${i}:${j}" class="mini" data-icon="mdi:close" title="Smazat podmínku">✕ podmínka</button></div>`;
         }).join("") + `<button data-a="ra:cadd:${i}" class="mini" style="margin-top:6px">+ podmínka</button>${conds.length ? "" : ' <span class="hint">bez podmínky platí vždy</span>'}`
           : `<p class="hint">Pravidlo s podmínkou „nebo“ (any) uprav v YAML.</p>`}
         ${out(i, r)}</div>`;
@@ -1814,11 +1950,13 @@ class FnsFloorplanPanel extends HTMLElement {
       if (v) o.room.label_rotation = v; else delete o.room.label_rotation;
     } else if (a.startsWith("rot")) o.rotation = (((o.rotation || 0) + Number(a.slice(3))) % 360 + 360) % 360;
     else if (a.startsWith("layer:")) {
-      // z-order among items of the same kind
-      const all = this._plan[sel.cat].filter((x) => sel.cat !== "furniture" || isLight(x) === isLight(o)).map((x) => x.layer || 0);
-      const cur = o.layer || 0, op = a.slice(6);
-      const next = op === "up" ? cur + 1 : op === "down" ? cur - 1 : op === "top" ? Math.max(...all) + 1 : Math.min(...all) - 1;
-      for (const t of targets) if (next) t.layer = next; else delete t.layer;
+      // z-order among items of the same kind; only the other items count, so a repeated click changes nothing
+      const others = this._plan[sel.cat].filter((x) => !targets.includes(x) && (sel.cat !== "furniture" || isLight(x) === isLight(o))).map((x) => x.layer || 0);
+      if (others.length) {
+        const cur = o.layer || 0;
+        const next = a === "layer:top" ? Math.max(cur, Math.max(...others) + 1) : Math.min(cur, Math.min(...others) - 1);
+        for (const t of targets) if (next) t.layer = next; else delete t.layer;
+      }
     } else if (a === "dup") {
       const base = this._plan[sel.cat].length;
       for (const t of targets) {
