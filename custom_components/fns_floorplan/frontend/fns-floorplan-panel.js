@@ -256,6 +256,9 @@ div.modes button.on { background: var(--primary-color, #03a9f4); color: var(--te
   border: 1px solid var(--divider-color, #e0e0e0); background: var(--primary-background-color, #fafafa); color: var(--primary-text-color, #212121); }
 .side textarea { min-height: 120px; font-family: monospace; font-size: 12px; }
 .side textarea.bad { border-color: var(--error-color, #db4437); }
+.side ha-code-editor { display: block; margin-top: 8px; border-radius: 8px; overflow: hidden; border: 1px solid var(--divider-color, #e0e0e0); }
+.side ha-code-editor.bad { border-color: var(--error-color, #db4437); }
+.side .hint.err { color: var(--error-color, #db4437); }
 .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .row2 label { margin-top: 12px; }
 .rot { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
@@ -1621,6 +1624,15 @@ class FnsFloorplanPanel extends HTMLElement {
 
   _bind(side, set, act) {
     this._nativize(side, set);
+    // the rules YAML gets HA's own code editor (syntax colours, entity completion); commits on blur
+    const ta = side.querySelector('textarea[data-k="rules_yaml"]');
+    if (ta && customElements.get("ha-code-editor")) {
+      const ed = document.createElement("ha-code-editor");
+      Object.assign(ed, { hass: this._hass, mode: "yaml", linewrap: true, autocompleteEntities: true, autocompleteIcons: true });
+      ed.dataset.k = "rules_yaml";
+      ed.addEventListener("focusout", () => ed.dispatchEvent(new Event("change")));
+      ta.replaceWith(ed);
+    }
     side.querySelectorAll(".fxpick .fxt").forEach((b) => b.addEventListener("click", () => set(b.closest(".fxpick").dataset.fxKey, b.dataset.fx, b)));
     side.querySelectorAll("[data-sec]").forEach((el) => {
       const rec = (open) => ((this._secOpen ||= {})[el.dataset.sec] = open);
@@ -1651,7 +1663,8 @@ class FnsFloorplanPanel extends HTMLElement {
       inp.replaceWith(pick);
     }
     const ta = side.querySelector('[data-k="rules_yaml"]');
-    if (ta) {
+    if (ta && this._aiDraft != null && this._aiFor === this._targets()[0]) ta.value = this._aiDraft;
+    else if (ta) {
       const rules = this._targets()[0]?.rules;
       if (!rules?.length) ta.value = "";
       else this._hass.callWS({ type: "fns_floorplan/yaml/dump", data: rules }).then((r) => (ta.value = r.text), () => (ta.value = JSON.stringify(rules, null, 1)));
@@ -1765,6 +1778,9 @@ class FnsFloorplanPanel extends HTMLElement {
   _rulesUI(o, fields) {
     const rules = o.rules || [];
     const own = this._ownEntity(o);
+    // AI suggestions need an ai_task entity that can generate data; remember the fields for the prompt
+    const ai = this._aiTask(), draft = this._aiDraft != null && this._aiFor === o;
+    this._ruleFields = fields;
     const opOf = (c) => (c.template != null ? "template" : ["state_not", "above", "below"].find((k) => c[k] != null) || "state");
     const valOf = (c, op) => (op === "template" ? c.template : [].concat(c[op] ?? "").join(", "));
     const out = (i, r) => {
@@ -1802,8 +1818,13 @@ class FnsFloorplanPanel extends HTMLElement {
     }).join("");
     return this._sec(`Pravidla: barvy, skrytí${fields.includes("icon") ? ", ikona" : ""}${rules.length ? ` (${rules.length})` : ""}`, `
       <p class="hint">Pro každou vlastnost platí první pravidlo, jehož podmínky platí.</p>${list}
-      <div class="actions"><button data-a="ra:add">+ pravidlo</button><button data-a="ra:yaml">${this._yaml ? "Skrýt YAML" : "Upravit v YAML"}</button></div>
-      ${this._yaml ? `<textarea data-k="rules_yaml" spellcheck="false" placeholder="- if:\n    - entity: binary_sensor.x\n      state: \"on\"\n  color: red">Načítám…</textarea>` : ""}`, rules.length > 0, "Pravidla");
+      <div class="actions"><button data-a="ra:add">+ pravidlo</button><button data-a="ra:yaml">${this._yaml ? "Skrýt YAML" : "Upravit v YAML"}</button>${ai ? `<button data-a="ra:ai">${this._ai ? "Skrýt AI" : "Navrhnout s AI"}</button>` : ""}</div>
+      ${ai && this._ai ? `<input data-k="rules_ai" value="${esc(this._aiText || "")}" data-label="Co má pravidlo dělat" placeholder="např. červeně, když je otevřené okno a topí se">
+        <div class="actions"><button data-a="ra:aigo" ${this._aiBusy ? "disabled" : ""}>${this._aiBusy ? "AI přemýšlí…" : "Navrhnout"}</button></div>
+        ${this._aiErr ? `<p class="hint err">${esc(this._aiErr)}</p>` : ""}` : ""}
+      ${draft ? `<p class="hint">Návrh od AI (${esc(ai)}). Zkontroluj ho a potvrď, zatím se nic nezměnilo.</p>` : ""}
+      ${this._yaml || draft ? `<textarea data-k="rules_yaml" spellcheck="false" placeholder="- if:\n    - entity: binary_sensor.x\n      state: \"on\"\n  color: red">Načítám…</textarea>` : ""}
+      ${draft ? `<div class="actions"><button data-a="ra:aiok">Použít návrh</button><button data-a="ra:aino">Zahodit</button></div>` : ""}`, rules.length > 0 || draft, "Pravidla");
   }
 
   // rule, action and look fields shared by every kind of item; true when the key was one of them
@@ -1815,6 +1836,9 @@ class FnsFloorplanPanel extends HTMLElement {
       catch (err) { inp?.classList.add("bad"); if (inp) inp.title = err.message || ""; throw err; }
     };
     const color = (v) => (v === "custom" ? (inp?.nextElementSibling?.value || "#ff0000") : v);
+    if (key === "rules_ai") { this._aiText = value; return true; }
+    // while an AI draft is open, the editor edits the draft, not the rules
+    if (key === "rules_yaml" && this._aiDraft != null && this._aiFor === first) { this._aiDraft = value; return true; }
     if (key === "rules_yaml") {
       const data = value.trim() ? await parseYaml(value).catch(() => undefined) : [];
       if (data === undefined) return true;
@@ -1873,6 +1897,10 @@ class FnsFloorplanPanel extends HTMLElement {
   _ruleAction(targets, a) {
     const [, op, i, j] = a.split(":");
     if (op === "yaml") { this._yaml = !this._yaml; return this._form(); }
+    if (op === "ai") { this._ai = !this._ai; this._aiErr = ""; return this._form(); }
+    if (op === "aigo") return this._aiSuggest(targets);
+    if (op === "aino") { this._aiDraft = null; return this._form(); }
+    if (op === "aiok") return this._aiApply(targets);
     const rules = JSON.parse(JSON.stringify(targets[0].rules || []));
     const n = Number(i), own = this._ownEntity(targets[0]);
     if (op === "self") { const c = [].concat(rules[n].if || []); c[Number(j)] = { ...c[Number(j)], entity: own }; rules[n].if = c; }
@@ -1883,6 +1911,80 @@ class FnsFloorplanPanel extends HTMLElement {
     else if (op === "cadd") rules[n].if = [...[].concat(rules[n].if || []), { entity: own, state: "on" }];
     else if (op === "cdel") { const c = [].concat(rules[n].if || []); c.splice(Number(j), 1); if (c.length) rules[n].if = c; else delete rules[n].if; }
     for (const t of targets) if (rules.length) t.rules = JSON.parse(JSON.stringify(rules)); else delete t.rules;
+    this._changed();
+  }
+
+  // the first ai_task entity that can generate data
+  _aiTask() {
+    return Object.keys(this._hass.states).find((e) => e.startsWith("ai_task.") && this._hass.states[e].attributes.supported_features & 1) || "";
+  }
+
+  // ask HA's AI Task for rules from a plain-language request; the answer opens as a draft in the YAML editor
+  async _aiSuggest(targets) {
+    const ask = (this._aiText || "").trim();
+    if (!ask) { this._aiErr = "Napiš, co má pravidlo dělat."; return this._form(); }
+    const o = targets[0], fields = this._ruleFields || [], hass = this._hass;
+    const own = this._ownEntity(o), so = hass.states[own];
+    const OUT = { color: "color: colour of the item (or its text when background is allowed)", background: "background: badge background colour",
+      wave: "wave: colour of radiator heat waves", glow: "glow: true = glowing", animate: "animate: true / false = force animation on / off",
+      fx: `fx: ring animation, one of ${Object.keys(DEVICE_FX).join(", ")}`, hide: "hide: true = hide the item",
+      icon: 'icon: "mdi:name" ("none" = no icon)', text: "text: label text, may be a Jinja template {{ }}" };
+    const outs = fields.filter((f) => OUT[f]).map((f) => "  - " + OUT[f]);
+    if (fields.includes("fx")) outs.push("  - progress: entity with remaining time or percent, for fx: countdown");
+    if (o.points) outs.push("  - opacity: 0..1 fill opacity");
+    const skip = /^(update|event|image|button|scene|script|automation|zone|tts|stt|wake_word|conversation|ai_task|todo|calendar|tag|notify)\./;
+    const ents = Object.values(hass.states).filter((s) => !skip.test(s.entity_id)).slice(0, 1500)
+      .map((s) => `${s.entity_id}: ${s.attributes.friendly_name || ""}`).join("\n");
+    const cur = o.rules?.length ? (await hass.callWS({ type: "fns_floorplan/yaml/dump", data: o.rules }).catch(() => ({ text: JSON.stringify(o.rules) }))).text : "(none)";
+    const instructions = `You write display rules for one item of a Home Assistant floor plan card.
+Answer with ONLY a YAML list of rules: no prose, no code fences.
+
+Rule format:
+- if:                          # all conditions must hold; leave "if" out for a rule that always applies
+    - entity: binary_sensor.x  # entity id
+      attribute: hvac_action   # optional; without it the state is compared
+      state: "on"              # or a list of states; instead of state use state_not, above or below (numbers)
+    - template: "{{ is_state('timer.x', 'active') }}"   # a Jinja condition instead of entity
+  <outputs>
+
+Outputs allowed for this item:
+${outs.join("\n")}
+For each output the first rule whose conditions hold wins, so put specific rules first.
+Colours are Home Assistant colour names (${[...UI_COLORS].join(", ")}) or "#rrggbb". Quote states like "on" and "off".
+Keep the current rules unless the request says to change them; return the whole new list.
+If the request cannot be done with these outputs or entities, answer with one short sentence in the request's language instead of YAML.
+
+Item: ${o.kind || o.type || "room"}${o.name ? ` "${o.name}"` : ""}
+Own entity: ${own || "(none)"}${so ? `, state "${so.state}", attributes ${JSON.stringify(so.attributes).slice(0, 2000)}` : ""}
+Current rules:
+${cur}
+
+Entities (id: name):
+${ents}
+
+Request (may be in Czech): ${ask}`;
+    this._aiBusy = true; this._aiErr = ""; this._form();
+    try {
+      const r = await hass.callWS({ type: "call_service", domain: "ai_task", service: "generate_data", return_response: true,
+        service_data: { task_name: "FNS Floorplan rules", entity_id: this._aiTask(), instructions } });
+      const text = String(r.response?.data ?? "").replace(/^\s*```\w*\n?/, "").replace(/```\s*$/, "").trim();
+      const data = (await hass.callWS({ type: "fns_floorplan/yaml/parse", text })).data;
+      // no list = the AI explains why it can't do it; show that as it is
+      if (!Array.isArray(data)) this._aiErr = `AI: ${typeof data === "string" ? data : "nevrátila seznam pravidel."}`;
+      else { this._aiDraft = text; this._aiFor = o; }
+    } catch (err) { this._aiErr = `Návrh se nepovedl: ${err.message || err}`; }
+    this._aiBusy = false;
+    this._form();
+  }
+
+  // the checked draft replaces the item's rules
+  async _aiApply(targets) {
+    let data;
+    try { data = (await this._hass.callWS({ type: "fns_floorplan/yaml/parse", text: this._aiDraft })).data; }
+    catch (err) { this._aiErr = `Chyba v YAML: ${err.message || err}`; return this._form(); }
+    if (!Array.isArray(data)) { this._aiErr = "Návrh musí být seznam pravidel."; return this._form(); }
+    for (const t of targets) if (data.length) t.rules = JSON.parse(JSON.stringify(data)); else delete t.rules;
+    this._aiDraft = null; this._aiErr = "";
     this._changed();
   }
 
