@@ -3,8 +3,40 @@
 // In the "Místnosti" mode rooms (corner points, whole rooms), windows and doors are edited.
 
 // icons, furniture types and the rules engine come from the card module (same URL, so loaded once)
-const { MDI, COLORS, UI_COLORS, color, FURNITURE, lightIcon, SIZES, evalRules, resolveIcon, iconHtml, FX_SVG, STYLE: CARD_STYLE } =
+const { MDI, COLORS, UI_COLORS, color, FURNITURE, lightIcon, SIZES, evalRules, resolveIcon, iconHtml, FX_SVG, DOMAIN_DEV, STYLE: CARD_STYLE } =
   await import(new URL("./fns-floorplan-card.js", import.meta.url).href + new URL(import.meta.url).search);
+
+// what a generic item does by default, by its entity's domain (the behaviour itself is DOMAIN_DEV in the card)
+const DOMAIN_HINT = {
+  fan: "Běží, když je zapnutý; kruh se točí, text: otáčky v %.",
+  siren: "Běží, když je zapnutá; kruh bliká.",
+  input_boolean: "Běží, když je zapnutý.",
+  switch: "Běží, když je zapnutý.",
+  humidifier: "Běží, když je zapnutý; kruh dýchá, text: cílová vlhkost.",
+  water_heater: "Běží, když je zapnutý; kruh dýchá, text: cílová teplota.",
+  climate: "Běží, když topí nebo chladí; text: aktuální → cílová teplota.",
+  valve: "Běží, když je otevřený nebo se hýbe; text: poloha v %.",
+  cover: "Běží, když je otevřený nebo se hýbe; text: poloha v %.",
+  lawn_mower: "Běží při sekání; kruh jede po obvodu.",
+  vacuum: "Běží při úklidu a návratu na dok; kruh jede po obvodu.",
+  camera: "Běží při nahrávání a streamu; kruh jako radar.",
+  person: "Doma = běží; v odznaku fotka, mimo domov šedá a název zóny.",
+  device_tracker: "Doma = běží; v odznaku fotka, mimo domov šedá a název zóny.",
+  script: "Běží, když se vykonává; klepnutí skript spustí.",
+  scene: "Klepnutí scénu spustí, kruh krátce pípne.",
+  button: "Klepnutí tlačítko stiskne, kruh krátce pípne.",
+  input_button: "Klepnutí tlačítko stiskne, kruh krátce pípne.",
+  input_select: "Nikdy neběží; text: zvolená hodnota.",
+  select: "Nikdy neběží; text: zvolená hodnota.",
+  number: "Nikdy neběží; text: hodnota s jednotkou.",
+  input_number: "Nikdy neběží; text: hodnota s jednotkou.",
+  counter: "Nikdy neběží; text: hodnota.",
+  sensor: "Nikdy neběží; text: hodnota s jednotkou.",
+  weather: "Nikdy neběží; text: teplota.",
+  sun: "Běží, když je slunce nad obzorem.",
+  timer: "Běží, když odpočítává; kruh ukazuje zbývající čas z vlastní entity.",
+  binary_sensor: "Běží, když je sepnutý.",
+};
 
 const S = 80; // px per metre, same as the card
 const PAD = 40;
@@ -1397,10 +1429,14 @@ class FnsFloorplanPanel extends HTMLElement {
         ${this._actionsUI(o, light ? { tap: "Přepnout", hold: "Detail entity" } : { tap: "Detail entity" })}
         ${this._rulesUI(o, o.type === "led_strip" ? ["hide"] : light || dock ? ["icon", "hide"] : ["color", "glow", "icon", "hide"])}`;
     } else if (sel.cat === "devices") {
+      // domain defaults of a generic item: hint, default ring, default tap
+      const dom = o.kind === "generic" ? String(o.entity || "").split(".")[0] : "", dd = DOMAIN_DEV[dom];
+      const domFx = typeof dd?.fx === "string" ? dd.fx : "", domTap = dd?.tap?.("")?.perform_action || "";
       html = `<h2>${DEVICE_KINDS[o.kind] || "Spotřebič"}</h2>
         ${this._sec("Základ", `<label>Druh</label><select data-k="kind">${Object.entries(DEVICE_KINDS).map(([k, v]) => `<option value="${k}" ${k === o.kind ? "selected" : ""}>${v}</option>`).join("")}</select>
         ${field("Název", "name", o.name || "")}
         ${field("Entita", "entity", o.entity || "", "text", 'list="ents"')}
+        ${o.kind === "generic" && DOMAIN_HINT[dom] ? `<p class="hint">${DOMAIN_HINT[dom]}</p>` : ""}
         <label class="chk"><input type="checkbox" data-k="sheet_hide" ${o.sheet_hide ? "checked" : ""}> nezobrazovat v panelu místnosti</label>
         ${o.kind === "media" ? `<label class="chk"><input type="checkbox" data-k="cover" ${o.cover === false ? "" : "checked"}> obal alba nebo pořadu v odznaku (při přehrávání a pauze)</label>` : ""}`, true)}
         ${this._sec("Když běží", `<label>Běží, když je stav</label><input data-k="active" value="${esc(Array.isArray(o.active) ? o.active.join(", ") : o.active ? JSON.stringify(o.active) : "")}" placeholder="${o.kind === "media" ? "playing" : "on, run"}">
@@ -1408,7 +1444,7 @@ class FnsFloorplanPanel extends HTMLElement {
         ${field("Text, když běží", "text_on", o.text_on || "")}
         <label>Barva, když běží</label>${this._colorPick("color_on", o.color_on)}
         <p class="hint">Výchozí = stejná jako Barva; obě výchozí = barva stavu z motivu.</p>
-        ${this._fxPicker("fx", o.fx, o.kind === "alarm" ? "výchozí (střeženo radar, zabezpečování načítání, poplach blikání)" : "výchozí (rozbíhající kruh)", o.kind === "alarm" ? "radar" : "ring", DEVICE_ICON[o.kind] || "mdiShapeOutline", "progress", o.progress)}
+        ${this._fxPicker("fx", o.fx, o.kind === "alarm" ? "výchozí (střeženo radar, zabezpečování načítání, poplach blikání)" : domFx ? `výchozí (${DEVICE_FX[domFx].split(" ")[0]})` : "výchozí (rozbíhající kruh)", o.kind === "alarm" ? "radar" : domFx || "ring", DEVICE_ICON[o.kind] || "mdiShapeOutline", "progress", o.progress)}
         ${o.fx === "countdown" && o.progress ? `<input data-k="progress_total" type="number" min="1" step="1" value="${o.progress_total ?? ""}" data-label="Celková doba (min, nepovinné)">` : ""}`, true)}
         ${this._sec("Vzhled", `${field("Text pod ikonou", "text", o.text || "")}
         <p class="hint">Může být šablona, např. {{ states('sensor.x') }} °C.</p>
@@ -1417,7 +1453,7 @@ class FnsFloorplanPanel extends HTMLElement {
         ${this._sizeField(o)}`)}
         ${this._sec("Pozice", `${xz}
         ${this._layerField(o)}`)}
-        ${this._actionsUI(o, { tap: "Detail entity" })}
+        ${this._actionsUI(o, { tap: domTap ? (domTap.includes("press") ? "Stisknout" : "Spustit") : "Detail entity" })}
         ${this._rulesUI(o, ["color", "glow", "animate", "fx", "text", "icon", "wave", "hide"])}`;
     } else if (sel.cat === "texts") {
       html = `<h2>Text</h2><p class="hint">Ukáže stav entity (s jednotkou), nebo vlastní text. Text může být šablona, třeba {{ states('sensor.x') }}.</p>
