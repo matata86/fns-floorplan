@@ -19,7 +19,6 @@ const DEVICE_KINDS = {
   fireplace: "Krb", lock: "Zámek", generic: "Jiné zařízení (ikona entity)",
 };
 const DEVICE_FX = { ring: "rozbíhající kruh", radar: "radar", comet: "kometa po obvodu", countdown: "odpočet", spin: "načítání", orbit: "oběžnice", breath: "dýchání", blink: "blikání", heartbeat: "tep", shake: "zvonění", none: "bez animace kruhu" };
-const fxOptions = (v, empty) => `<option value="">${empty}</option>` + Object.entries(DEVICE_FX).map(([k, t]) => `<option value="${k}" ${v === k ? "selected" : ""}>${t}</option>`).join("");
 const DEVICE_ICON = {
   fan: "mdiFan", purifier: "mdiAirPurifier", dishwasher: "mdiDishwasher", dryer: "mdiTumbleDryer", boiler: "mdiWaterBoiler",
   radiator: "mdiRadiator", alarm: "mdiShieldOutline", media: "mdiCastVariant", generic: "mdiShapeOutline",
@@ -172,6 +171,10 @@ svg { width: 100%; height: 100%; display: block; touch-action: none; user-select
   border-radius: 6px; padding: 3px 8px; cursor: pointer; }
 .cond { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; padding-top: 6px; border-top: 1px dashed var(--divider-color, #e0e0e0); }
 .cond .wide { flex: 1 1 100%; }
+.cond-foot { display: flex; align-items: center; gap: 8px; flex: 1 1 100%; margin-top: 2px; }
+.cond-foot .sp { flex: 1; }
+.cond-foot .hint { margin: 0; }
+.side ha-icon-button.mini { border: 0; background: none; padding: 0; }
 .side .cond input, .side .cond select, .side .outc input, .side .outc select { padding: 5px; font-size: 13px; }
 .outc { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 8px; font-size: 13px; }
 .outc select { width: auto; flex: 1; }
@@ -181,7 +184,9 @@ svg { width: 100%; height: 100%; display: block; touch-action: none; user-select
 .side label.chk input { width: auto; }
 .badge-opts { border: 0; padding: 0 0 0 22px; margin: 0; }
 .badge-opts:disabled { opacity: .45; }
-.icon-row { display: flex; align-items: center; gap: 8px; }
+.icon-row { display: flex; align-items: flex-start; gap: 8px; margin-top: 12px; }
+/* the picker field is 56 px tall (its helper hangs below it): centre the button on the field, not on field + helper */
+.icon-row > ha-button, .icon-row > button { margin-top: 8px; height: 40px; }
 .icon-row ha-icon { flex: none; color: var(--primary-color, #03a9f4); }
 .icon-row input, .icon-row ha-icon-picker { flex: 1; }
 .place { display: grid; grid-template-columns: repeat(3, 40px); gap: 0; margin-top: 4px; }
@@ -1400,7 +1405,8 @@ class FnsFloorplanPanel extends HTMLElement {
         ${field("Text, když běží", "text_on", o.text_on || "")}
         <label>Barva, když běží</label>${this._colorPick("color_on", o.color_on)}
         <p class="hint">Výchozí = stejná jako Barva; obě výchozí = barva stavu z motivu.</p>
-        ${this._fxPicker("fx", o.fx, o.kind === "alarm" ? "výchozí (střeženo radar, zabezpečování načítání, poplach blikání)" : "výchozí (rozbíhající kruh)", o.kind === "alarm" ? "radar" : "ring", DEVICE_ICON[o.kind] || "mdiShapeOutline")}`, true)}
+        ${this._fxPicker("fx", o.fx, o.kind === "alarm" ? "výchozí (střeženo radar, zabezpečování načítání, poplach blikání)" : "výchozí (rozbíhající kruh)", o.kind === "alarm" ? "radar" : "ring", DEVICE_ICON[o.kind] || "mdiShapeOutline", "progress", o.progress)}
+        ${o.fx === "countdown" && o.progress ? `<input data-k="progress_total" type="number" min="1" step="1" value="${o.progress_total ?? ""}" data-label="Celková doba (min, nepovinné)">` : ""}`, true)}
         ${this._sec("Vzhled", `${field("Text pod ikonou", "text", o.text || "")}
         <p class="hint">Může být šablona, např. {{ states('sensor.x') }} °C.</p>
         <label>Barva</label>${this._colorPick("color", o.color)}
@@ -1440,11 +1446,14 @@ class FnsFloorplanPanel extends HTMLElement {
 
   // swaps plain inputs and selects for HA's ha-selector (same data-k, same set callback)
   // tile picker of the circle animations, each tile plays its animation with the card's own CSS
-  _fxPicker(key, value, defLabel, defFx, iconName) {
+  // a countdown tile adds an entity field (progKey) that drives the arc; defText names the default tile, title the label above
+  _fxPicker(key, value, defLabel, defFx, iconName, progKey, progValue, defText = "výchozí", title = "Animace kruhu, když běží") {
     const tile = (v, anim, text, title) => `<button class="fxt${(value || "") === v ? " on" : ""}" data-fx="${v}" title="${esc(title)}">
       <svg viewBox="-34 -34 68 68" width="56" height="56"><g class="dev on dev-generic" data-fx="${anim}"><circle r="17" class="badge"/><circle r="17" class="ring"/><g class="fx">${FX_SVG[anim] || ""}</g><g class="icon">${iconHtml(null, 20, iconName, "glyph")}</g></g></svg>
       <span>${text}</span></button>`;
-    return `<label>Animace kruhu, když běží</label><div class="app fxapp" data-mode="day"><div class="fxpick" data-fx-key="${key}">${tile("", defFx, "výchozí", defLabel)}${Object.entries(DEVICE_FX).map(([k, t]) => tile(k, k, t.split(" ")[0], t)).join("")}</div></div>`;
+    const prog = value === "countdown" && progKey ? `<input data-k="${progKey}" value="${esc(progValue || "")}" placeholder="timer, % průběhu, zbývající čas nebo čas konce" data-label="Průběh odpočtu (entita)" list="ents">
+      <p class="hint">Bez entity se odpočet jen dekorativně opakuje.</p>` : "";
+    return `<label>${title}</label><div class="app fxapp" data-mode="day"><div class="fxpick" data-fx-key="${key}">${tile("", defFx, defText, defLabel)}${Object.entries(DEVICE_FX).map(([k, t]) => tile(k, k, t.split(" ")[0], t)).join("")}</div></div>${prog}`;
   }
 
   _nativize(side, set) {
@@ -1458,7 +1467,7 @@ class FnsFloorplanPanel extends HTMLElement {
       let label = "Barva";
       if (prev && (prev.tagName === "LABEL" || prev.tagName === "SPAN")) { label = prev.textContent.trim(); prev.remove(); }
       const h = document.createElement("ha-selector");
-      Object.assign(h, { hass: this._hass, selector: { ui_color: { include_state: true, include_none: box.hasAttribute("data-none"), default_color: "state" } }, label, value: v, required: true }); // "state" is the default, so no clear ✕
+      Object.assign(h, { hass: this._hass, selector: { ui_color: { include_state: true, include_none: box.hasAttribute("data-none"), default_color: "state" } }, label, value: v, required: false });
       h.dataset.k = key;
       h.addEventListener("value-changed", (e) => {
         e.stopPropagation();
@@ -1490,8 +1499,8 @@ class FnsFloorplanPanel extends HTMLElement {
       } else if (type === "checkbox") { selector = { boolean: {} }; value = el.checked; }
       else { selector = { text: {} }; value = el.value; typed = true; }
       const h = document.createElement("ha-selector");
-      // a select never offers the clear ✕; the empty choice ("Výchozí") stays in the list
-      Object.assign(h, { hass: this._hass, selector, value, label, required: tag === "SELECT" });
+      // a select has no required star: the clear ✕ gives "" (norm turns DEF/undefined into "")
+      Object.assign(h, { hass: this._hass, selector, value, label, required: false });
       if (tag === "INPUT" && type === "text") h.placeholder = el.placeholder;
       h.dataset.k = k;
       if (el.closest("fieldset[disabled]")) h.disabled = true;
@@ -1688,7 +1697,7 @@ class FnsFloorplanPanel extends HTMLElement {
       if (fields.includes("wave") && o.kind === "radiator") parts.push(`<span>Vlny</span>${this._colorPick(`ro:${i}:wave`, r.wave)}`);
       if (fields.includes("glow")) parts.push(`<label class="chk"><input type="checkbox" data-k="ro:${i}:glow" ${r.glow ? "checked" : ""}> záře</label>`);
       if (fields.includes("animate")) parts.push(`<select data-k="ro:${i}:animate" data-label="Animace"><option value="">animace podle stavu</option><option value="true" ${r.animate === true ? "selected" : ""}>animovat</option><option value="false" ${r.animate === false ? "selected" : ""}>neanimovat</option></select>`);
-      if (fields.includes("fx")) parts.push(`<select data-k="ro:${i}:fx" data-label="Kruh">${fxOptions(r.fx, "kruh podle prvku")}</select>`);
+      if (fields.includes("fx")) parts.push(`<div style="flex:1 1 100%">${this._fxPicker(`ro:${i}:fx`, r.fx, "podle prvku", o.kind === "alarm" ? "radar" : "ring", DEVICE_ICON[o.kind] || "mdiShapeOutline", `ro:${i}:progress`, r.progress, "podle prvku", "Animace kruhu")}</div>`);
       if (fields.includes("hide")) parts.push(`<label class="chk"><input type="checkbox" data-k="ro:${i}:hide" ${r.hide ? "checked" : ""}> skrýt</label>`);
       if (o.points) parts.push(`<span>Průhlednost</span><input type="number" step="0.05" min="0" max="1" data-k="ro:${i}:opacity" value="${r.opacity ?? ""}" placeholder="0,14" style="width:70px">`);
       if (fields.includes("icon")) parts.push(`<input type="text" data-k="ro:${i}:icon" value="${esc(r.icon || "")}" placeholder="ikona, např. mdi:timer-sand (none = bez ikony)">`);
@@ -1698,17 +1707,19 @@ class FnsFloorplanPanel extends HTMLElement {
     const list = rules.map((r, i) => {
       const conds = [].concat(r.if || []);
       const simple = conds.every((c) => !c.any);
+      // "+ podmínka" sits in the footer of the last condition, next to its delete icon
+      const addCond = `<button data-a="ra:cadd:${i}" class="mini">+ podmínka</button>`;
       return `<div class="rule"><div class="rule-h"><span>Pravidlo ${i + 1}</span>
           <button data-a="ra:up:${i}" data-icon="mdi:arrow-up" title="Posunout výš" ${i ? "" : "disabled"}>↑</button><button data-a="ra:down:${i}" data-icon="mdi:arrow-down" title="Posunout níž" ${i < rules.length - 1 ? "" : "disabled"}>↓</button><button data-a="ra:del:${i}" data-icon="mdi:delete" title="Smazat pravidlo">✕</button></div>
         ${simple ? conds.map((c, j) => {
           const op = opOf(c);
-          return `<div class="cond">${op === "template" ? "" : `<input data-k="rc:${i}:${j}:entity" value="${esc(c.entity || "")}" placeholder="entita" list="ents">
+          return `<div class="cond">${op === "template" ? "" : `<input data-k="rc:${i}:${j}:entity" value="${esc(c.entity || "")}" placeholder="entita" data-label="Entita" list="ents">
               ${own && c.entity !== own ? `<button class="mini wide" data-a="ra:self:${i}:${j}" title="${esc(own)}">↳ tato entita</button>` : ""}
-              <input data-k="rc:${i}:${j}:attribute" value="${esc(c.attribute || "")}" placeholder="atribut (jinak stav)">`}
+              <input data-k="rc:${i}:${j}:attribute" value="${esc(c.attribute || "")}" placeholder="jinak stav" data-label="Atribut">`}
             <select data-k="rc:${i}:${j}:op" data-label="Podmínka">${Object.entries(OPS).map(([k, v]) => `<option value="${k}" ${k === op ? "selected" : ""}>${v}</option>`).join("")}</select>
-            <input data-k="rc:${i}:${j}:value" value="${esc(valOf(c, op))}" placeholder="${op === "template" ? "{{ is_state('timer.x', 'active') }}" : op === "state" || op === "state_not" ? "on, open" : "20"}" ${op === "template" ? 'class="wide"' : ""}>
-            <button data-a="ra:cdel:${i}:${j}" class="mini" data-icon="mdi:close" title="Smazat podmínku">✕ podmínka</button></div>`;
-        }).join("") + `<button data-a="ra:cadd:${i}" class="mini" style="margin-top:6px">+ podmínka</button>${conds.length ? "" : ' <span class="hint">bez podmínky platí vždy</span>'}`
+            <input data-k="rc:${i}:${j}:value" value="${esc(valOf(c, op))}" placeholder="${op === "template" ? "{{ is_state('timer.x', 'active') }}" : op === "state" || op === "state_not" ? "on, open" : "20"}" data-label="Hodnota" ${op === "template" ? 'class="wide"' : ""}>
+            <div class="cond-foot">${j === conds.length - 1 ? addCond : ""}<span class="sp"></span><button data-a="ra:cdel:${i}:${j}" data-icon="mdi:delete-outline" title="Smazat podmínku">✕</button></div></div>`;
+        }).join("") + (conds.length ? "" : `<div class="cond-foot">${addCond}<span class="hint">bez podmínky platí vždy</span></div>`)
           : `<p class="hint">Pravidlo s podmínkou „nebo“ (any) uprav v YAML.</p>`}
         ${out(i, r)}</div>`;
     }).join("");
