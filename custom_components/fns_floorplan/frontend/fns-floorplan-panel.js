@@ -1451,7 +1451,7 @@ class FnsFloorplanPanel extends HTMLElement {
         ${point ? "" : rotation}
         ${dock ? "" : this._layerField(o)}`)}
         ${this._actionsUI(o, light ? { tap: "Přepnout", hold: "Detail entity" } : { tap: "Detail entity" })}
-        ${this._rulesUI(o, o.type === "led_strip" ? ["hide"] : light ? ["icon", "hide"] : dock ? ["color", "icon", "hide"] : ["color", "glow", "icon", "hide"])}`;
+        ${this._rulesUI(o, o.type === "led_strip" ? ["color", "fx", "hide"] : light || dock ? ["color", "fx", "icon", "hide"] : ["color", "glow", "fx", "icon", "hide"])}`;
     } else if (sel.cat === "devices") {
       // domain defaults of a generic item: hint, default ring, default tap
       const dom = o.kind === "generic" ? String(o.entity || "").split(".")[0] : "", dd = DOMAIN_DEV[dom];
@@ -1807,7 +1807,9 @@ class FnsFloorplanPanel extends HTMLElement {
       if (fields.includes("wave") && o.kind === "radiator") parts.push(`<span>Vlny</span>${this._colorPick(`ro:${i}:wave`, r.wave)}`);
       if (fields.includes("glow")) parts.push(`<label class="chk"><input type="checkbox" data-k="ro:${i}:glow" ${r.glow ? "checked" : ""}> záře</label>`);
       if (fields.includes("animate")) parts.push(`<select data-k="ro:${i}:animate" data-label="Animace"><option value="">animace podle stavu</option><option value="true" ${r.animate === true ? "selected" : ""}>animovat</option><option value="false" ${r.animate === false ? "selected" : ""}>neanimovat</option></select>`);
-      if (fields.includes("fx")) parts.push(`<div style="flex:1 1 100%">${this._fxPicker(`ro:${i}:fx`, r.fx, "podle prvku", o.kind === "alarm" ? "radar" : "ring", DEVICE_ICON[o.kind] || "mdiShapeOutline", `ro:${i}:progress`, r.progress, "podle prvku", "Animace kruhu")}</div>`);
+      if (fields.includes("fx")) parts.push(`<div style="flex:1 1 100%">${(o.kind ? this._fxPicker(`ro:${i}:fx`, r.fx, "podle prvku", o.kind === "alarm" ? "radar" : "ring", DEVICE_ICON[o.kind] || "mdiShapeOutline", `ro:${i}:progress`, r.progress, "podle prvku", "Animace kruhu")
+        // lights, strips, the dock and furniture have no animation of their own: empty = none
+        : this._fxPicker(`ro:${i}:fx`, r.fx === "none" ? "" : r.fx, "bez animace", "none", FURNITURE[o.type]?.[1] || "mdiShapeOutline", `ro:${i}:progress`, r.progress, "žádná", "Animace kruhu").replace(/<button class="fxt[^"]*" data-fx="none"[\s\S]*?<\/button>/, ""))}</div>`);
       if (fields.includes("hide")) parts.push(`<label class="chk"><input type="checkbox" data-k="ro:${i}:hide" ${r.hide ? "checked" : ""}> skrýt</label>`);
       if (o.points) parts.push(`<span>Průhlednost</span><input type="number" step="0.05" min="0" max="1" data-k="ro:${i}:opacity" value="${r.opacity ?? ""}" placeholder="0,14" style="width:70px">`);
       if (fields.includes("icon")) parts.push(`<input type="text" data-k="ro:${i}:icon" value="${esc(r.icon || "")}" placeholder="ikona, např. mdi:timer-sand (none = bez ikony)">`);
