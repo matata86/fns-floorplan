@@ -291,7 +291,9 @@ div.modes button.on { background: var(--primary-color, #03a9f4); color: var(--te
   :host { display: flex; flex-direction: column; height: 100vh; }
   .top { flex-wrap: wrap; height: auto; padding: 4px 8px; gap: 4px; }
   .top h1 { display: none; }
-  .top .modes { flex: 1; }
+  /* first row: menu, mode tabs, save; the rest wraps to the second row */
+  .top .modes { flex: 1 1 calc(100% - 132px); min-width: 0; }
+  .top > :not(ha-menu-button):not(.modes):not(.save), .top > ha-dropdown > * { order: 1; } /* a dropdown is display: contents, its trigger is the flex item */
   .top ha-selector.level { width: 100px; }
   .top .lbl { display: none; }
   .main { flex: 1; min-height: 0; height: auto; }
