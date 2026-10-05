@@ -92,16 +92,19 @@ const STYLE = `
 .top h1 { font-size: 20px; font-weight: 400; margin: 0 8px 0 0; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .top .state { font-size: 13px; opacity: .85; }
 button, select, input, textarea { font: inherit; }
-.btn { border: 1px solid var(--divider-color, #e0e0e0); border-radius: 18px; padding: 7px 14px; cursor: pointer; background: var(--card-background-color, #fff); color: var(--primary-text-color, #212121); }
-.btn.primary { background: var(--primary-color, #03a9f4); border-color: transparent; color: var(--text-primary-color, #fff); font-weight: 600; }
-.btn:disabled { opacity: .45; cursor: default; }
-.btn.undo, .btn.redo { padding: 7px 11px; font-size: 16px; line-height: 1; }
+.top ha-button, .top ha-icon-button { --mdc-theme-primary: var(--app-header-text-color, #fff); color: var(--app-header-text-color, #fff); }
+.top ha-button.save { --mdc-theme-primary: initial; }
+/* fallback while HA's own elements are not defined yet (or never are) */
+ha-button:not(:defined) { border: 1px solid var(--divider-color, #e0e0e0); border-radius: 18px; padding: 7px 14px; cursor: pointer; background: var(--card-background-color, #fff); color: var(--primary-text-color, #212121); }
+ha-button.save:not(:defined) { background: var(--primary-color, #03a9f4); border-color: transparent; color: var(--text-primary-color, #fff); font-weight: 600; }
+ha-icon-button:not(:defined) { display: inline-block; padding: 4px; cursor: pointer; }
+ha-button[disabled], ha-icon-button[disabled] { opacity: .45; }
 .top select.level { max-width: 150px; }
-.top select { border-radius: 18px; padding: 6px 10px; border: 1px solid var(--divider-color, #e0e0e0); background: var(--card-background-color, #fff); color: var(--primary-text-color, #212121); }
+.top select { height: 36px; border-radius: 8px; padding: 6px 10px; border: 1px solid var(--divider-color, #e0e0e0); background: var(--card-background-color, #fff); color: var(--primary-text-color, #212121); }
 .main { display: flex; height: calc(100vh - 56px); }
 .stage { flex: 1; min-width: 0; padding: 12px; box-sizing: border-box; position: relative; }
 .zoom { position: absolute; left: 20px; top: 20px; display: flex; flex-direction: column; gap: 6px; z-index: 1; }
-.zoom button { width: 34px; height: 34px; border-radius: 10px; border: 1px solid var(--divider-color, #e0e0e0); cursor: pointer; font-size: 18px; line-height: 1;
+.zoom [data-z] { width: 40px; height: 40px; border-radius: 10px; border: 1px solid var(--divider-color, #e0e0e0);
   background: var(--card-background-color, #fff); color: var(--primary-text-color, #212121); box-shadow: 0 1px 3px rgba(0,0,0,.15); }
 svg { width: 100%; height: 100%; display: block; touch-action: none; user-select: none; }
 .floor { fill: var(--card-background-color, #fff); stroke: var(--primary-text-color, #212121); stroke-opacity: .55; stroke-width: 4; }
@@ -166,6 +169,10 @@ svg { width: 100%; height: 100%; display: block; touch-action: none; user-select
 .layers { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 6px; }
 .layers button { padding: 6px 2px; border-radius: 8px; border: 1px solid var(--divider-color, #e0e0e0); background: var(--primary-background-color, #fafafa);
   color: var(--primary-text-color, #212121); cursor: pointer; font-size: 12px; }
+.side ha-selector { display: block; margin-top: 12px; }
+.side .bad { --mdc-theme-error: var(--error-color); outline: 1px solid var(--error-color); border-radius: 4px; }
+.side ha-expansion-panel { margin-top: 12px; display: block; }
+.sec { padding: 0 4px 12px; }
 details { margin-top: 14px; }
 details summary { cursor: pointer; font-weight: 600; font-size: 14px; }
 .modes { display: flex; border: 1px solid var(--divider-color, #e0e0e0); border-radius: 18px; overflow: hidden; }
@@ -181,7 +188,9 @@ details summary { cursor: pointer; font-weight: 600; font-size: 14px; }
 .vtx { fill: #fff; stroke: var(--primary-color, #03a9f4); stroke-width: 2.5; cursor: grab; }
 .vtx.sel { fill: var(--primary-color, #03a9f4); }
 .mid { fill: var(--primary-color, #03a9f4); fill-opacity: .35; cursor: copy; }
-.side { width: 320px; flex: none; overflow: auto; padding: 16px; box-sizing: border-box; border-left: 1px solid var(--divider-color, #e0e0e0);
+.grip { width: 6px; flex: none; cursor: col-resize; background: transparent; border-left: 1px solid var(--divider-color, #e0e0e0); touch-action: none; }
+.grip:hover, .grip.on { background: var(--primary-color); opacity: .4; }
+.side { width: 320px; flex: none; overflow: auto; padding: 16px; box-sizing: border-box;
   background: var(--card-background-color, #fff); }
 .side h2 { font-size: 17px; margin: 0 0 4px; }
 .side .hint { color: var(--secondary-text-color, #727272); font-size: 13px; line-height: 1.45; }
@@ -207,7 +216,8 @@ details summary { cursor: pointer; font-weight: 600; font-size: 14px; }
 @media (max-width: 800px) {
   .main { flex-direction: column; }
   .stage { flex: none; height: 58vh; }
-  .side { width: auto; border-left: 0; border-top: 1px solid var(--divider-color, #e0e0e0); flex: 1; }
+  .grip { display: none; }
+  .side { width: auto !important; border-top: 1px solid var(--divider-color, #e0e0e0); flex: 1; }
   .top .state { display: none; }
 }
 `;
@@ -278,6 +288,21 @@ class FnsFloorplanPanel extends HTMLElement {
     this._skeleton();
     this._draw();
     this._form();
+    if (!this._haLoading) {
+      this._haLoading = true;
+      this._loadHa().then(() => { this._skeleton(); this._draw(); this._form(); });
+    }
+  }
+
+  // ha-selector / ha-entity-picker are lazy-loaded by HA; the entities card editor pulls them in
+  async _loadHa() {
+    if (customElements.get("ha-selector")) return;
+    try {
+      const helpers = await window.loadCardHelpers?.();
+      const card = await helpers?.createCardElement({ type: "entities", entities: [] });
+      await card?.constructor?.getConfigElement?.();
+    } catch (err) { /* stays on plain inputs */ }
+    await Promise.race([customElements.whenDefined("ha-selector"), new Promise((r) => setTimeout(r, 5000))]);
   }
 
   _skeleton() {
@@ -289,16 +314,17 @@ class FnsFloorplanPanel extends HTMLElement {
   <div class="modes"><button data-m="items">Vybavení</button><button data-m="rooms">Místnosti</button></div>
   <select class="level" title="Patro"></select>
   <select class="add"><option value="">+ Přidat</option>${ADD.map(([l], i) => `<option value="${i}">${l}</option>`).join("")}</select>
-  <button class="btn undo" disabled title="Zpět (Ctrl+Z)">↶</button>
-  <button class="btn redo" disabled title="Vpřed (Ctrl+Y)">↷</button>
-  <button class="btn hist" title="Historie uložení">Historie</button>
-  <button class="btn check" title="Kontrola entit">Kontrola</button>
-  <button class="btn revert" disabled>Zahodit</button>
-  <button class="btn primary save" disabled>Uložit</button>
+  <ha-icon-button class="undo" label="Zpět (Ctrl+Z)" disabled><ha-icon icon="mdi:undo"></ha-icon></ha-icon-button>
+  <ha-icon-button class="redo" label="Vpřed (Ctrl+Y)" disabled><ha-icon icon="mdi:redo"></ha-icon></ha-icon-button>
+  <ha-button class="hist" appearance="plain" title="Historie uložení">Historie</ha-button>
+  <ha-button class="check" appearance="plain" title="Kontrola entit">Kontrola</ha-button>
+  <ha-button class="revert" appearance="plain" disabled>Zahodit</ha-button>
+  <ha-button class="save" disabled>Uložit</ha-button>
 </div>
 <div class="main">
   <div class="stage"><svg preserveAspectRatio="xMidYMin meet"></svg>
-    <div class="zoom"><button data-z="in" title="Přiblížit">+</button><button data-z="out" title="Oddálit">−</button><button data-z="fit" title="Celý plán">⤢</button></div></div>
+    <div class="zoom"><ha-icon-button data-z="in" label="Přiblížit"><ha-icon icon="mdi:plus"></ha-icon></ha-icon-button><ha-icon-button data-z="out" label="Oddálit"><ha-icon icon="mdi:minus"></ha-icon></ha-icon-button><ha-icon-button data-z="fit" label="Celý plán"><ha-icon icon="mdi:fit-to-screen-outline"></ha-icon></ha-icon-button></div></div>
+  <div class="grip" title="Táhni pro změnu šířky"></div>
   <div class="side"></div>
 </div>
 <datalist id="ents"></datalist>`;
@@ -312,6 +338,22 @@ class FnsFloorplanPanel extends HTMLElement {
     $(".hist").addEventListener("click", () => this._showHistory());
     $(".check").addEventListener("click", () => this._showCheck());
     $(".revert").addEventListener("click", () => { if (confirm("Zahodit neuložené změny?")) this._load(); });
+    // drag the grip to resize the side panel; the width is remembered
+    const side = $(".side"), grip = $(".grip"), main = $(".main");
+    try { const w = Number(localStorage.getItem("fns-floorplan-side-w")); if (w > 0) side.style.width = w + "px"; } catch (err) { /* storage blocked */ }
+    grip.addEventListener("pointerdown", (e) => { grip.setPointerCapture(e.pointerId); grip.classList.add("on"); });
+    grip.addEventListener("pointermove", (e) => {
+      if (!grip.hasPointerCapture(e.pointerId)) return;
+      side.style.width = clamp(main.getBoundingClientRect().right - e.clientX, 260, Math.min(720, innerWidth * 0.6)) + "px";
+    });
+    const gripEnd = (e) => {
+      if (!grip.hasPointerCapture(e.pointerId)) return;
+      grip.releasePointerCapture(e.pointerId);
+      grip.classList.remove("on");
+      try { localStorage.setItem("fns-floorplan-side-w", String(parseInt(side.style.width, 10) || "")); } catch (err) { /* storage blocked */ }
+    };
+    grip.addEventListener("pointerup", gripEnd);
+    grip.addEventListener("pointercancel", gripEnd);
     this.shadowRoot.querySelectorAll(".modes button").forEach((b) => b.addEventListener("click", () => {
       this._mode = b.dataset.m;
       this._sel = null;
@@ -385,7 +427,7 @@ class FnsFloorplanPanel extends HTMLElement {
       const p = this._svgPt(e.clientX, e.clientY);
       this._zoom(e.deltaY > 0 ? 1.15 : 1 / 1.15, p[0], p[1]);
     }, { passive: false });
-    this.shadowRoot.querySelectorAll(".zoom button").forEach((b) => b.addEventListener("click", () => {
+    this.shadowRoot.querySelectorAll(".zoom [data-z]").forEach((b) => b.addEventListener("click", () => {
       if (b.dataset.z === "fit") { this._view = null; this._applyView(); }
       else this._zoom(b.dataset.z === "in" ? 1 / 1.4 : 1.4);
     }));
@@ -1247,54 +1289,58 @@ class FnsFloorplanPanel extends HTMLElement {
       const light = isLight(o), point = isPoint(o), dock = o.type === "robot_vacuum";
       const types = light ? Object.keys(LIGHT_TYPES) : FURNITURE_TYPES;
       const label = (t) => (light ? LIGHT_TYPES[t] : FURNITURE[t]?.[0] || t);
-      html = `<h2>${esc(label(o.type))}${sel.g ? ` <span class="hint">(${sel.g.length} svítidla jednoho světla)</span>` : ""}</h2>
-        ${sel.g ? `<p class="hint">Svítidla jednoho světla v jedné místnosti jsou na kartě jeden prvek. Táhnutím posuneš všechna, změny platí pro všechna.</p>` : ""}
-        <label>Typ</label><select data-k="type">${types.map((t) => `<option value="${t}" ${t === o.type ? "selected" : ""}>${esc(label(t))}</option>`).join("")}</select>
-        ${field(light ? "Entita (světlo nebo spínač)" : o.type === "tv_wall" ? "Entita (media_player)" : dock ? "Entita (vacuum)" : "Entita (nepovinná, klepnutí otevře její detail)", "entity", o.entity || "", "text", 'list="ents"')}
-        ${light ? `<label>Osvětlení místnosti (%, prázdné = výchozí 100, LED pásek 45; 15 = jen slabě)</label><input data-k="room_light" type="number" min="0" step="5" placeholder="100"
-          value="${o.room_light === false ? 15 : typeof o.room_light === "number" ? Math.round(o.room_light * 100) : ""}">` : ""}
-        ${light ? `<label class="chk"><input type="checkbox" data-k="sheet_hide" ${o.sheet_hide ? "checked" : ""}> nezobrazovat v panelu místnosti</label>` : ""}
-        ${xz}
-        ${o.type === "led_strip" ? `<label>Směr světla</label><select data-k="glow_side">
+      const look = `${o.type === "led_strip" ? `<label>Směr světla</label><select data-k="glow_side">
           <option value="" ${!o.glow_side ? "selected" : ""}>Všemi směry</option>
           <option value="1" ${o.glow_side === 1 ? "selected" : ""}>Na jednu stranu (podle náhledu)</option>
           <option value="-1" ${o.glow_side === -1 ? "selected" : ""}>Na druhou stranu</option></select>` : ""}
-        ${point ? "" : o.type === "led_strip" ? num("Délka (m)", "w", o.w) : `<div class="row2"><div>${num("Šířka (m)", "w", o.w)}</div><div>${num("Hloubka (m)", "d", o.d)}</div></div>`}
         ${point || light ? "" : `<label>Barva</label>${this._colorPick("color", o.color)}`}
-        ${point ? "" : rotation}
         ${o.type === "lamp_spot" ? `${rotation.replace("Otočení (°)", "Směr svícení (°, 0 = doprava, 90 = dolů)")}<label>Šířka kužele (°)</label><input data-k="beam" type="number" min="5" max="180" step="5" value="${o.beam || 40}">` : ""}
         ${o.type === "led_strip" ? "" : this._iconField(o, light ? lightIcon(o.type) : FURNITURE[o.type]?.[1])}
-        ${point ? this._sizeField(o) : ""}
-        ${dock ? "" : this._layerField(o)}
+        ${point ? this._sizeField(o) : ""}`;
+      html = `<h2>${esc(label(o.type))}${sel.g ? ` <span class="hint">(${sel.g.length} svítidla jednoho světla)</span>` : ""}</h2>
+        ${sel.g ? `<p class="hint">Svítidla jednoho světla v jedné místnosti jsou na kartě jeden prvek. Táhnutím posuneš všechna, změny platí pro všechna.</p>` : ""}
+        ${this._sec("Základ", `<label>Typ</label><select data-k="type">${types.map((t) => `<option value="${t}" ${t === o.type ? "selected" : ""}>${esc(label(t))}</option>`).join("")}</select>
+        ${field(light ? "Entita (světlo nebo spínač)" : o.type === "tv_wall" ? "Entita (media_player)" : dock ? "Entita (vacuum)" : "Entita (nepovinná, klepnutí otevře její detail)", "entity", o.entity || "", "text", 'list="ents"')}
+        ${light ? `<label>Osvětlení místnosti (%, prázdné = výchozí 100, LED pásek 45; 15 = jen slabě)</label><input data-k="room_light" type="number" min="0" step="5" placeholder="100"
+          value="${o.room_light === false ? 15 : typeof o.room_light === "number" ? Math.round(o.room_light * 100) : ""}">` : ""}
+        ${light ? `<label class="chk"><input type="checkbox" data-k="sheet_hide" ${o.sheet_hide ? "checked" : ""}> nezobrazovat v panelu místnosti</label>` : ""}`, true)}
+        ${look.replace(/\s/g, "") ? this._sec("Vzhled", look) : ""}
+        ${this._sec("Rozměry a pozice", `${xz}
+        ${point ? "" : o.type === "led_strip" ? num("Délka (m)", "w", o.w) : `<div class="row2"><div>${num("Šířka (m)", "w", o.w)}</div><div>${num("Hloubka (m)", "d", o.d)}</div></div>`}
+        ${point ? "" : rotation}
+        ${dock ? "" : this._layerField(o)}`)}
         ${this._actionsUI(o, light ? { tap: "Přepnout", hold: "Detail entity" } : { tap: "Detail entity" })}
         ${this._rulesUI(o, o.type === "led_strip" ? ["hide"] : light || dock ? ["icon", "hide"] : ["color", "glow", "icon", "hide"])}`;
     } else if (sel.cat === "devices") {
       html = `<h2>${DEVICE_KINDS[o.kind] || "Spotřebič"}</h2>
-        <label>Druh</label><select data-k="kind">${Object.entries(DEVICE_KINDS).map(([k, v]) => `<option value="${k}" ${k === o.kind ? "selected" : ""}>${v}</option>`).join("")}</select>
+        ${this._sec("Základ", `<label>Druh</label><select data-k="kind">${Object.entries(DEVICE_KINDS).map(([k, v]) => `<option value="${k}" ${k === o.kind ? "selected" : ""}>${v}</option>`).join("")}</select>
         ${field("Název", "name", o.name || "")}
         ${field("Entita", "entity", o.entity || "", "text", 'list="ents"')}
-        <label>Běží, když má entita stav (čárkou, nebo {"above": 20})</label><input data-k="active" value="${esc(Array.isArray(o.active) ? o.active.join(", ") : o.active ? JSON.stringify(o.active) : "")}" placeholder="${o.kind === "media" ? "playing" : "on, run"}">
-        <div class="row2"><div>${field("Text pod ikonou", "text", o.text || "")}</div><div>${field("Text, když běží", "text_on", o.text_on || "")}</div></div>
-        <p class="hint">Oba texty můžou být šablona {{ … }}. Stav entity vložíš šablonou, třeba {{ states('sensor.teplota') }} °C. Když běží, má přednost text pro běh (u přehrávače jinak název), jinak text pod ikonou.</p>
-        <div class="row2"><div><label>Barva</label>${this._colorPick("color", o.color)}</div><div><label>Barva, když běží</label>${this._colorPick("color_on", o.color_on)}</div></div>
-        <p class="hint">Barva, když běží: Výchozí = stejná jako Barva. Obě výchozí = barva stavu entity z motivu HA.</p>
-        <label>Animace kruhu, když běží</label><select data-k="fx">${fxOptions(o.fx, o.kind === "alarm" ? "výchozí (střeženo radar, zabezpečování načítání, poplach blikání)" : "výchozí (rozbíhající kruh)")}</select>
         <label class="chk"><input type="checkbox" data-k="sheet_hide" ${o.sheet_hide ? "checked" : ""}> nezobrazovat v panelu místnosti</label>
-        ${o.kind === "media" ? `<label class="chk"><input type="checkbox" data-k="cover" ${o.cover === false ? "" : "checked"}> obal alba nebo pořadu v odznaku (při přehrávání a pauze)</label>` : ""}
-        ${xz}
+        ${o.kind === "media" ? `<label class="chk"><input type="checkbox" data-k="cover" ${o.cover === false ? "" : "checked"}> obal alba nebo pořadu v odznaku (při přehrávání a pauze)</label>` : ""}`, true)}
+        ${this._sec("Když běží", `<label>Běží, když je stav</label><input data-k="active" value="${esc(Array.isArray(o.active) ? o.active.join(", ") : o.active ? JSON.stringify(o.active) : "")}" placeholder="${o.kind === "media" ? "playing" : "on, run"}">
+        <p class="hint">Čárkou víc stavů, nebo {"above": 20}.</p>
+        ${field("Text, když běží", "text_on", o.text_on || "")}
+        <label>Barva, když běží</label>${this._colorPick("color_on", o.color_on)}
+        <p class="hint">Výchozí = stejná jako Barva; obě výchozí = barva stavu z motivu.</p>
+        <label>Animace kruhu, když běží</label><select data-k="fx">${fxOptions(o.fx, o.kind === "alarm" ? "výchozí (střeženo radar, zabezpečování načítání, poplach blikání)" : "výchozí (rozbíhající kruh)")}</select>`, true)}
+        ${this._sec("Vzhled", `${field("Text pod ikonou", "text", o.text || "")}
+        <p class="hint">Může být šablona, např. {{ states('sensor.x') }} °C.</p>
+        <label>Barva</label>${this._colorPick("color", o.color)}
         ${this._iconField(o, DEVICE_ICON[o.kind])}
-        ${this._sizeField(o)}
-        ${this._layerField(o)}
+        ${this._sizeField(o)}`)}
+        ${this._sec("Pozice", `${xz}
+        ${this._layerField(o)}`)}
         ${this._actionsUI(o, { tap: "Detail entity" })}
         ${this._rulesUI(o, ["color", "glow", "animate", "fx", "text", "icon", "wave", "hide"])}`;
     } else if (sel.cat === "texts") {
       html = `<h2>Text</h2><p class="hint">Ukáže stav entity (s jednotkou), nebo vlastní text. Text může být šablona, třeba {{ states('sensor.x') }}.</p>
-        ${field("Entita", "entity", o.entity || "", "text", 'list="ents"')}
-        ${field("Vlastní text (místo stavu)", "text", o.text || "")}
-        <label>Barva textu</label>${this._colorPick("color", o.color)}
+        ${this._sec("Základ", `${field("Entita", "entity", o.entity || "", "text", 'list="ents"')}
+        ${field("Vlastní text (místo stavu)", "text", o.text || "")}`, true)}
+        ${this._sec("Vzhled", `<label>Barva textu</label>${this._colorPick("color", o.color)}
         <label>Pozadí</label>${this._colorPick("background", o.background, true)}
-        ${xz}${rotation}
-        ${this._sizeField(o)}
+        ${this._sizeField(o)}`)}
+        ${this._sec("Pozice", `${xz}${rotation}`)}
         ${this._actionsUI(o, { tap: "Detail entity" })}
         ${this._rulesUI(o, ["color", "background", "text", "hide"])}`;
     } else {
@@ -1307,8 +1353,66 @@ class FnsFloorplanPanel extends HTMLElement {
     this._afterForm(side);
   }
 
+  // a collapsible group of fields (ha-expansion-panel as in HA editors); remembers open/closed per title
+  _sec(title, html, open = false, key = title) {
+    const ex = this._secOpen?.[key] ?? open;
+    return customElements.get("ha-expansion-panel")
+      ? `<ha-expansion-panel outlined header="${esc(title)}" data-sec="${esc(key)}" ${ex ? "expanded" : ""}><div class="sec">${html}</div></ha-expansion-panel>`
+      : `<details data-sec="${esc(key)}" ${ex ? "open" : ""}><summary>${esc(title)}</summary>${html}</details>`;
+  }
+
+  // swaps plain inputs and selects for HA's ha-selector (same data-k, same set callback)
+  _nativize(side, set) {
+    if (!customElements.get("ha-selector")) return;
+    side.querySelectorAll("[data-k]").forEach((el) => {
+      const tag = el.tagName, type = tag === "INPUT" ? el.getAttribute("type") || "text" : "";
+      if (tag !== "SELECT" && !(tag === "INPUT" && ["text", "number", "checkbox"].includes(type))) return;
+      if (el.closest(".outc, .cond, .rule, .icon-row")) return;
+      const k = el.dataset.k;
+      let label = el.placeholder || "", selector, value, typed = false;
+      const chk = type === "checkbox" ? el.closest("label.chk") : null, prev = el.previousElementSibling;
+      if (chk) label = chk.textContent.trim();
+      else if (prev?.tagName === "LABEL" && !prev.classList.contains("chk")) { label = prev.textContent.trim(); prev.remove(); }
+      if (tag === "SELECT") {
+        selector = { select: { mode: "dropdown", options: [...el.options].map((o) => ({ value: o.value, label: o.textContent.trim() })) } };
+        value = el.value;
+      } else if (el.getAttribute("list") === "ents") { selector = { entity: {} }; value = el.value || undefined; }
+      else if (type === "number") {
+        const n = { mode: "box", step: Number(el.step) || "any" };
+        if (el.hasAttribute("min")) n.min = Number(el.min);
+        if (el.hasAttribute("max")) n.max = Number(el.max);
+        selector = { number: n }; value = el.value === "" ? undefined : Number(el.value); typed = true;
+      } else if (type === "checkbox") { selector = { boolean: {} }; value = el.checked; }
+      else { selector = { text: {} }; value = el.value; typed = true; }
+      const h = document.createElement("ha-selector");
+      Object.assign(h, { hass: this._hass, selector, value, label, required: false });
+      if (tag === "INPUT" && type === "text") h.placeholder = el.placeholder;
+      h.dataset.k = k;
+      if (el.closest("fieldset[disabled]")) h.disabled = true;
+      const norm = (v) => (type === "checkbox" ? !!v : String(v ?? ""));
+      let last = norm(value), pending; // last: what the typed field committed
+      if (typed) {
+        // a re-render after every keystroke would steal the focus: commit on blur or Enter
+        h.addEventListener("value-changed", (e) => { e.stopPropagation(); h.value = e.detail.value; const v = norm(e.detail.value); pending = v === last ? undefined : v; });
+        const commit = () => { if (pending === undefined) return; last = pending; pending = undefined; set(k, last, h); };
+        h.addEventListener("focusout", commit);
+        h.addEventListener("keydown", (e) => { if (e.key === "Enter") commit(); });
+      } else {
+        // h.value follows the pick (other code reads it back, e.g. the room badge checkboxes); compared to it, not to a stale copy
+        h.addEventListener("value-changed", (e) => { e.stopPropagation(); const v = norm(e.detail.value), same = v === norm(h.value); h.value = e.detail.value; if (!same) set(k, v, h); });
+      }
+      (chk || el).replaceWith(h);
+    });
+  }
+
   _bind(side, set, act) {
-    side.querySelectorAll("[data-k]").forEach((inp) => inp.addEventListener("change", () => set(inp.dataset.k, inp.type === "checkbox" ? inp.checked : inp.value, inp)));
+    this._nativize(side, set);
+    side.querySelectorAll("[data-sec]").forEach((el) => {
+      const rec = (open) => ((this._secOpen ||= {})[el.dataset.sec] = open);
+      if (el.localName === "details") el.addEventListener("toggle", () => rec(el.open));
+      else el.addEventListener("expanded-changed", (e) => rec(e.detail.expanded));
+    });
+    side.querySelectorAll("[data-k]:not(ha-selector)").forEach((inp) => inp.addEventListener("change", () => set(inp.dataset.k, inp.type === "checkbox" ? inp.checked : inp.value, inp)));
     side.querySelectorAll("[data-a]").forEach((btn) => btn.addEventListener("click", () => act(btn.dataset.a)));
   }
 
@@ -1430,7 +1534,7 @@ class FnsFloorplanPanel extends HTMLElement {
       return `<label>${label}</label><select data-k="act:${k}:action">${Object.entries(ACTIONS).map(([v, t]) => `<option value="${v}" ${v === cur ? "selected" : ""}>${v ? t : def}</option>`).join("")}</select>${more}`;
     }).join("");
     const set = Object.keys(ACTION_KEYS).some((k) => o[k + "_action"]);
-    return `<details ${set ? "open" : ""}><summary>Akce (klepnutí, dvojklik, podržení)</summary>${rows}</details>`;
+    return this._sec("Akce (klepnutí, dvojklik, podržení)", rows, set, "Akce");
   }
 
   // colour rules as a form: each rule has conditions (all must hold) and what it changes; YAML for the rest
@@ -1470,10 +1574,10 @@ class FnsFloorplanPanel extends HTMLElement {
           : `<p class="hint">Pravidlo s podmínkou „nebo“ (any) uprav v YAML.</p>`}
         ${out(i, r)}</div>`;
     }).join("");
-    return `<details ${rules.length ? "open" : ""}><summary>Pravidla: barvy, skrytí${fields.includes("icon") ? ", ikona" : ""}${rules.length ? ` (${rules.length})` : ""}</summary>
+    return this._sec(`Pravidla: barvy, skrytí${fields.includes("icon") ? ", ikona" : ""}${rules.length ? ` (${rules.length})` : ""}`, `
       <p class="hint">Pro každou vlastnost platí první pravidlo, jehož podmínky platí.</p>${list}
       <div class="actions"><button data-a="ra:add">+ pravidlo</button><button data-a="ra:yaml">${this._yaml ? "Skrýt YAML" : "Upravit v YAML"}</button></div>
-      ${this._yaml ? `<textarea data-k="rules_yaml" spellcheck="false" placeholder="- if:\n    - entity: binary_sensor.x\n      state: \"on\"\n  color: red">Načítám…</textarea>` : ""}</details>`;
+      ${this._yaml ? `<textarea data-k="rules_yaml" spellcheck="false" placeholder="- if:\n    - entity: binary_sensor.x\n      state: \"on\"\n  color: red">Načítám…</textarea>` : ""}`, rules.length > 0, "Pravidla");
   }
 
   // rule, action and look fields shared by every kind of item; true when the key was one of them
@@ -1565,16 +1669,14 @@ class FnsFloorplanPanel extends HTMLElement {
       <label>Název</label><input data-k="name" value="${esc(r.name)}">
       <label>Teplota (entita)</label><input data-k="temperature" value="${esc(r.temperature || "")}" list="ents">
       <label>Vlhkost (entita)</label><input data-k="humidity" value="${esc(r.humidity || "")}" list="ents">
-      <details open><summary>Badge místnosti</summary>
-        <label class="chk"><input type="checkbox" data-k="label_show" ${r.label_hidden ? "" : "checked"}> zobrazit badge</label>
+      ${this._sec("Badge místnosti", `<label class="chk"><input type="checkbox" data-k="label_show" ${r.label_hidden ? "" : "checked"}> zobrazit badge</label>
         <fieldset class="badge-opts" ${r.label_hidden ? "disabled" : ""}>
         <label class="chk"><input type="checkbox" data-k="label_name" ${r.label_name === false ? "" : "checked"}> název místnosti</label>
         <label class="chk"><input type="checkbox" data-k="label_t" ${info.includes("temperature") ? "checked" : ""}> teplota</label>
         <label class="chk"><input type="checkbox" data-k="label_h" ${info.includes("humidity") ? "checked" : ""}> vlhkost</label>
         <label>Další údaje pod názvem (entita nebo šablona, každá na řádek)</label>
         <textarea data-k="label_extra" spellcheck="false" style="min-height:60px" placeholder="sensor.co2_obyvak">${esc(extra.join("\n"))}</textarea>
-        </fieldset>
-      </details>
+        </fieldset>`, true)}
       ${v != null ? `<div class="row2"><div><label>Roh ${v + 1}: X (m)</label><input data-k="vx" type="number" step="0.05" value="${r.points[v][0]}"></div><div><label>Z (m)</label><input data-k="vz" type="number" step="0.05" value="${r.points[v][1]}"></div></div>
         <div class="actions"><button data-a="delv" ${r.points.length <= 3 ? "disabled" : ""}>Smazat roh ${v + 1}</button></div>` : `<p class="hint">Rohů: ${r.points.length}. Klepnutím na roh ho vybereš.</p>`}
       <label>Další entity v panelu místnosti (každá na řádek; světla a spínače s přepínačem)</label>
@@ -1592,7 +1694,8 @@ class FnsFloorplanPanel extends HTMLElement {
       else if (k === "label_name") { if (val) delete r.label_name; else r.label_name = false; }
       else if (k === "label_t" || k === "label_h" || k === "label_extra") {
         const q = (x) => side.querySelector(`[data-k="${x}"]`);
-        const list = [...(q("label_t").checked ? ["temperature"] : []), ...(q("label_h").checked ? ["humidity"] : []),
+        const on = (x) => { const n = q(x); return n.localName === "ha-selector" ? !!n.value : n.checked; }; // checkbox or its ha-selector twin
+        const list = [...(on("label_t") ? ["temperature"] : []), ...(on("label_h") ? ["humidity"] : []),
           ...q("label_extra").value.split("\n").map((x) => x.trim()).filter(Boolean)];
         if (list.join() === "temperature,humidity") delete r.label_info; else r.label_info = list;
       } else r[k] = k === "name" ? val : val || null;
@@ -1766,7 +1869,7 @@ class FnsFloorplanPanel extends HTMLElement {
 
   _key(e) {
     if (!this.isConnected || !this._plan) return;
-    const typing = e.composedPath().some((n) => n.tagName === "INPUT" || n.tagName === "TEXTAREA" || n.tagName === "SELECT");
+    const typing = e.composedPath().some((n) => n.tagName === "INPUT" || n.tagName === "TEXTAREA" || n.tagName === "SELECT" || n.tagName === "HA-SELECTOR" || n.tagName === "HA-ENTITY-PICKER" || n.tagName === "HA-COMBO-BOX");
     if ((e.ctrlKey || e.metaKey) && !typing && /^[zy]$/i.test(e.key)) {
       e.preventDefault();
       const redo = e.key.toLowerCase() === "y" || e.shiftKey;
