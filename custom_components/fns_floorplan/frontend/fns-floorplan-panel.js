@@ -210,6 +210,7 @@ svg { width: 100%; height: 100%; display: block; touch-action: none; user-select
 .side .cond input, .side .cond select, .side .outc input, .side .outc select { padding: 5px; font-size: 13px; }
 .outc { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 8px; font-size: 13px; }
 .outc select { width: auto; flex: 1; }
+.outc ha-icon-picker { flex: 1 1 100%; }
 .outc input[type=color] { width: 36px; height: 30px; padding: 1px; }
 .outc input[type=text] { flex: 1 1 100%; }
 .side label.chk { display: flex; align-items: center; gap: 6px; margin: 6px 0; color: var(--primary-text-color, #212121); font-size: 14px; }
@@ -1450,7 +1451,7 @@ class FnsFloorplanPanel extends HTMLElement {
         ${point ? "" : rotation}
         ${dock ? "" : this._layerField(o)}`)}
         ${this._actionsUI(o, light ? { tap: "Přepnout", hold: "Detail entity" } : { tap: "Detail entity" })}
-        ${this._rulesUI(o, o.type === "led_strip" ? ["hide"] : light || dock ? ["icon", "hide"] : ["color", "glow", "icon", "hide"])}`;
+        ${this._rulesUI(o, o.type === "led_strip" ? ["hide"] : light ? ["icon", "hide"] : dock ? ["color", "icon", "hide"] : ["color", "glow", "icon", "hide"])}`;
     } else if (sel.cat === "devices") {
       // domain defaults of a generic item: hint, default ring, default tap
       const dom = o.kind === "generic" ? String(o.entity || "").split(".")[0] : "", dd = DOMAIN_DEV[dom];
@@ -1559,7 +1560,8 @@ class FnsFloorplanPanel extends HTMLElement {
     side.querySelectorAll("[data-k]").forEach((el) => {
       const tag = el.tagName, type = tag === "INPUT" ? el.getAttribute("type") || "text" : "";
       if (tag !== "SELECT" && !(tag === "INPUT" && ["text", "number", "checkbox"].includes(type))) return;
-      if (el.closest(".icon-row, .colorpick")) return;
+      // rule icons get the HA icon picker in _bind
+      if (el.closest(".icon-row, .colorpick") || el.dataset.k.endsWith(":icon")) return;
       const k = el.dataset.k;
       let label = el.placeholder || "", selector, value, typed = false;
       const chk = type === "checkbox" ? el.closest("label.chk") : null, prev = el.previousElementSibling;
@@ -1631,6 +1633,14 @@ class FnsFloorplanPanel extends HTMLElement {
 
   _bind(side, set, act) {
     this._nativize(side, set);
+    // rule icons: HA's icon picker with its list and search (typing "none" still works)
+    if (customElements.get("ha-icon-picker")) side.querySelectorAll('input[data-k$=":icon"]').forEach((inp) => {
+      const pick = document.createElement("ha-icon-picker");
+      Object.assign(pick, { hass: this._hass, value: inp.value, label: "Ikona", helper: "prázdné = podle prvku, none = bez ikony" });
+      pick.dataset.k = inp.dataset.k;
+      pick.addEventListener("value-changed", (e) => { e.stopPropagation(); set(inp.dataset.k, e.detail.value || "", pick); });
+      inp.replaceWith(pick);
+    });
     // the rules YAML gets HA's own code editor (syntax colours, entity completion); commits on blur
     const ta = side.querySelector('textarea[data-k="rules_yaml"]');
     if (ta && customElements.get("ha-code-editor")) {
