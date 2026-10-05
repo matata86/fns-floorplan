@@ -195,6 +195,7 @@ details { margin-top: 14px; }
 details summary { cursor: pointer; font-weight: 600; font-size: 14px; }
 div.modes { display: flex; border: 1px solid var(--divider-color, #e0e0e0); border-radius: 18px; overflow: hidden; }
 div.modes button { border: 0; padding: 7px 12px; background: var(--card-background-color, #fff); color: var(--primary-text-color, #212121); cursor: pointer; }
+ha-tab-group.modes { align-self: flex-end; }
 div.modes button.on { background: var(--primary-color, #03a9f4); color: var(--text-primary-color, #fff); }
 .spot-cone { fill: var(--primary-color, #03a9f4); fill-opacity: .1; stroke: var(--primary-color, #03a9f4); stroke-opacity: .35; stroke-dasharray: 3 3; pointer-events: none; }
 .mode-rooms .item { pointer-events: none; opacity: .3; }
@@ -330,7 +331,7 @@ class FnsFloorplanPanel extends HTMLElement {
   <ha-menu-button></ha-menu-button>
   <h1>Půdorys</h1>
   <span class="state"></span>
-  ${nd("ha-button-toggle-group") ? '<ha-button-toggle-group class="modes"></ha-button-toggle-group>' : '<div class="modes"><button data-m="items">Vybavení</button><button data-m="rooms">Místnosti</button></div>'}
+  ${nd("ha-tab-group") ? '<ha-tab-group class="modes"><ha-tab-group-tab slot="nav" panel="items">Vybavení</ha-tab-group-tab><ha-tab-group-tab slot="nav" panel="rooms">Místnosti</ha-tab-group-tab></ha-tab-group>' : '<div class="modes"><button data-m="items">Vybavení</button><button data-m="rooms">Místnosti</button></div>'}
   ${nd("ha-selector") ? '<ha-selector class="level"></ha-selector>' : '<select class="level" title="Patro"></select>'}
   ${nd("ha-dropdown") ? `<ha-dropdown class="add"><ha-button slot="trigger" appearance="filled" size="small" with-caret><ha-icon slot="start" icon="mdi:plus"></ha-icon>Přidat</ha-button></ha-dropdown>` : '<select class="add"><option value="">+ Přidat</option></select>'}
   <ha-icon-button class="undo" label="Zpět (Ctrl+Z)" disabled><ha-icon icon="mdi:undo"></ha-icon></ha-icon-button>
@@ -394,10 +395,10 @@ class FnsFloorplanPanel extends HTMLElement {
     grip.addEventListener("pointerup", gripEnd);
     grip.addEventListener("pointercancel", gripEnd);
     const modes = $(".modes");
-    if (modes.localName === "ha-button-toggle-group") {
-      modes.buttons = [{ label: "Vybavení", value: "items" }, { label: "Místnosti", value: "rooms" }];
+    // HA's tabs (as in Settings): wa-tab-show names the picked panel
+    if (modes.localName === "ha-tab-group") {
       modes.active = this._mode;
-      modes.addEventListener("value-changed", (e) => { e.stopPropagation(); this._setMode(e.detail.value); });
+      modes.addEventListener("wa-tab-show", (e) => this._setMode(e.detail.name));
     } else modes.querySelectorAll("button").forEach((b) => b.addEventListener("click", () => this._setMode(b.dataset.m)));
     const level = $(".level");
     if (level.localName === "ha-selector") {
@@ -641,7 +642,7 @@ class FnsFloorplanPanel extends HTMLElement {
     svg.setAttribute("class", "mode-" + this._mode);
     if (this._multi && !this._multi.some((m) => selEq(m, this._sel))) this._multi = null;
     const modes = this.shadowRoot.querySelector(".modes");
-    if (modes.localName === "ha-button-toggle-group") modes.active = this._mode;
+    if (modes.localName === "ha-tab-group") modes.active = this._mode;
     else modes.querySelectorAll("button").forEach((b) => b.classList.toggle("on", b.dataset.m === this._mode));
     this._fillAdd();
     const plan = this._plan;
