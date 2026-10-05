@@ -3,7 +3,7 @@
 // In the "Místnosti" mode rooms (corner points, whole rooms), windows and doors are edited.
 
 // icons, furniture types and the rules engine come from the card module (same URL, so loaded once)
-const { MDI, COLORS, UI_COLORS, color, FURNITURE, lightIcon, SIZES, evalRules, resolveIcon, iconHtml, FX_SVG, DOMAIN_DEV, STYLE: CARD_STYLE } =
+const { vacRoom, MDI, COLORS, UI_COLORS, color, FURNITURE, lightIcon, SIZES, evalRules, resolveIcon, iconHtml, FX_SVG, DOMAIN_DEV, STYLE: CARD_STYLE } =
   await import(new URL("./fns-floorplan-card.js", import.meta.url).href + new URL(import.meta.url).search);
 
 // what a generic item does by default, by its entity's domain (the behaviour itself is DOMAIN_DEV in the card)
@@ -224,6 +224,7 @@ svg { width: 100%; height: 100%; display: block; touch-action: none; user-select
 .place { display: grid; grid-template-columns: repeat(3, 40px); gap: 0; margin-top: 4px; }
 .layers { display: flex; gap: 4px; margin-top: 6px; }
 .side ha-selector { display: block; margin-top: 12px; }
+.vrow.cur ha-selector { outline: 2px solid var(--primary-color); border-radius: 4px; }
 .outc ha-selector, .cond ha-selector { flex: 1 1 100%; margin-top: 4px; }
 .side .bad { --mdc-theme-error: var(--error-color); outline: 1px solid var(--error-color); border-radius: 4px; }
 .side ha-expansion-panel { margin-top: 12px; display: block; }
@@ -334,6 +335,13 @@ class FnsFloorplanPanel extends HTMLElement {
     this._tries = 0;
     for (const k of ["furniture", "devices", "sensors", "texts"]) this._plan[k] ||= [];
     this._plan.labels ||= {};
+    // vacuum settings moved from plan.vacuum to the dock; saved with the next save
+    const vdock = this._plan.vacuum && this._plan.furniture.find((f) => f.type === "robot_vacuum");
+    if (vdock) {
+      vdock.entity ||= this._plan.vacuum.entity;
+      if (this._plan.vacuum.room_sensor) vdock.room_sensor ||= this._plan.vacuum.room_sensor;
+      delete this._plan.vacuum;
+    }
     this._dirty = false;
     this._sel = null;
     this._mode ||= "items";
@@ -1245,7 +1253,16 @@ class FnsFloorplanPanel extends HTMLElement {
       for (const id of [r.temperature, r.humidity, ...(r.sheet_extra || [])]) if (id) check(id, r.name, sel, r.level, "rooms");
       rules(r, r.name, sel, "rooms");
     });
-    for (const k of ["entity", "room_sensor"]) if (plan.vacuum?.[k]) check(plan.vacuum[k], "Vysavač", null, null, "items");
+    const vdock = plan.furniture.find((f) => f.type === "robot_vacuum");
+    if (vdock || plan.vacuum) {
+      const vsel = vdock ? { cat: "furniture", i: plan.furniture.indexOf(vdock) } : null, vlevel = vdock?.level;
+      const vsensor = vdock?.room_sensor || plan.vacuum?.room_sensor;
+      for (const id of [vdock?.entity || plan.vacuum?.entity, vsensor]) if (id) check(id, "Vysavač", vsel, vlevel, "items");
+      // every room name the sensor can report needs a plan room (pairing or same name)
+      for (const n of states[vsensor]?.attributes?.options || []) {
+        if (!vdock?.room_map?.[n] && !vacRoom(n, plan.rooms, {})) add("Vysavač", `místnost „${n}“ není spárovaná`, vsel, vlevel);
+      }
+    }
     return out;
   }
 
@@ -1418,6 +1435,7 @@ class FnsFloorplanPanel extends HTMLElement {
         ${sel.g ? `<p class="hint">Svítidla jednoho světla v jedné místnosti jsou na kartě jeden prvek. Táhnutím posuneš všechna, změny platí pro všechna.</p>` : ""}
         ${this._sec("Základ", `<label>Typ</label><select data-k="type">${types.map((t) => `<option value="${t}" ${t === o.type ? "selected" : ""}>${esc(label(t))}</option>`).join("")}</select>
         ${field(light ? "Entita (světlo nebo spínač)" : o.type === "tv_wall" ? "Entita (media_player)" : dock ? "Entita (vacuum)" : "Entita (nepovinná, klepnutí otevře její detail)", "entity", o.entity || "", "text", 'list="ents"')}
+        ${dock ? this._vacPairing(o) : ""}
         ${light ? `<label>Osvětlení místnosti (%, prázdné = výchozí 100, LED pásek 45; 15 = jen slabě)</label><input data-k="room_light" type="number" min="0" step="5" placeholder="100"
           value="${o.room_light === false ? 15 : typeof o.room_light === "number" ? Math.round(o.room_light * 100) : ""}">` : ""}
         ${light ? `<label class="chk"><input type="checkbox" data-k="sheet_hide" ${o.sheet_hide ? "checked" : ""}> nezobrazovat v panelu místnosti</label>` : ""}`, true)}
@@ -1481,6 +1499,23 @@ class FnsFloorplanPanel extends HTMLElement {
     return customElements.get("ha-expansion-panel")
       ? `<ha-expansion-panel outlined header="${esc(title)}" data-sec="${esc(key)}" ${ex ? "expanded" : ""}><div class="sec">${html}</div></ha-expansion-panel>`
       : `<details data-sec="${esc(key)}" ${ex ? "open" : ""}><summary>${esc(title)}</summary>${html}</details>`;
+  }
+
+  // dock: vacuum room sensor and the table "room name in the vacuum" -> "room in the plan"
+  _vacPairing(o) {
+    const sensor = o.room_sensor || this._plan.vacuum?.room_sensor || "", s = this._hass.states[sensor], cur = s?.state;
+    const names = [...new Set([...(s?.attributes?.options || []), ...Object.keys(o.room_map || {}), ...(cur && !["unknown", "unavailable"].includes(cur) ? [cur] : []), ...(this._vacExtra || [])])].sort((a, b) => a.localeCompare(b, "cs"));
+    const rooms = this._plan.rooms;
+    const rows = names.map((name) => {
+      const auto = vacRoom(name, rooms, {}), val = o.room_map?.[name] || "";
+      return `<div class="vrow${name === cur ? " cur" : ""}"><select data-k="rm:${esc(name)}" data-label="${esc(name)}${name === cur ? " (teď)" : ""}">
+        <option value="" ${val === "" ? "selected" : ""}>automaticky (${esc(auto ? auto.name : "nespárováno")})</option>
+        <option value="__none" ${val === "__none" ? "selected" : ""}>nepárovat</option>
+        ${rooms.map((r) => `<option value="${esc(r.id)}" ${val === r.id ? "selected" : ""}>${esc(r.name)}</option>`).join("")}</select></div>`;
+    }).join("");
+    return this._sec("Párování místností", `<input data-k="room_sensor" value="${esc(sensor)}" data-label="Senzor místnosti" placeholder="sensor.*_current_room" list="ents">
+      <p class="hint">Senzor, který hlásí, kde vysavač právě uklízí (u Roborocku sensor.*_current_room).</p>
+      ${sensor ? `${rows}<input data-k="rm_add" data-label="Přidat název místnosti ve vysavači" placeholder="např. Hall">` : `<p class="hint">Nejdřív vyber senzor místnosti.</p>`}`, true);
   }
 
   // swaps plain inputs and selects for HA's ha-selector (same data-k, same set callback)
@@ -1961,6 +1996,9 @@ class FnsFloorplanPanel extends HTMLElement {
       return this._changed();
     }
     const targets = this._targets();
+    // dock vacuum pairing; before _setShared, which splits keys on ":"
+    if (key.startsWith("rm:")) { const name = key.slice(3), t = targets[0]; const m = { ...(t.room_map || {}) }; if (value) m[name] = value; else delete m[name]; if (Object.keys(m).length) t.room_map = m; else delete t.room_map; return this._changed(); }
+    if (key === "rm_add") { if (value.trim()) (this._vacExtra ||= new Set()).add(value.trim()); return this._form(); }
     if (await this._setShared(targets, key, value, inp)) return;
     if (sel.g && (key === "x" || key === "z")) {
       this._move(sel, key === "x" ? Number(value) : o.x, key === "z" ? Number(value) : o.z);
