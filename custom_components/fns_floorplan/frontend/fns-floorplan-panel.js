@@ -795,6 +795,9 @@ class FnsFloorplanPanel extends HTMLElement {
       if (res.hide) g.classList.add("rhid");
       paint(el("circle", { r: 15, class: "dev" + (d.entity ? "" : " noent") }, g), res, false);
       icon(g, d, 18, DEVICE_ICON[d.kind] || "mdiShapeOutline");
+      // a generic item without its own icon shows its entity's icon, as on the card
+      const so = !d.icon && d.kind === "generic" && this._hass.states[d.entity], ip = g.lastElementChild.querySelector("path");
+      if (so) resolveIcon(null, so, this._hass).then((x) => x && ip.setAttribute("d", x));
     });
     plan.sensors.forEach((s, i) => {
       if (!this._on(s)) return;
@@ -1566,6 +1569,9 @@ class FnsFloorplanPanel extends HTMLElement {
       pick.value = inp.value;
       Object.assign(pick, { label: "Ikona", placeholder: inp.placeholder, helper: "prázdné = výchozí" });
       pick.addEventListener("value-changed", (e) => this._set("icon", e.detail.value || ""));
+      // the default of a generic item is its entity's own icon: show that one in the empty picker
+      const o = this._get(), so = o && !o.icon && o.kind === "generic" && this._hass.states[o.entity];
+      if (so) { pick.placeholder = so.attributes.icon || ""; resolveIcon(null, so, this._hass).then((x) => x && (pick.fallbackPath = x)); }
       // the picker has its own label, preview and clear button
       const row = inp.closest(".icon-row"), lab = row?.previousElementSibling;
       if (lab?.tagName === "LABEL") lab.remove();
