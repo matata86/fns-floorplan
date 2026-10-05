@@ -246,6 +246,7 @@ div.modes button.on { background: var(--primary-color, #03a9f4); color: var(--te
 .vtx { fill: #fff; stroke: var(--primary-color, #03a9f4); stroke-width: 2.5; cursor: grab; }
 .vtx.sel { fill: var(--primary-color, #03a9f4); }
 .mid { fill: var(--primary-color, #03a9f4); fill-opacity: .35; cursor: copy; }
+.sheet-x { display: none; }
 .grip { width: 6px; flex: none; cursor: col-resize; background: transparent; border-left: 1px solid var(--divider-color, #e0e0e0); touch-action: none; }
 .grip:hover, .grip.on { background: var(--primary-color); opacity: .4; }
 .side { width: 320px; flex: none; overflow: auto; padding: 16px; box-sizing: border-box;
@@ -278,10 +279,22 @@ div.modes button.on { background: var(--primary-color, #03a9f4); color: var(--te
 .side h3 { font-size: 14px; margin: 18px 0 4px; }
 @media (max-width: 800px) {
   .main { flex-direction: column; }
-  .stage { flex: none; height: 58vh; }
+  /* phone: the plan fills the screen, the item's form opens as a sheet over its lower part (tap an item, ✕ or the dimmed plan closes it) */
   .grip { display: none; }
-  .side { width: auto !important; border-top: 1px solid var(--divider-color, #e0e0e0); flex: 1; }
+  .side { display: none; }
+  .main.sheet::before { content: ""; position: fixed; inset: 0; background: rgba(0, 0, 0, .35); z-index: 9; }
+  .main.sheet .side { display: block; position: fixed; left: 0; right: 0; top: 30vh; bottom: 0; width: auto !important; z-index: 10;
+    border-radius: 16px 16px 0 0; box-shadow: 0 -4px 24px rgba(0, 0, 0, .3); padding-top: 20px; }
+  .main.sheet .sheet-x { display: block; position: fixed; top: calc(30vh + 4px); right: 4px; z-index: 11; }
   .top .state { display: none; }
+  /* the toolbar wraps to two rows instead of scrolling the page sideways */
+  :host { display: flex; flex-direction: column; height: 100vh; }
+  .top { flex-wrap: wrap; height: auto; padding: 4px 8px; gap: 4px; }
+  .top h1 { display: none; }
+  .top .modes { flex: 1; }
+  .top ha-selector.level { width: 100px; }
+  .top .lbl { display: none; }
+  .main { flex: 1; min-height: 0; height: auto; }
 }
 `;
 
@@ -384,7 +397,7 @@ class FnsFloorplanPanel extends HTMLElement {
   <span class="state"></span>
   ${nd("ha-tab-group") ? '<ha-tab-group class="modes"><ha-tab-group-tab slot="nav" panel="items">Vybavení</ha-tab-group-tab><ha-tab-group-tab slot="nav" panel="rooms">Místnosti</ha-tab-group-tab></ha-tab-group>' : '<div class="modes"><button data-m="items">Vybavení</button><button data-m="rooms">Místnosti</button></div>'}
   ${nd("ha-selector") ? '<ha-selector class="level"></ha-selector>' : '<select class="level" title="Patro"></select>'}
-  ${nd("ha-dropdown") ? `<ha-dropdown class="add"><ha-button slot="trigger" appearance="filled" size="small" with-caret><ha-icon slot="start" icon="mdi:plus"></ha-icon>Přidat</ha-button></ha-dropdown>` : '<select class="add"><option value="">+ Přidat</option></select>'}
+  ${nd("ha-dropdown") ? `<ha-dropdown class="add"><ha-button slot="trigger" appearance="filled" size="small" with-caret><ha-icon slot="start" icon="mdi:plus"></ha-icon><span class="lbl">Přidat</span></ha-button></ha-dropdown>` : '<select class="add"><option value="">+ Přidat</option></select>'}
   <ha-icon-button class="undo" label="Zpět (Ctrl+Z)" disabled><ha-icon icon="mdi:undo"></ha-icon></ha-icon-button>
   <ha-icon-button class="redo" label="Vpřed (Ctrl+Y)" disabled><ha-icon icon="mdi:redo"></ha-icon></ha-icon-button>
   ${nd("ha-dropdown") ? `<ha-dropdown class="more" placement="bottom-end">
@@ -399,13 +412,14 @@ class FnsFloorplanPanel extends HTMLElement {
   </ha-dropdown>` : `<ha-button class="hist" appearance="plain" title="Historie uložení">Historie</ha-button>
   <ha-button class="check" appearance="plain" title="Kontrola entit">Kontrola</ha-button>
   <ha-button class="revert" appearance="plain" disabled>Zahodit</ha-button>`}
-  <ha-button class="save" appearance="accent" disabled><ha-icon slot="start" icon="mdi:content-save"></ha-icon>Uložit</ha-button>
+  <ha-button class="save" appearance="accent" disabled><ha-icon slot="start" icon="mdi:content-save"></ha-icon><span class="lbl">Uložit</span></ha-button>
 </div>
 <div class="main">
   <div class="stage"><svg preserveAspectRatio="xMidYMin meet"></svg>
     <div class="zoom"><ha-icon-button data-z="in" label="Přiblížit"><ha-icon icon="mdi:plus"></ha-icon></ha-icon-button><ha-icon-button data-z="out" label="Oddálit"><ha-icon icon="mdi:minus"></ha-icon></ha-icon-button><ha-icon-button data-z="fit" label="Celý plán"><ha-icon icon="mdi:fit-to-screen-outline"></ha-icon></ha-icon-button></div></div>
   <div class="grip" title="Táhni pro změnu šířky"></div>
   <div class="side"></div>
+  <ha-icon-button class="sheet-x" label="Zavřít"><ha-icon icon="mdi:close"></ha-icon></ha-icon-button>
 </div>
 <datalist id="ents"></datalist>`;
     const $ = (s) => this.shadowRoot.querySelector(s);
@@ -431,6 +445,10 @@ class FnsFloorplanPanel extends HTMLElement {
     }
     // drag the grip to resize the side panel; the width is remembered
     const side = $(".side"), grip = $(".grip"), main = $(".main");
+    // phone sheet: ✕ or a tap on the dimmed plan closes it, the selection stays (the item can be dragged then)
+    const closeSheet = () => { this._sheet = false; this._sheetUI(); };
+    $(".sheet-x").addEventListener("click", closeSheet);
+    main.addEventListener("click", (e) => { if (e.target === main) closeSheet(); });
     try { const w = Number(localStorage.getItem("fns-floorplan-side-w")); if (w > 0) side.style.width = w + "px"; } catch (err) { /* storage blocked */ }
     grip.addEventListener("pointerdown", (e) => { grip.setPointerCapture(e.pointerId); grip.classList.add("on"); });
     grip.addEventListener("pointermove", (e) => {
@@ -524,6 +542,7 @@ class FnsFloorplanPanel extends HTMLElement {
 
   // v: "room" or the index into ADD
   _addItem(v) {
+    this._sheet = true;
     if (v === "room") {
       const [cx, cz] = centroid(this._bounds()).map((v) => r3(snap(v)));
       this._plan.rooms.push(this._stamp({ id: uid("room"), name: "Nová místnost", points: [[cx - 1, cz - 1], [cx + 1, cz - 1], [cx + 1, cz + 1], [cx - 1, cz + 1]], temperature: null, humidity: null }));
@@ -1171,9 +1190,11 @@ class FnsFloorplanPanel extends HTMLElement {
         svg.removeEventListener("pointermove", move);
         svg.removeEventListener("pointerup", up);
         svg.removeEventListener("pointercancel", up);
-        if (moved) this._changed();
-        else if (toggle) { this._toggle(sel); this._draw(); this._form(); }
+        if (moved) return this._changed();
+        this._sheet = true; // a tap (not a drag) opens the phone sheet
+        if (toggle) { this._toggle(sel); this._draw(); this._form(); }
         else if (changedSel || this._multi) { this._draw(); this._form(); }
+        else this._sheetUI();
       };
       svg.addEventListener("pointermove", move);
       svg.addEventListener("pointerup", up);
@@ -1276,6 +1297,7 @@ class FnsFloorplanPanel extends HTMLElement {
     this._sel = null;
     this._multi = null;
     this._sidePage = page;
+    this._sheet = true;
     this._draw();
     const side = this.shadowRoot.querySelector(".side");
     side.innerHTML = `<h2>${title}</h2>${hint ? `<p class="hint">${hint}</p>` : ""}<div class="list"></div><div class="actions"><button data-a="close">Zavřít</button></div>`;
@@ -1395,8 +1417,14 @@ class FnsFloorplanPanel extends HTMLElement {
   }
 
   // properties of the selected item
+  // the phone sheet is shown while it is open and has something to show
+  _sheetUI() {
+    this.shadowRoot.querySelector(".main")?.classList.toggle("sheet", !!this._sheet && !!(this._sel || this._multi?.length || this._sidePage));
+  }
+
   _form() {
     this._status();
+    this._sheetUI();
     if (this._sidePage && !this._sel) return; // history / check list stays until closed or an item is picked
     const side = this.shadowRoot.querySelector(".side");
     const sel = this._sel, o = this._get();
