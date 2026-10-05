@@ -258,6 +258,8 @@ div.modes button.on { background: var(--primary-color, #03a9f4); color: var(--te
 .side textarea.bad { border-color: var(--error-color, #db4437); }
 .side ha-code-editor { display: block; margin-top: 8px; border-radius: 8px; overflow: hidden; border: 1px solid var(--divider-color, #e0e0e0); }
 .side ha-code-editor.bad { border-color: var(--error-color, #db4437); }
+.ai-ask { margin-top: 16px; }
+.ai-ask .actions { margin-top: 8px; }
 .side .hint.err { color: var(--error-color, #db4437); }
 .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .row2 label { margin-top: 12px; }
@@ -1439,7 +1441,7 @@ class FnsFloorplanPanel extends HTMLElement {
         ${this._sec("Základ", `<label>Typ</label><select data-k="type">${types.map((t) => `<option value="${t}" ${t === o.type ? "selected" : ""}>${esc(label(t))}</option>`).join("")}</select>
         ${field(light ? "Entita (světlo nebo spínač)" : o.type === "tv_wall" ? "Entita (media_player)" : dock ? "Entita (vacuum)" : "Entita (nepovinná, klepnutí otevře její detail)", "entity", o.entity || "", "text", 'list="ents"')}
         ${dock ? this._vacPairing(o) : ""}
-        ${light ? `<label>Osvětlení místnosti (%, prázdné = výchozí 100, LED pásek 45; 15 = jen slabě)</label><input data-k="room_light" type="number" min="0" step="5" placeholder="100"
+        ${light ? `<label>Osvětlení místnosti (v %; prázdné = 100, LED pásek 45, 15 = jen slabě)</label><input data-k="room_light" type="number" min="0" step="5" placeholder="100"
           value="${o.room_light === false ? 15 : typeof o.room_light === "number" ? Math.round(o.room_light * 100) : ""}">` : ""}
         ${light ? `<label class="chk"><input type="checkbox" data-k="sheet_hide" ${o.sheet_hide ? "checked" : ""}> nezobrazovat v panelu místnosti</label>` : ""}`, true)}
         ${look.replace(/\s/g, "") ? this._sec("Vzhled", look) : ""}
@@ -1564,6 +1566,10 @@ class FnsFloorplanPanel extends HTMLElement {
       if (chk) label = chk.textContent.trim();
       else if ((prev?.tagName === "LABEL" && !prev.classList.contains("chk")) || (prev?.tagName === "SPAN" && el.closest(".outc"))) { label = prev.textContent.trim(); prev.remove(); }
       if (el.dataset.label) label = el.dataset.label;
+      // a long "Name (explanation)" label overflows the field: the explanation goes to the helper line below
+      let helper;
+      const m = label.length > 30 && label.match(/^(.+?)\s*\((.+)\)$/s);
+      if (m) [, label, helper] = m;
       if (tag === "SELECT") {
         selector = { select: { mode: "dropdown", options: [...el.options].map((o) => ({ value: o.value === "" ? DEF : o.value, label: o.textContent.trim() })) } };
         value = el.value === "" ? DEF : el.value;
@@ -1578,6 +1584,7 @@ class FnsFloorplanPanel extends HTMLElement {
       const h = document.createElement("ha-selector");
       // a select has no required star: the clear ✕ gives "" (norm turns DEF/undefined into "")
       Object.assign(h, { hass: this._hass, selector, value, label, required: false });
+      if (helper) h.helper = helper;
       if (tag === "INPUT" && type === "text") h.placeholder = el.placeholder;
       h.dataset.k = k;
       if (el.closest("fieldset[disabled]")) h.disabled = true;
@@ -1819,8 +1826,8 @@ class FnsFloorplanPanel extends HTMLElement {
     return this._sec(`Pravidla: barvy, skrytí${fields.includes("icon") ? ", ikona" : ""}${rules.length ? ` (${rules.length})` : ""}`, `
       <p class="hint">Pro každou vlastnost platí první pravidlo, jehož podmínky platí.</p>${list}
       <div class="actions"><button data-a="ra:add">+ pravidlo</button><button data-a="ra:yaml">${this._yaml ? "Skrýt YAML" : "Upravit v YAML"}</button>${ai ? `<button data-a="ra:ai">${this._ai ? "Skrýt AI" : "Navrhnout s AI"}</button>` : ""}</div>
-      ${ai && this._ai ? `<input data-k="rules_ai" value="${esc(this._aiText || "")}" data-label="Co má pravidlo dělat" placeholder="např. červeně, když je otevřené okno a topí se">
-        <div class="actions"><button data-a="ra:aigo" ${this._aiBusy ? "disabled" : ""}>${this._aiBusy ? "AI přemýšlí…" : "Navrhnout"}</button></div>
+      ${ai && this._ai ? `<div class="ai-ask"><input data-k="rules_ai" value="${esc(this._aiText || "")}" data-label="Co má pravidlo dělat" placeholder="např. červeně, když je otevřené okno a topí se">
+        <div class="actions"><button data-a="ra:aigo" ${this._aiBusy ? "disabled" : ""}>${this._aiBusy ? "AI přemýšlí…" : "Navrhnout"}</button></div></div>
         ${this._aiErr ? `<p class="hint err">${esc(this._aiErr)}</p>` : ""}` : ""}
       ${draft ? `<p class="hint">Návrh od AI (${esc(ai)}). Zkontroluj ho a potvrď, zatím se nic nezměnilo.</p>` : ""}
       ${this._yaml || draft ? `<textarea data-k="rules_yaml" spellcheck="false" placeholder="- if:\n    - entity: binary_sensor.x\n      state: \"on\"\n  color: red">Načítám…</textarea>` : ""}
@@ -1968,10 +1975,11 @@ Request (may be in Czech): ${ask}`;
       const r = await hass.callWS({ type: "call_service", domain: "ai_task", service: "generate_data", return_response: true,
         service_data: { task_name: "FNS Floorplan rules", entity_id: this._aiTask(), instructions } });
       const text = String(r.response?.data ?? "").replace(/^\s*```\w*\n?/, "").replace(/```\s*$/, "").trim();
-      const data = (await hass.callWS({ type: "fns_floorplan/yaml/parse", text })).data;
+      let data = (await hass.callWS({ type: "fns_floorplan/yaml/parse", text })).data;
+      if (data && typeof data === "object" && !Array.isArray(data)) data = [data];
       // no list = the AI explains why it can't do it; show that as it is
       if (!Array.isArray(data)) this._aiErr = `AI: ${typeof data === "string" ? data : "nevrátila seznam pravidel."}`;
-      else { this._aiDraft = text; this._aiFor = o; }
+      else { this._aiDraft = Array.isArray(data) && !text.trimStart().startsWith("-") ? (await hass.callWS({ type: "fns_floorplan/yaml/dump", data })).text : text; this._aiFor = o; }
     } catch (err) { this._aiErr = `Návrh se nepovedl: ${err.message || err}`; }
     this._aiBusy = false;
     this._form();
@@ -1982,6 +1990,7 @@ Request (may be in Czech): ${ask}`;
     let data;
     try { data = (await this._hass.callWS({ type: "fns_floorplan/yaml/parse", text: this._aiDraft })).data; }
     catch (err) { this._aiErr = `Chyba v YAML: ${err.message || err}`; return this._form(); }
+    if (data && typeof data === "object" && !Array.isArray(data)) data = [data];
     if (!Array.isArray(data)) { this._aiErr = "Návrh musí být seznam pravidel."; return this._form(); }
     for (const t of targets) if (data.length) t.rules = JSON.parse(JSON.stringify(data)); else delete t.rules;
     this._aiDraft = null; this._aiErr = "";
