@@ -1385,7 +1385,8 @@ class FnsFloorplanPanel extends HTMLElement {
       } else if (type === "checkbox") { selector = { boolean: {} }; value = el.checked; }
       else { selector = { text: {} }; value = el.value; typed = true; }
       const h = document.createElement("ha-selector");
-      Object.assign(h, { hass: this._hass, selector, value, label, required: false });
+      // a select without an empty option must not offer the clear ✕ (Druh, Typ…)
+      Object.assign(h, { hass: this._hass, selector, value, label, required: tag === "SELECT" && ![...el.options].some((o) => o.value === "") });
       if (tag === "INPUT" && type === "text") h.placeholder = el.placeholder;
       h.dataset.k = k;
       if (el.closest("fieldset[disabled]")) h.disabled = true;
