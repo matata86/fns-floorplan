@@ -283,6 +283,11 @@ div.modes button.on { background: var(--primary-color, #03a9f4); color: var(--te
 .prob:hover { background: var(--secondary-background-color, #f5f5f5); }
 .hist-row { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px solid var(--divider-color, #e0e0e0); }
 .hist-row span { flex: 1; }
+.wall-ang { stroke: var(--warning-color, #ff9800); stroke-width: 3; pointer-events: none; }
+.wall-ang.ok { stroke: var(--success-color, #4caf50); stroke-width: 5; }
+.ang-t { font-size: 11px; font-weight: 600; fill: var(--warning-color, #ff9800); paint-order: stroke; stroke: var(--card-background-color, #fff); stroke-width: 3; pointer-events: none; }
+.len-t { font-size: 11px; fill: var(--primary-text-color, #212121); paint-order: stroke; stroke: var(--card-background-color, #fff); stroke-width: 3; pointer-events: none; }
+.ang-t.ok { fill: var(--success-color, #4caf50); }
 .guide { stroke: #ff4081; stroke-width: 1; stroke-dasharray: 4 3; pointer-events: none; }
 .side h3 { font-size: 14px; margin: 18px 0 4px; }
 @media (max-width: 800px) {
@@ -1004,13 +1009,17 @@ class FnsFloorplanPanel extends HTMLElement {
   // corners of the selected room: drag to move (snaps to other rooms' corners), "+" between two adds one;
   // a wall itself drags out or in as a whole (its two corners move together, square to the wall)
   _handles(svg, ri) {
-    const r = this._plan.rooms[ri];
+    const r = this._plan.rooms[ri], c0 = centroid(r.points);
     r.points.forEach((p, k) => {
       const k2 = (k + 1) % r.points.length, q = r.points[k2];
       const L = Math.hypot(q[0] - p[0], q[1] - p[1]);
       if (L < 1e-6) return;
       const n = [-(q[1] - p[1]) / L, (q[0] - p[0]) / L];
       const [A, B] = [P(p), P(q)];
+      // wall length, outside the room
+      const m = [(p[0] + q[0]) / 2, (p[1] + q[1]) / 2], out = (m[0] - c0[0]) * n[0] + (m[1] - c0[1]) * n[1] < 0 ? -1 : 1;
+      const [tx, tz] = P([m[0] + n[0] * out * 0.25, m[1] + n[1] * out * 0.25]);
+      el("text", { x: tx, y: tz + 4, "text-anchor": "middle", class: "len-t" }, svg).textContent = L.toFixed(2).replace(".", ",") + " m";
       const hit = el("line", { x1: A[0], y1: A[1], x2: B[0], y2: B[1], class: "edge-hit" }, svg);
       hit.style.cursor = Math.abs(n[1]) > Math.abs(n[0]) ? "ns-resize" : "ew-resize";
       hit.addEventListener("pointerdown", (e) => {
@@ -1038,6 +1047,19 @@ class FnsFloorplanPanel extends HTMLElement {
         this._changed();
       });
     });
+    // the two walls of the selected corner: green when exactly straight, else orange with their angle
+    if (this._sel.v != null && r.points[this._sel.v]) {
+      const n = r.points.length, v = this._sel.v;
+      for (const [a, b] of [[r.points[(v - 1 + n) % n], r.points[v]], [r.points[v], r.points[(v + 1) % n]]]) {
+        const ang = ((Math.round((Math.atan2(b[1] - a[1], b[0] - a[0]) * 180) / Math.PI) % 180) + 180) % 180;
+        const ok = Math.abs(a[0] - b[0]) < 0.002 || Math.abs(a[1] - b[1]) < 0.002, cls = ok ? " ok" : "";
+        const [A, B] = [P(a), P(b)];
+        el("line", { x1: A[0], y1: A[1], x2: B[0], y2: B[1], class: "wall-ang" + cls }, svg);
+        const m = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2], d = Math.hypot(c0[0] - m[0], c0[1] - m[1]) || 1;
+        const [tx, tz] = P([m[0] + ((c0[0] - m[0]) / d) * 0.25, m[1] + ((c0[1] - m[1]) / d) * 0.25]);
+        el("text", { x: tx, y: tz + 4, "text-anchor": "middle", class: "ang-t" + cls }, svg).textContent = ok ? "rovně" : ang + "°";
+      }
+    }
     r.points.forEach((p, k) => {
       const [cx, cz] = P(p);
       el("circle", { cx, cy: cz, r: 8, class: "vtx" + (this._sel.v === k ? " sel" : "") }, svg).addEventListener("pointerdown", (e) => {
@@ -1046,6 +1068,11 @@ class FnsFloorplanPanel extends HTMLElement {
         const twins = this._twins(r, base);
         const others = this._otherCorners(r, twins);
         this._press(e, { cat: "rooms", i: ri, v: k }, (dx, dz, pt, ev) => {
+          if (ev?.ctrlKey || ev?.metaKey) {
+            r.points[k] = this._angleSnap(r, k, pt);
+            if (!ev.altKey) for (const t of twins) t.room.points[t.k] = [...r.points[k]];
+            return;
+          }
           let x = base[0] + dx, z = base[1] + dz;
           // onto another room's corner, else in line with other corners (walls), else the grid; Alt: grid only
           const near = !ev?.altKey && others.find((o) => Math.hypot(o[0] - x, o[1] - z) < 0.15);
@@ -1058,6 +1085,27 @@ class FnsFloorplanPanel extends HTMLElement {
         });
       });
     });
+  }
+
+  // Ctrl: corner k goes where a wall to one of its two neighbours runs at a multiple of 15°
+  // (onto both walls at once near their crossing, e.g. a square corner); wall length on the 5 cm grid
+  _angleSnap(r, k, pt) {
+    const n = r.points.length, step = Math.PI / 12, rays = [];
+    for (const a of [r.points[(k - 1 + n) % n], r.points[(k + 1) % n]]) {
+      const vx = pt[0] - a[0], vz = pt[1] - a[1];
+      if (Math.hypot(vx, vz) < 1e-6) continue;
+      const t = Math.round(Math.atan2(vz, vx) / step) * step, c = Math.cos(t), s = Math.sin(t);
+      rays.push({ a, c, s, p: [a[0] + c * snap(vx * c + vz * s), a[1] + s * snap(vx * c + vz * s)] });
+    }
+    let best = rays.map((x) => x.p).sort((p, q) => Math.hypot(p[0] - pt[0], p[1] - pt[1]) - Math.hypot(q[0] - pt[0], q[1] - pt[1]))[0] || pt;
+    if (rays.length === 2) {
+      const [u, w] = rays, det = u.c * -w.s + w.c * u.s;
+      if (Math.abs(det) > 1e-6) {
+        const t = ((w.a[0] - u.a[0]) * -w.s + w.c * (w.a[1] - u.a[1])) / det, X = [u.a[0] + u.c * t, u.a[1] + u.s * t];
+        if (t > 0 && Math.hypot(X[0] - pt[0], X[1] - pt[1]) < 0.2) best = X;
+      }
+    }
+    return [r3(Math.max(0, best[0])), r3(Math.max(0, best[1]))];
   }
 
   // corners of the other rooms on this floor, except the shared ones that move along (`twins`)
@@ -1477,7 +1525,7 @@ class FnsFloorplanPanel extends HTMLElement {
     const side = this.shadowRoot.querySelector(".side");
     const sel = this._sel, o = this._get();
     if (!o && this._mode === "rooms") {
-      side.innerHTML = `<h2>Místnosti, okna a dveře</h2><p class="hint">Klepni na místnost: táhnutím ji posuneš celou, za modré body táhneš rohy (přichytí se k rohům sousedních místností), za stěnu ji celou posuneš ven nebo dovnitř (stěny a rohy se přichytí k sousedním místnostem, Alt to vypne), poloprůhledné body mezi rohy přidají nový roh.<br><br>Okno nebo dveře vybereš klepnutím a táhnutím posuneš po stěně. U vybraných dveří přehodí ⇄ panty a ⇅ směr otevírání. Nové přidáš v panelu vybrané místnosti.<br><br>Společný roh sousedních místností se posouvá s oběma místnostmi naráz; s Alt jen ten jeden.</p>`;
+      side.innerHTML = `<h2>Místnosti, okna a dveře</h2><p class="hint">Klepni na místnost: táhnutím ji posuneš celou, za modré body táhneš rohy (přichytí se k rohům sousedních místností; s Ctrl jdou stěny po 15°, zelená = zcela rovně; u stěn je jejich délka), za stěnu ji celou posuneš ven nebo dovnitř (stěny a rohy se přichytí k sousedním místnostem, Alt to vypne), poloprůhledné body mezi rohy přidají nový roh.<br><br>Okno nebo dveře vybereš klepnutím a táhnutím posuneš po stěně. U vybraných dveří přehodí ⇄ panty a ⇅ směr otevírání. Nové přidáš v panelu vybrané místnosti.<br><br>Společný roh sousedních místností se posouvá s oběma místnostmi naráz; s Alt jen ten jeden.</p>`;
       this._bgUI(side);
       return;
     }
