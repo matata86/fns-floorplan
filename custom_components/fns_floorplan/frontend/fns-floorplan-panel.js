@@ -884,8 +884,7 @@ class FnsFloorplanPanel extends HTMLElement {
       const so = !d.icon && d.kind === "generic" && this._hass.states[d.entity], ip = g.lastElementChild.querySelector("path");
       if (so) resolveIcon(null, so, this._hass).then((x) => x && ip.setAttribute("d", x));
     });
-    plan.sensors.forEach((s, i) => {
-      if (!this._on(s)) return;
+    plan.sensors.map((s, i) => [s, i]).filter(([s]) => this._on(s)).sort((a, b) => layer(a[0]) - layer(b[0])).forEach(([s, i]) => {
       const g = group({ cat: "sensors", i }, s.x, s.z);
       el("circle", { r: 11, class: "sensor" + (s.entity ? "" : " noent") }, g);
       const dc = states[s.entity]?.attributes.device_class;
@@ -1620,7 +1619,7 @@ class FnsFloorplanPanel extends HTMLElement {
         ${this._rulesUI(o, ["color", "background", "text", "hide"])}`;
     } else {
       html = `<h2>Senzor</h2><p class="hint">Pohyb a přítomnost dělají vlnky, voda (třída moisture) rozbliká místnost.</p>
-        ${field("Entita (binary_sensor)", "entity", o.entity || "", "text", 'list="ents"')}${xz}`;
+        ${field("Entita (binary_sensor)", "entity", o.entity || "", "text", 'list="ents"')}${xz}${this._layerField(o)}`;
     }
     if (sel.cat !== "labels") html += `<div class="actions"><button data-a="dup">Duplikovat</button><button data-a="del" class="del">Smazat</button></div>`;
     side.innerHTML = html;
