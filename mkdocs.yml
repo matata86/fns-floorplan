@@ -15,15 +15,15 @@ theme:
   palette:
     - media: "(prefers-color-scheme: light)"
       scheme: default
-      primary: indigo
-      accent: amber
+      primary: custom
+      accent: custom
       toggle:
         icon: material/weather-night
         name: Switch to dark mode
     - media: "(prefers-color-scheme: dark)"
       scheme: slate
-      primary: indigo
-      accent: amber
+      primary: custom
+      accent: custom
       toggle:
         icon: material/weather-sunny
         name: Switch to light mode
@@ -36,7 +36,6 @@ theme:
     - search.highlight
     - toc.follow
     - content.code.copy
-    - content.tabs.link
 
 plugins:
   - search
@@ -74,6 +73,21 @@ plugins:
             FAQ: Časté otázky
             Changelog: Změny
             Live demo: Živé demo
+            "Card not found": "Po instalaci se karta nenajde"
+            "Custom element doesn't exist": "„Custom element doesn't exist“"
+            "Old version after update": "Po aktualizaci stará verze"
+            "Card waits for the integration": "Karta čeká na integraci"
+            "Plan is empty": "Půdorys je prázdný"
+            "Sidebar entry is missing": "V menu chybí položka"
+            "Icons are missing": "Chybí ikony"
+            "Plan changed meanwhile": "Půdorys se mezitím změnil"
+            "Slow or choppy card": "Karta se seká"
+            "Wrong light colour": "Světlo svítí jinou barvou"
+            "Rule does not apply": "Pravidlo se neuplatní"
+            "Texts not translated": "Texty se nepřekládají"
+            "Still not working": "Pořád to nejde"
+            "When something doesn't work": "Když něco nejde"
+            "All topics": "Všechna témata"
         - locale: de
           name: Deutsch
           build: true
@@ -100,6 +114,21 @@ plugins:
             FAQ: Häufige Fragen
             Changelog: Änderungen
             Live demo: Live-Demo
+            "Card not found": "Karte nach der Installation nicht gefunden"
+            "Custom element doesn't exist": "„Custom element doesn't exist“"
+            "Old version after update": "Nach dem Update alte Version"
+            "Card waits for the integration": "Karte wartet auf die Integration"
+            "Plan is empty": "Plan ist leer"
+            "Sidebar entry is missing": "Seitenleisten-Eintrag fehlt"
+            "Icons are missing": "Symbole fehlen"
+            "Plan changed meanwhile": "Plan hat sich inzwischen geändert"
+            "Slow or choppy card": "Karte ruckelt"
+            "Wrong light colour": "Licht leuchtet in anderer Farbe"
+            "Rule does not apply": "Regel greift nicht"
+            "Texts not translated": "Texte nicht übersetzt"
+            "Still not working": "Es klappt immer noch nicht"
+            "When something doesn't work": "Wenn etwas nicht geht"
+            "All topics": "Alle Themen"
 
 markdown_extensions:
   - admonition
@@ -123,25 +152,45 @@ markdown_extensions:
 extra_css:
   - assets/extra.css
 
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/matata86/fns-floorplan
+      name: GitHub
+
 nav:
   - Home: index.md
   - Getting started:
       - Installation: installation.md
       - Quick start: quick-start.md
+  - Card:
+      - Card: card.md
+      - Room panel: room-panel.md
+      - Robot vacuum: robot-vacuum.md
   - Editor:
       - Overview: editor/index.md
       - Rooms: editor/rooms.md
       - Doors and windows: editor/openings.md
       - Items: editor/items.md
       - Rules: editor/rules.md
-  - Features:
-      - Card: card.md
-      - Room panel: room-panel.md
-      - Robot vacuum: robot-vacuum.md
       - History and check: history.md
+  - When something doesn't work:
+      - All topics: faq.md
+      - Card not found: help/card-not-found.md
+      - Custom element doesn't exist: help/custom-element-missing.md
+      - Old version after update: help/old-version-after-update.md
+      - Card waits for the integration: help/waiting-for-integration.md
+      - Plan is empty: help/plan-empty.md
+      - Sidebar entry is missing: help/sidebar-entry-missing.md
+      - Icons are missing: help/icons-missing.md
+      - Plan changed meanwhile: help/plan-conflict.md
+      - Slow or choppy card: help/performance.md
+      - Wrong light colour: help/light-wrong-colour.md
+      - Rule does not apply: help/rule-not-applied.md
+      - Texts not translated: help/languages.md
+      - Still not working: help/still-not-working.md
   - Reference:
       - Plan format: reference/plan-format.md
       - Websocket API: reference/websocket-api.md
-  - FAQ: faq.md
   - Changelog: changelog.md
   - Live demo: https://matata86.github.io/fns-floorplan/demo/

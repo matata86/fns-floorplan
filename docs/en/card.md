@@ -42,7 +42,7 @@ The visual card editor has the same fields (Appearance, Plan rotation, Default f
 - `auto`: a card narrower than 600 px turns a wide plan by 90 degrees, but only when the plan is more than 1.25 times wider than tall,
 - `true`: always turn, `false`: never.
 
-## Light and dark
+## Light and dark { #light-and-dark }
 
 The card looks good in both themes. With `mode: ha` it follows the light or dark theme of Home Assistant, with `auto` the sun decides, and `day` or `night` fixes one look (see [mode](#mode)).
 
@@ -102,7 +102,7 @@ The clock button opens a bar **under the plan**, which does not cover it. It rep
 
 Everything can be changed per item with [actions](editor/items.md#actions). Tooltips list what tap, double tap and hold do.
 
-## Animations
+## Animations { #animations }
 
 What the card shows when the entities change:
 

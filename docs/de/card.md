@@ -42,7 +42,7 @@ Der visuelle Karteneditor hat dieselben Felder (Darstellung, Drehung des Plans, 
 - `auto`: Eine Karte, die schmaler als 600 px ist, dreht einen breiten Plan um 90 Grad, aber nur, wenn der Plan mehr als 1,25-mal so breit wie hoch ist,
 - `true`: immer drehen, `false`: nie.
 
-## Hell und dunkel
+## Hell und dunkel { #light-and-dark }
 
 Die Karte sieht in beiden Designs gut aus. Mit `mode: ha` folgt sie dem hellen oder dunklen Design von Home Assistant, mit `auto` entscheidet die Sonne, und `day` oder `night` legt ein Aussehen fest (siehe [mode](#mode)).
 
@@ -102,7 +102,7 @@ Die Uhr-Schaltfläche öffnet eine Leiste **unter dem Plan**, die ihn nicht verd
 
 Alles lässt sich pro Element mit [Aktionen](editor/items.md#actions) ändern. Tooltips listen auf, was Tippen, Doppeltippen und Halten bewirken.
 
-## Animationen
+## Animationen { #animations }
 
 Was die Karte zeigt, wenn sich Entitäten ändern:
 

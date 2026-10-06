@@ -63,7 +63,7 @@ Volba `rotate` otočí plán na úzké kartě o 90 stupňů, zde přepínání `
 
 ## Aktualizace
 
-Aktualizuj přes HACS jako každou jinou integraci a restartuj Home Assistant. Karta i editor se načítají s verzí integrace v adrese, takže prohlížeč zahodí starou cache sám. Pokud přesto vidíš starou verzi, mrkni do [Častých otázek](faq.md#the-card-shows-the-old-version-after-an-update).
+Aktualizuj přes HACS jako každou jinou integraci a restartuj Home Assistant. Karta i editor se načítají s verzí integrace v adrese, takže prohlížeč zahodí starou cache sám. Pokud přesto vidíš starou verzi, mrkni do [Častých otázek](help/old-version-after-update.md).
 
 Tvůj půdorys uchovává Home Assistant (`.storage/fns_floorplan`) a aktualizace se ho nedotknou.
 

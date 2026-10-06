@@ -63,7 +63,7 @@ Mit `rotate` dreht sich der Grundriss auf einer schmalen Karte um 90 Grad, hier 
 
 ## Aktualisieren
 
-Aktualisiere über HACS wie jede andere Integration und starte Home Assistant neu. Karte und Editor werden mit der Version der Integration in der URL geladen, dein Browser verwirft seinen Cache also von selbst. Siehst du trotzdem noch die alte Version, schau in die [häufigen Fragen](faq.md#the-card-shows-the-old-version-after-an-update).
+Aktualisiere über HACS wie jede andere Integration und starte Home Assistant neu. Karte und Editor werden mit der Version der Integration in der URL geladen, dein Browser verwirft seinen Cache also von selbst. Siehst du trotzdem noch die alte Version, schau in die [häufigen Fragen](help/old-version-after-update.md).
 
 Dein Grundriss wird von Home Assistant gespeichert (`.storage/fns_floorplan`) und von Updates nicht angetastet.
 

@@ -1,3 +1,66 @@
+/* Look modelled on the Nokturno help site, in the FNS Floorplan colours: indigo #4f46e5 and amber #ffc46b. */
+:root {
+  --md-text-font: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --md-code-font: ui-monospace, Menlo, Consolas, monospace;
+}
+[data-md-color-scheme="slate"] {
+  --md-hue: 248;
+  --md-default-bg-color: #0d0c1d;
+  --md-default-fg-color: #e8e6f5;
+  --md-default-fg-color--light: #9a97b8;
+  --md-default-fg-color--lighter: #6f6c90;
+  --md-default-fg-color--lightest: #2f2d4d;
+  --md-typeset-color: #e8e6f5;
+  --md-typeset-a-color: #a5a0ff;
+  --md-accent-fg-color: #ffc46b;
+  --md-primary-fg-color: #17162b;
+  --md-primary-bg-color: #e8e6f5;
+  --md-code-bg-color: #201f38;
+  --md-code-fg-color: #e8e6f5;
+  --md-footer-bg-color: #17162b;
+  --md-footer-bg-color--dark: #0d0c1d;
+  --md-typeset-table-color: #2f2d4d;
+}
+[data-md-color-scheme="default"] {
+  --md-default-bg-color: #f6f5fb;
+  --md-default-fg-color: #1c1a33;
+  --md-default-fg-color--light: #5f5b7a;
+  --md-typeset-color: #1c1a33;
+  --md-typeset-a-color: #4f46e5;
+  --md-accent-fg-color: #b36b00;
+  --md-primary-fg-color: #ffffff;
+  --md-primary-bg-color: #1c1a33;
+  --md-code-bg-color: #f0eefa;
+  --md-footer-bg-color: #ffffff;
+  --md-footer-bg-color--dark: #f1effa;
+  --md-footer-fg-color: #1c1a33;
+  --md-footer-fg-color--light: #5f5b7a;
+  --md-typeset-table-color: #e2def0;
+}
+.md-header, .md-tabs { border-bottom: 1px solid var(--md-default-fg-color--lightest); box-shadow: none; }
+[data-md-color-scheme="slate"] .md-tabs { background: #17162b; }
+[data-md-color-scheme="default"] .md-tabs { background: #ffffff; color: #1c1a33; }
+.md-header__button.md-logo img { height: 1.8rem; border-radius: 8px; }
+.md-search__form { border-radius: 9px; }
+.md-typeset h1 { font-weight: 700; letter-spacing: -.01em; }
+.md-typeset h2 { font-weight: 650; }
+.md-typeset code { border-radius: 5px; border: 1px solid var(--md-default-fg-color--lightest); }
+.md-typeset table:not([class]) { border-radius: 14px; overflow: hidden; }
+.md-typeset .admonition, .md-typeset details { border-radius: 14px; }
+.md-typeset .md-button { border-radius: 9px; }
+/* article as a card */
+.md-content__inner {
+  background: var(--md-code-bg-color);
+  background: color-mix(in srgb, var(--md-default-bg-color) 60%, var(--md-code-bg-color));
+  border: 1px solid var(--md-default-fg-color--lightest);
+  border-radius: 14px; padding: 1.2rem 1.6rem 1.6rem; margin-top: 1.2rem;
+}
+.md-content__inner::before { display: none; }
+@media screen and (max-width: 44.9375em) {
+  .md-content__inner { border-radius: 0; border-left: 0; border-right: 0; margin: 0; }
+}
+
+/* screenshots and GIFs */
 .md-typeset img {
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.18);

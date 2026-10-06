@@ -63,7 +63,7 @@ With `rotate` the plan turns by 90 degrees on a narrow card, shown here switchin
 
 ## Update
 
-Update through HACS like any other integration and restart Home Assistant. The card and the editor are loaded with the integration version in the URL, so your browser drops its cache by itself. If you still see the old version, see the [FAQ](faq.md#the-card-shows-the-old-version-after-an-update).
+Update through HACS like any other integration and restart Home Assistant. The card and the editor are loaded with the integration version in the URL, so your browser drops its cache by itself. If you still see the old version, see the [FAQ](help/old-version-after-update.md).
 
 Your plan is stored by Home Assistant (`.storage/fns_floorplan`) and is not touched by updates.
 

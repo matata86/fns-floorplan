@@ -42,7 +42,7 @@ Vizuální editor karty má stejná pole (Vzhled, Otočení plánu, Výchozí pa
 - `auto`: karta užší než 600 px otočí široký půdorys o 90 stupňů, ale jen když je půdorys víc než 1,25krát širší než vysoký,
 - `true`: otáčí vždy, `false`: nikdy.
 
-## Světlý a tmavý vzhled
+## Světlý a tmavý vzhled { #light-and-dark }
 
 Karta vypadá dobře v obou motivech. S `mode: ha` následuje světlý nebo tmavý motiv Home Assistantu, s `auto` rozhoduje slunce a `day` nebo `night` zafixuje jeden vzhled (viz [mode](#mode)).
 
@@ -102,7 +102,7 @@ Tlačítko s hodinami otevře lištu **pod půdorysem**, která ho nezakrývá. 
 
 Vše lze měnit u jednotlivých položek pomocí [akcí](editor/items.md#actions). Tooltipy uvádějí, co dělá klepnutí, dvojklik a podržení.
 
-## Animace
+## Animace { #animations }
 
 Co karta ukazuje, když se mění entity:
 
