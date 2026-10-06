@@ -117,6 +117,8 @@ Meble, światła i stacja dokująca robota dzielą tę listę.
 | `active` | lista / `{"above": n}` | według rodzaju / domeny | Stany, które liczą się jako „pracuje” |
 | `text` | string | | Tekst pod ikoną, zawsze; może być szablonem |
 | `text_on` | string | | Tekst podczas pracy; może być szablonem |
+| `label_position` | string | `bottom` | Położenie etykiety: `bottom` (domyślnie), `top`, `left`, `right` |
+| `label_vertical` | bool | `false` | Obraca etykietę o 90 stopni (czytana od dołu do góry) |
 | `color`, `color_on` | kolor | kolor stanu | Kolor w spoczynku / podczas pracy |
 | `fx` | string | według rodzaju | Animacja pierścienia |
 | `progress`, `progress_total` | encja / minuty | | Źródło odliczania |

@@ -1612,6 +1612,8 @@ class FnsFloorplanPanel extends HTMLElement {
         ${this._fxPicker("fx", o.fx, o.kind === "alarm" ? t("panel.f.fx_alarm_def") : domFx ? t("panel.f.fx_def_x", { fx: DEVICE_FX[domFx].split(" ")[0] }) : t("panel.f.fx_def_ring"), o.kind === "alarm" ? "radar" : domFx || "ring", DEVICE_ICON[o.kind] || "mdiShapeOutline", "progress", o.progress, undefined, undefined, o.progress_total)}`, true)}
         ${this._sec(t("panel.f.sec_look"), `${field(t("panel.f.text_below_icon"), "text", o.text || "")}
         <p class="hint">${t("panel.f.template_hint")}</p>
+        <label>${t("panel.f.label_pos")}</label><select data-k="label_position">${["", "top", "left", "right"].map((v) => `<option value="${v}" ${(o.label_position || "") === v ? "selected" : ""}>${t("panel.f.label_pos_" + (v || "bottom"))}</option>`).join("")}</select>
+        <label class="chk"><input type="checkbox" data-k="label_vertical" ${o.label_vertical ? "checked" : ""}> ${t("panel.f.label_vertical")}</label>
         <label>${t("panel.f.color")}</label>${this._colorPick("color", o.color)}
         ${this._iconField(o, DEVICE_ICON[o.kind])}
         ${this._sizeField(o)}`)}
@@ -2324,7 +2326,7 @@ Request (may be in Czech): ${ask}`;
       else if (key === "glow_side") { if (value) t.glow_side = Number(value); else delete t.glow_side; }
       else if (key === "type" && value === "led_strip" && !(t.w >= 0.5)) Object.assign(t, { type: value, w: 1, d: 0.04 }); // a lamp turned into a strip gets a usable length
       else if (key === "beam") { if (value === "") delete t.beam; else t.beam = Math.min(180, Math.max(5, Number(value))); }
-      else if (key === "sheet_hide") { if (value) t.sheet_hide = true; else delete t.sheet_hide; }
+      else if (key === "sheet_hide" || key === "label_vertical") { if (value) t[key] = true; else delete t[key]; }
       else if (key === "room_light") { if (value === "") delete t.room_light; else t.room_light = Math.max(0, Number(value)) / 100; }
       else if (key === "color" || key === "color_on" || key === "background") {
         const v = value === "custom" ? inp.nextElementSibling.value : value;

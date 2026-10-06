@@ -117,6 +117,8 @@ Möbel, Lichter und die Station des Roboters teilen sich diese Liste.
 | `active` | list / `{"above": n}` | nach Art / Domain | Zustände, die als „läuft“ zählen |
 | `text` | string | | Text unter dem Symbol, immer; kann eine Vorlage sein |
 | `text_on` | string | | Text, solange es läuft; kann eine Vorlage sein |
+| `label_position` | string | `bottom` | Position der Beschriftung: `bottom` (Standard), `top`, `left`, `right` |
+| `label_vertical` | bool | `false` | Dreht die Beschriftung um 90 Grad (von unten nach oben lesbar) |
 | `color`, `color_on` | colour | Zustandsfarbe | Farbe im Ruhezustand / beim Laufen |
 | `fx` | string | nach Art | Ringanimation |
 | `progress`, `progress_total` | entity / minutes | | Quelle des Countdowns |

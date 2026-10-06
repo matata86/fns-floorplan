@@ -117,6 +117,8 @@ Furniture, lights and the robot dock share this list.
 | `active` | list / `{"above": n}` | by kind / domain | States that count as running |
 | `text` | string | | Text under the icon, always; may be a template |
 | `text_on` | string | | Text while running; may be a template |
+| `label_position` | string | `bottom` | Label position: `bottom` (default), `top`, `left`, `right` |
+| `label_vertical` | bool | `false` | Turns the label by 90 degrees (reads bottom to top) |
 | `color`, `color_on` | colour | state colour | Idle / running colour |
 | `fx` | string | by kind | Ring animation |
 | `progress`, `progress_total` | entity / minutes | | Countdown source |

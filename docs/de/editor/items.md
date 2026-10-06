@@ -50,7 +50,7 @@ Füge eine **Deckenleuchte**, **Pendelleuchte**, ein **Panel**, eine **Tischleuc
 | `fireplace` | Eine Flamme, die beim Brennen flackert |
 | `generic` | „Anderes Gerät“: das eigene Symbol der Entität, Verhalten nach Domain (unten) |
 
-Einstellungen: `name`, `entity`, `active` (eine Liste von Zuständen oder `{"above": n}`, die als „läuft“ zählen), `text` (immer unter dem Symbol angezeigt), `text_on` (angezeigt, solange es läuft; beide können Vorlagen wie `{{ states('sensor.washer_time') }}` sein), `color` / `color_on` (Farbe im Ruhezustand / beim Laufen; ohne sie wird die Zustandsfarbe des Designs deines Home Assistant verwendet), `fx` (die Ringanimation: `ring`, `radar`, `comet`, `countdown`, `spin`, `orbit`, `breath`, `blink`, `heartbeat`, `shake`, `none`).
+Einstellungen: `name`, `entity`, `active` (eine Liste von Zuständen oder `{"above": n}`, die als „läuft“ zählen), `text` (immer unter dem Symbol angezeigt), `text_on` (angezeigt, solange es läuft; beide können Vorlagen wie `{{ states('sensor.washer_time') }}` sein), `label_position` (`top`, `left`, `right`, standardmäßig unter dem Symbol) und `label_vertical` (die Beschriftung um 90 Grad gedreht), `color` / `color_on` (Farbe im Ruhezustand / beim Laufen; ohne sie wird die Zustandsfarbe des Designs deines Home Assistant verwendet), `fx` (die Ringanimation: `ring`, `radar`, `comet`, `countdown`, `spin`, `orbit`, `breath`, `blink`, `heartbeat`, `shake`, `none`).
 
 Textbeschriftungen unter dem Symbol haben einen Hintergrund im Stil des Raum-Badges (tagsüber hell, nachts dunkel).
 

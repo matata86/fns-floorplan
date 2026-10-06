@@ -105,7 +105,7 @@ The plan lives in the integration's storage (`.storage/fns_floorplan`) and is ed
 | `openings` | `id`, `room_id`, `edge`, `offset`, `width`, `type` (door / window), `style` (`passage` = opening only), `hinge`, `swing`, `contact`, `blind`, `blind_side`, `blind_invert`, `lock` |
 | `furniture` | `id`, `type`, `x`, `z`, `rotation`, `w`, `d`; lights (`lamp_*`, `led_strip`) carry `entity` and optional `room_light`; `lamp_spot` has `beam`; `tv_wall` with a media player; `robot_vacuum` marks the dock |
 | `sensors` | binary sensors with `entity`, `x`, `z` |
-| `devices` | `kind`, `name`, `entity`, `x`, `z`, `active`, `text`, `text_on`, `color`, `color_on` |
+| `devices` | `kind`, `name`, `entity`, `x`, `z`, `active`, `text`, `text_on`, `label_position`, `label_vertical`, `color`, `color_on` |
 | `texts` | `entity` or `text` (plain or a `{{ }}` template), `x`, `z`, `rotation`, `size`, `color`, `background` |
 | `rules` | on every item: conditional colours, hiding, icons, ring animations |
 | `labels` | `{room_id: [x, z]}` to place a room label by hand |
