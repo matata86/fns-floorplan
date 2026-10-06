@@ -406,7 +406,7 @@ document.getElementById("title").textContent = TEXT.home;
 document.getElementById("ptitle").textContent = TEXT.controls;
 document.getElementById("phint").textContent = TEXT.hint;
 const docsUrl = "https://matata86.github.io/fns-floorplan/" + (lang === "en" ? "" : lang + "/");
-document.getElementById("foot").innerHTML = `${TEXT.foot} · <a href="${docsUrl}">${TEXT.docs}</a>`;
+document.getElementById("foot").innerHTML = `${TEXT.foot} · <a href="${docsUrl}">${TEXT.docs}</a> · ☕ <a href="https://ko-fi.com/matata86">Ko-fi</a> · <a href="https://paypal.me/matata86">PayPal</a> · <a href="${docsUrl}support/">Bitcoin</a>`;
 for (const a of document.querySelectorAll("#langs a")) {
   const l = a.getAttribute("href").slice(6), p = new URLSearchParams(location.search);
   p.set("lang", l);

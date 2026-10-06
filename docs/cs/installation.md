@@ -16,6 +16,10 @@ FNS Floorplan není ve výchozím seznamu HACS, přidáš ho proto jako vlastní
 4. V HACS vyhledej **FNS Floorplan** a klikni na **Stáhnout**.
 5. **Restartuj Home Assistant** (Nastavení, Systém, Restartovat).
 
+Nebo ho otevři v HACS rovnou tímto tlačítkem:
+
+[![Open your Home Assistant instance and open the repository inside HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=matata86&repository=fns-floorplan&category=integration)
+
 ## Ruční instalace
 
 1. Stáhni nejnovější verzi ze [stránky s vydáními](https://github.com/matata86/fns-floorplan/releases) nebo naklonuj repozitář.
@@ -26,6 +30,10 @@ FNS Floorplan není ve výchozím seznamu HACS, přidáš ho proto jako vlastní
 
 1. Jdi do **Nastavení, Zařízení a služby, Přidat integraci**.
 2. Vyhledej **FNS Floorplan** a přidej ho. Není co nastavovat, může existovat jen jedna instance.
+
+Nebo ji spusť tímto tlačítkem:
+
+[![Open your Home Assistant instance and start setting up FNS Floorplan](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=fns_floorplan)
 
 ![Integrace FNS Floorplan v dialogu Přidat integraci](../assets/screenshots/cs/add-integration.png){ loading=lazy }
 

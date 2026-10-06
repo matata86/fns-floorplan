@@ -10,6 +10,9 @@ Here you will find guides to the card and the editor and solutions to the most c
 !!! tip "Ask on GitHub"
     Did not find your problem? [Open a new issue](https://github.com/matata86/fns-floorplan/issues) on GitHub, or try the [live demo](https://matata86.github.io/fns-floorplan/demo/) first, it runs the real card with fake states.
 
+!!! example "Like FNS Floorplan?"
+    Support it on [Ko-fi](https://ko-fi.com/matata86), with [PayPal](https://paypal.me/matata86) or with [Bitcoin](support.md).
+
 ## Getting started
 - [Installation](installation.md)
 - [Quick start: your first plan in about ten steps](quick-start.md)

@@ -10,6 +10,9 @@ Znajdziesz tu przewodniki po karcie i edytorze oraz rozwiązania najczęstszych 
 !!! tip "Zapytaj na GitHubie"
     Nie znalazłeś swojego problemu? [Otwórz nowe zgłoszenie](https://github.com/matata86/fns-floorplan/issues) na GitHubie albo najpierw wypróbuj [demo na żywo](https://matata86.github.io/fns-floorplan/demo/) – działa na prawdziwej karcie z fikcyjnymi stanami.
 
+!!! example "Podoba ci się FNS Floorplan?"
+    Wesprzyj go przez [Ko-fi](https://ko-fi.com/matata86), [PayPal](https://paypal.me/matata86) albo [Bitcoinem](support.md).
+
 ## Pierwsze kroki
 - [Instalacja](installation.md)
 - [Szybki start: pierwszy plan w około dziesięciu krokach](quick-start.md)

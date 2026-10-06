@@ -77,3 +77,8 @@
   text-align: center;
   margin-top: 0.4em;
 }
+/* secondary buttons: indigo outline in both schemes (the custom primary colour is white in the light header) */
+.md-typeset .md-button:not(.md-button--primary) { color: var(--md-typeset-a-color); border-color: var(--md-typeset-a-color); }
+.md-typeset .md-button:not(.md-button--primary):hover { color: #fff; background: var(--md-typeset-a-color); border-color: var(--md-typeset-a-color); }
+.md-typeset .md-button--primary { color: #fff; background: #4f46e5; border-color: #4f46e5; }
+.md-typeset .md-button--primary:hover { background: #3f37c9; border-color: #3f37c9; color: #fff; }

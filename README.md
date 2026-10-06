@@ -6,6 +6,12 @@
 [![GitHub release](https://img.shields.io/github/v/release/matata86/fns-floorplan)](https://github.com/matata86/fns-floorplan/releases)
 [![License: MIT](https://img.shields.io/github/license/matata86/fns-floorplan)](LICENSE)
 [![Home Assistant](https://img.shields.io/badge/Home%20Assistant-2025.1%2B-blue.svg)](https://www.home-assistant.io)
+[![Ko-fi](https://img.shields.io/badge/Ko--fi-support-ff5e5b?logo=ko-fi&logoColor=white)](https://ko-fi.com/matata86)
+[![PayPal](https://img.shields.io/badge/PayPal-donate-00457C?logo=paypal&logoColor=white)](https://paypal.me/matata86)
+[![Bitcoin](https://img.shields.io/badge/Bitcoin-donate-F7931A?logo=bitcoin&logoColor=white)](#support)
+
+[![Open your Home Assistant instance and open the repository inside HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=matata86&repository=fns-floorplan&category=integration)
+[![Open your Home Assistant instance and start setting up FNS Floorplan](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=fns_floorplan)
 
 An animated 2D floor plan for Home Assistant that shows the live state of your home: lights glowing in their colour, doors and windows swinging open, motion ripples, water leaks, a robot vacuum driving through the room it reports, appliances with animated icons, an alarm that tints the whole flat when triggered, media players with the playing title, cameras, free text items and room climate. You draw the plan in a built-in editor, no YAML needed.
 
@@ -129,6 +135,12 @@ With `rev`, a save only succeeds when it matches the stored revision, otherwise 
 ## Support
 
 Questions, bugs and feature requests: [GitHub issues](https://github.com/matata86/fns-floorplan/issues). The [FAQ](https://matata86.github.io/fns-floorplan/faq/) covers the common problems.
+
+If FNS Floorplan saves you time, you can support its development:
+
+- **Ko-fi:** https://ko-fi.com/matata86
+- **PayPal:** https://paypal.me/matata86
+- **Bitcoin:** `bc1qhjwt8xxmuym0xsd50yfpvjph00386uz73gqwlc`
 
 ## License
 

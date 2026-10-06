@@ -72,6 +72,7 @@ plugins:
             Websocket API: Websocket API
             FAQ: Časté otázky
             Changelog: Změny
+            Support: Podpora
             Live demo: Živé demo
             "Card not found": "Po instalaci se karta nenajde"
             "Custom element doesn't exist": "„Custom element doesn't exist“"
@@ -113,6 +114,7 @@ plugins:
             Websocket API: Websocket-API
             FAQ: Häufige Fragen
             Changelog: Änderungen
+            Support: Unterstützung
             Live demo: Live-Demo
             "Card not found": "Karte nach der Installation nicht gefunden"
             "Custom element doesn't exist": "„Custom element doesn't exist“"
@@ -154,6 +156,7 @@ plugins:
             "Websocket API": "Websocket API"
             FAQ: FAQ
             Changelog: "Lista zmian"
+            Support: Wsparcie
             Live demo: "Demo na żywo"
             "Card not found": "Karta nie jest znaleziona po instalacji"
             "Custom element doesn't exist": "„Custom element doesn't exist”"
@@ -198,6 +201,15 @@ extra:
     - icon: fontawesome/brands/github
       link: https://github.com/matata86/fns-floorplan
       name: GitHub
+    - icon: simple/kofi
+      link: https://ko-fi.com/matata86
+      name: Ko-fi
+    - icon: fontawesome/brands/paypal
+      link: https://paypal.me/matata86
+      name: PayPal
+    - icon: fontawesome/brands/bitcoin
+      link: https://matata86.github.io/fns-floorplan/support/
+      name: Bitcoin
 
 nav:
   - Home: index.md
@@ -234,4 +246,5 @@ nav:
       - Plan format: reference/plan-format.md
       - Websocket API: reference/websocket-api.md
   - Changelog: changelog.md
+  - Support: support.md
   - Live demo: https://matata86.github.io/fns-floorplan/demo/

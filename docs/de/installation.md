@@ -16,6 +16,10 @@ FNS Floorplan steht nicht in der Standardliste von HACS, du fügst es deshalb al
 4. Suche in HACS nach **FNS Floorplan** und klicke auf **Herunterladen**.
 5. **Starte Home Assistant neu** (Einstellungen, System, Neu starten).
 
+Oder öffne es direkt in HACS mit diesem Button:
+
+[![Open your Home Assistant instance and open the repository inside HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=matata86&repository=fns-floorplan&category=integration)
+
 ## Manuelle Installation
 
 1. Lade die neueste Version von der [Release-Seite](https://github.com/matata86/fns-floorplan/releases) herunter oder klone das Repository.
@@ -26,6 +30,10 @@ FNS Floorplan steht nicht in der Standardliste von HACS, du fügst es deshalb al
 
 1. Gehe zu **Einstellungen, Geräte & Dienste, Integration hinzufügen**.
 2. Suche nach **FNS Floorplan** und füge die Integration hinzu. Es gibt nichts einzustellen, es kann nur eine Instanz geben.
+
+Oder starte sie mit diesem Button:
+
+[![Open your Home Assistant instance and start setting up FNS Floorplan](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=fns_floorplan)
 
 ![Die Integration FNS Floorplan im Dialog „Integration hinzufügen“](../assets/screenshots/de/add-integration.png){ loading=lazy }
 

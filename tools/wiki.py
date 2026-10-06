@@ -146,7 +146,9 @@ def build():
         if lang in pages:
             home += [f"## {label}", "", listing(lang), ""]
             side += [f"**{label}**", "", listing(lang), ""]
-    footer = f"[Documentation site]({SITE}) | [Repository]({REPO}) | [Issues]({REPO}/issues)\n"
+    footer = (f"[Documentation site]({SITE}) | [Repository]({REPO}) | [Issues]({REPO}/issues) | "
+              "Support: [Ko-fi](https://ko-fi.com/matata86) · [PayPal](https://paypal.me/matata86) · "
+              f"[Bitcoin]({SITE}support/)\n")
     (OUT / "Home.md").write_text("\n".join(home).rstrip() + "\n", encoding="utf-8")
     (OUT / "_Sidebar.md").write_text("\n".join(side).rstrip() + "\n", encoding="utf-8")
     (OUT / "_Footer.md").write_text(footer, encoding="utf-8")
