@@ -1606,7 +1606,7 @@ class FnsFloorplanPanel extends HTMLElement {
         ${dock ? this._vacPairing(o) : ""}
         ${light ? `<label>Osvětlení místnosti (v %; prázdné = 100, LED pásek 45, 15 = jen slabě)</label><input data-k="room_light" type="number" min="0" step="5" placeholder="100"
           value="${o.room_light === false ? 15 : typeof o.room_light === "number" ? Math.round(o.room_light * 100) : ""}">` : ""}
-        ${light ? `<label class="chk"><input type="checkbox" data-k="sheet_hide" ${o.sheet_hide ? "checked" : ""}> nezobrazovat v panelu místnosti</label>` : ""}`, true)}
+        ${light || dock ? `<label class="chk"><input type="checkbox" data-k="sheet_hide" ${o.sheet_hide ? "checked" : ""}> nezobrazovat v panelu místnosti</label>` : ""}`, true)}
         ${dock ? this._sec("Když běží (uklízí)", `<label>Barva, když uklízí</label>${this._colorPick("color_on", o.color_on)}
         <p class="hint">Výchozí = barva stavu z motivu HA.</p>
         ${this._fxPicker("fx", o.fx, "žádná (jen jízda)", "none", "mdiRobotVacuum", "progress", o.progress, "žádná", "Animace kruhu, když uklízí", o.progress_total).replace(/<button class="fxt[^"]*" data-fx="none"[\s\S]*?<\/button>/, "")}`) : ""}
@@ -2219,6 +2219,7 @@ Request (may be in Czech): ${ask}`;
     const extra = info.filter((k) => k !== "temperature" && k !== "humidity");
     side.innerHTML = `<h2>Místnost</h2>
       <label>Název</label><input data-k="name" value="${esc(r.name)}">
+      <input type="text" data-k="r:icon" value="${esc(r.icon || "")}" placeholder="ikona v panelu místnosti, např. mdi:sofa">
       <label>Teplota (entita)</label><input data-k="temperature" value="${esc(r.temperature || "")}" list="ents">
       <label>Vlhkost (entita)</label><input data-k="humidity" value="${esc(r.humidity || "")}" list="ents">
       ${this._sec("Badge místnosti", `<label class="chk"><input type="checkbox" data-k="label_show" ${r.label_hidden ? "" : "checked"}> zobrazit badge</label>
@@ -2240,6 +2241,7 @@ Request (may be in Czech): ${ask}`;
     this._bind(side, async (k, val, inp) => {
       if (await this._setShared([r], k, val, inp)) return;
       if (k === "wall") return (this._wall = Number(val));
+      if (k === "r:icon") { if (val) r.icon = val; else delete r.icon; return this._changed(); }
       if (k === "vx" || k === "vz") r.points[v][k === "vx" ? 0 : 1] = r3(Math.max(0, Number(val)));
       else if (k === "sheet_extra") { const list = val.split("\n").map((x) => x.trim()).filter(Boolean); if (list.length) r.sheet_extra = list; else delete r.sheet_extra; }
       else if (k === "label_show") { if (val) delete r.label_hidden; else r.label_hidden = true; }
