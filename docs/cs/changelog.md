@@ -1,0 +1,38 @@
+# Změny
+
+Každé vydání je s poznámkami uvedeno na [GitHub releases](https://github.com/matata86/fns-floorplan/releases). Tato stránka shrnuje řadu 0.6.x podle témat.
+
+## Panel místnosti (0.6.44 až 0.6.50)
+
+- Panel místnosti se nejdřív vysouval jako boční obrazovka a pak se stal panelem podobným dashboardu: dlaždice Home Assistantu, dva sloupce, pozadí z motivu, hlavička s ikonou místnosti, teplotou a vlhkostí.
+- Sekce: termostat, světla s jasem přímo v řádku, kamery, okna a dveře, spínače, zařízení, senzory, ostatní. Ovládání zámků a vysavačů.
+- Ikona místnosti, `sheet_hide` pro robotický vysavač.
+- Řazené a vyhledávatelné výběry typů s typem „Jiný“.
+
+## Robotický vysavač (0.6.14 až 0.6.42)
+
+- Párování místností vysavače s místnostmi půdorysu, kruh baterie a stav nabíjení, barvy motivu podle stavu.
+- Zastavený robot stojí ve své místnosti na volném místě a bliká, chyby jsou červené.
+- Robot si drží orientaci doku, po načtení stránky se objeví ve své místnosti, jezdí pod entitami a nad nábytkem.
+- Obchůzka celého patra, když není známá jeho místnost; sekce „Když běží“ a vrstva pro dok.
+
+## Editor (0.6.9 až 0.6.43)
+
+- Lišta nástrojů, nabídky a boční panel z nativních prvků Home Assistantu, boční panel s měnitelnou šířkou, výběr barvy napojený na proměnné motivu.
+- Rozvržení pro telefon se spodním listem.
+- Úpravy místností: tažení celých stěn, přichytávání k sousedům, sdílené stěny, délky stěn, úhly po 15 stupních, značky rovnosti, rohová sedačka.
+- Přetahování dveří a oken na jiné stěny; Ctrl+X; YAML u každého pravidla; režim šablon Jinja pro podmínky; tlačítka ikon „Bez ikony“ a „Vrátit výchozí“.
+
+## Pravidla a animace (0.6.1 až 0.6.43)
+
+- Animace ikon podle názvu ikony, efekty kruhu (radar, kometa, odpočet a další), výstup pravidla `fx`.
+- Odpočet z časovače, senzoru doby nebo časového razítka, procentuální entity (plní se jako baterie) nebo pevné délky.
+- Barvy pravidel a kruhy pro světla, LED pásky, dok a nábytek.
+- Návrhy pravidel od AI Task; YAML pravidel v editoru kódu Home Assistantu; výběr ikon v pravidlech.
+- „Jiné zařízení“ se chová podle domény své entity; avatary osob; blikání scén a tlačítek.
+
+## Vzhled (0.6.5 až 0.6.19)
+
+- Zdi a pozadí karty v barvách motivu, lišta odznaků vrstev nad půdorysem s legendou tepla, plynulé vlnky pohybu, žádný šev v tmavém režimu, lišta přehrávání pod půdorysem.
+
+Starší verze než 0.6 najdeš na GitHub releases a v historii repozitáře.

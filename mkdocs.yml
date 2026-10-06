@@ -51,9 +51,55 @@ plugins:
         - locale: cs
           name: Čeština
           build: true
+          site_description: Animovaná 2D karta s půdorysem a editor pro Home Assistant
+          nav_translations:
+            Home: Úvod
+            Getting started: Začínáme
+            Installation: Instalace
+            Quick start: Rychlý start
+            Editor: Editor
+            Overview: Přehled
+            Rooms: Místnosti
+            Doors and windows: Dveře a okna
+            Items: Položky
+            Rules: Pravidla
+            Features: Funkce
+            Card: Karta
+            Room panel: Panel místnosti
+            Robot vacuum: Robotický vysavač
+            History and check: Historie a kontrola
+            Reference: Reference
+            Plan format: Formát plánu
+            Websocket API: Websocket API
+            FAQ: Časté otázky
+            Changelog: Změny
+            Live demo: Živé demo
         - locale: de
           name: Deutsch
           build: true
+          site_description: Eine animierte 2D-Grundriss-Karte mit Editor für Home Assistant
+          nav_translations:
+            Home: Startseite
+            Getting started: Erste Schritte
+            Installation: Installation
+            Quick start: Schnellstart
+            Editor: Editor
+            Overview: Übersicht
+            Rooms: Räume
+            Doors and windows: Türen und Fenster
+            Items: Elemente
+            Rules: Regeln
+            Features: Funktionen
+            Card: Karte
+            Room panel: Raum-Panel
+            Robot vacuum: Saugroboter
+            History and check: Verlauf und Prüfung
+            Reference: Referenz
+            Plan format: Planformat
+            Websocket API: Websocket-API
+            FAQ: Häufige Fragen
+            Changelog: Änderungen
+            Live demo: Live-Demo
 
 markdown_extensions:
   - admonition
