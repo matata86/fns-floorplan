@@ -219,7 +219,10 @@ svg { width: 100%; height: 100%; display: block; touch-action: none; user-select
 .rule { border: 1px solid var(--divider-color, #e0e0e0); border-radius: var(--ha-card-border-radius, 12px); padding: 8px 12px; margin-top: 8px; }
 .rule-h { display: flex; align-items: center; gap: 4px; font-weight: 600; font-size: 13px; }
 .rule-h span { flex: 1; }
-.cmode { display: flex; gap: 6px; margin: 8px 0 4px; }
+.cmode { display: inline-flex; margin: 8px 0 6px; border: 1px solid var(--divider-color, #e0e0e0); border-radius: 16px; overflow: hidden; }
+.cmode button { border: 0; background: none; padding: 5px 14px; font: inherit; font-size: 13px; color: var(--secondary-text-color, #727272); cursor: pointer; }
+.cmode button + button { border-left: 1px solid var(--divider-color, #e0e0e0); }
+.cmode button.on { background: var(--primary-color, #03a9f4); color: var(--text-primary-color, #fff); }
 .mini { border: 1px solid var(--divider-color, #e0e0e0); background: var(--primary-background-color, #fafafa); color: var(--primary-text-color, #212121);
   border-radius: 6px; padding: 3px 8px; cursor: pointer; }
 .cond { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; padding-top: 6px; border-top: 1px dashed var(--divider-color, #e0e0e0); }
@@ -1768,7 +1771,7 @@ class FnsFloorplanPanel extends HTMLElement {
     // buttons: icon buttons for data-icon, otherwise ha-button; data-a clicks are bound by _bind afterwards
     if (!customElements.get("ha-button")) return;
     side.querySelectorAll("button").forEach((b) => {
-      if (b.closest(".fxpick")) return;
+      if (b.closest(".fxpick, .cmode")) return;
       const text = b.textContent.trim(), icon = b.dataset.icon;
       let n;
       if (icon) {
@@ -1993,7 +1996,7 @@ class FnsFloorplanPanel extends HTMLElement {
       const simple = conds.every((c) => !c.any);
       // the condition is either the entity form or one Jinja template (and / or / anything), true = the settings below apply
       const tplMode = conds.length === 1 && conds[0].template != null;
-      const mode = `<div class="cmode"><button class="mini${tplMode ? "" : " on"}" data-a="ra:cmode:${i}:form">Podle entit</button><button class="mini${tplMode ? " on" : ""}" data-a="ra:cmode:${i}:tpl">Šablona Jinja</button></div>`;
+      const mode = `<div class="cmode"><button class="${tplMode ? "" : "on"}" data-a="ra:cmode:${i}:form">Podle entit</button><button class="${tplMode ? "on" : ""}" data-a="ra:cmode:${i}:tpl">Šablona Jinja</button></div>`;
       const tplUI = `<textarea data-k="rc:${i}:0:value" data-jinja spellcheck="false" placeholder="{{ is_state('vacuum.x', 'cleaning') and states('sensor.y') | float(0) > 20 }}">${esc(conds[0]?.template || "")}</textarea>
         <p class="hint">Když šablona vyjde true (nebo on, yes, 1), platí nastavení níže.</p>`;
       // "+ podmínka" sits in the footer of the last condition, next to its delete icon
