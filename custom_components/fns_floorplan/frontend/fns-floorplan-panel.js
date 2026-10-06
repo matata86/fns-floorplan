@@ -83,6 +83,12 @@ const el = (tag, attrs = {}, parent) => {
 };
 const P = ([x, z]) => [x * S + PAD, z * S + PAD];
 const snap = (v) => Math.round(v / SNAP) * SNAP;
+// the smallest shift (within 15 cm) that puts one of `vals` on one of `targets`: {d, t} or null
+const nearest = (vals, targets, tol = 0.15) => {
+  let best = null;
+  for (const v of vals) for (const t of targets) if (Math.abs(t - v) < tol && (!best || Math.abs(t - v) < Math.abs(best.d))) best = { d: t - v, t };
+  return best;
+};
 const r3 = (v) => Math.round(v * 1000) / 1000;
 const isLight = (f) => /^(lamp|led)/.test(f.type);
 const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
@@ -246,6 +252,8 @@ div.modes button.on { background: var(--primary-color, #03a9f4); color: var(--te
 .vtx { fill: #fff; stroke: var(--primary-color, #03a9f4); stroke-width: 2.5; cursor: grab; }
 .vtx.sel { fill: var(--primary-color, #03a9f4); }
 .mid { fill: var(--primary-color, #03a9f4); fill-opacity: .35; cursor: copy; }
+.edge-hit { stroke: transparent; stroke-width: 14; }
+.mode-items .edge-hit { display: none; }
 .sheet-x { display: none; }
 .grip { width: 6px; flex: none; cursor: col-resize; background: transparent; border-left: 1px solid var(--divider-color, #e0e0e0); touch-action: none; }
 .grip:hover, .grip.on { background: var(--primary-color); opacity: .4; }
@@ -739,8 +747,13 @@ class FnsFloorplanPanel extends HTMLElement {
       if (this._mode !== "rooms") return;
       f.addEventListener("pointerdown", (e) => {
         const base = r.points.map((p) => [...p]);
-        this._press(e, { cat: "rooms", i }, (dx, dz) => {
-          const sx = snap(dx), sz = snap(dz);
+        const others = this._otherCorners(r, []);
+        this._press(e, { cat: "rooms", i }, (dx, dz, p, ev) => {
+          // walls line up with other rooms' corners and walls (Alt turns it off)
+          const nx = !ev?.altKey && nearest(base.map((b) => b[0] + dx), others.map((o) => o[0]));
+          const nz = !ev?.altKey && nearest(base.map((b) => b[1] + dz), others.map((o) => o[1]));
+          const sx = nx ? dx + nx.d : snap(dx), sz = nz ? dz + nz.d : snap(dz);
+          this._guides = [...(nx ? [{ x: nx.t }] : []), ...(nz ? [{ z: nz.t }] : [])];
           r.points = base.map(([x, z]) => [r3(Math.max(0, x + sx)), r3(Math.max(0, z + sz))]);
         });
       });
@@ -909,9 +922,9 @@ class FnsFloorplanPanel extends HTMLElement {
       el("line", { x1: cx, y1: cz, x2: hx, y2: hz, class: "rot-line" }, svg);
       const h = el("circle", { cx: hx, cy: hz, r: 7, class: "rot-h" }, svg);
       el("title", {}, h).textContent = "Směr svícení";
-      h.addEventListener("pointerdown", (e) => this._press(e, this._sel, (dx, dz, p) => {
-        const deg = (Math.atan2(p[1] - f.z, p[0] - f.x) * 180) / Math.PI;
-        f.rotation = (((Math.round(deg / 5) * 5) % 360) + 360) % 360;
+      h.addEventListener("pointerdown", (e) => this._press(e, this._sel, (dx, dz, p, ev) => {
+        const deg = (Math.atan2(p[1] - f.z, p[0] - f.x) * 180) / Math.PI, st = ev?.ctrlKey || ev?.metaKey ? 15 : 1;
+        f.rotation = (((Math.round(deg / st) * st) % 360) + 360) % 360;
       }));
     }
     if (this._guides) {
@@ -981,16 +994,40 @@ class FnsFloorplanPanel extends HTMLElement {
     const [ax, az] = P(toW(f, 0, top)), [rx, rz] = P(toW(f, 0, top - 0.35));
     el("line", { x1: ax, y1: az, x2: rx, y2: rz, class: "rot-line" }, svg);
     const h = el("circle", { cx: rx, cy: rz, r: 7, class: "rot-h" }, svg);
-    el("title", {}, h).textContent = "Otočit (po 15°)";
-    h.addEventListener("pointerdown", (e) => this._press(e, sel, (dx, dz, p) => {
-      const deg = (Math.atan2(p[1] - f.z, p[0] - f.x) * 180) / Math.PI + 90;
-      f.rotation = (((Math.round(deg / 15) * 15) % 360) + 360) % 360;
+    el("title", {}, h).textContent = "Otočit (s Ctrl po 15°)";
+    h.addEventListener("pointerdown", (e) => this._press(e, sel, (dx, dz, p, ev) => {
+      const deg = (Math.atan2(p[1] - f.z, p[0] - f.x) * 180) / Math.PI + 90, st = ev?.ctrlKey || ev?.metaKey ? 15 : 1;
+      f.rotation = (((Math.round(deg / st) * st) % 360) + 360) % 360;
     }));
   }
 
-  // corners of the selected room: drag to move (snaps to other rooms' corners), "+" between two adds one
+  // corners of the selected room: drag to move (snaps to other rooms' corners), "+" between two adds one;
+  // a wall itself drags out or in as a whole (its two corners move together, square to the wall)
   _handles(svg, ri) {
     const r = this._plan.rooms[ri];
+    r.points.forEach((p, k) => {
+      const k2 = (k + 1) % r.points.length, q = r.points[k2];
+      const L = Math.hypot(q[0] - p[0], q[1] - p[1]);
+      if (L < 1e-6) return;
+      const n = [-(q[1] - p[1]) / L, (q[0] - p[0]) / L];
+      const [A, B] = [P(p), P(q)];
+      const hit = el("line", { x1: A[0], y1: A[1], x2: B[0], y2: B[1], class: "edge-hit" }, svg);
+      hit.style.cursor = Math.abs(n[1]) > Math.abs(n[0]) ? "ns-resize" : "ew-resize";
+      hit.addEventListener("pointerdown", (e) => {
+        const b0 = [...p], b1 = [...q];
+        const tw = [this._twins(r, b0), this._twins(r, b1)];
+        // how far each other corner is from the wall, measured square to it
+        const dist = this._otherCorners(r, [...tw[0], ...tw[1]]).map((o) => (o[0] - b0[0]) * n[0] + (o[1] - b0[1]) * n[1]);
+        this._press(e, { cat: "rooms", i: ri }, (dx, dz, pt, ev) => {
+          const raw = dx * n[0] + dz * n[1], hit = !ev?.altKey && nearest([raw], dist);
+          const d = hit ? hit.t : snap(raw);
+          [[k, b0], [k2, b1]].forEach(([j, b], t) => {
+            r.points[j] = [r3(Math.max(0, b[0] + n[0] * d)), r3(Math.max(0, b[1] + n[1] * d))];
+            if (!ev?.altKey) for (const x of tw[t]) x.room.points[x.k] = [...r.points[j]];
+          });
+        });
+      });
+    });
     r.points.forEach((p, k) => {
       const q = r.points[(k + 1) % r.points.length];
       const [mx, mz] = P([(p[0] + q[0]) / 2, (p[1] + q[1]) / 2]);
@@ -1007,17 +1044,26 @@ class FnsFloorplanPanel extends HTMLElement {
         const base = [...p];
         // the same corner of a neighbouring room (a shared wall) moves along, unless Alt is held
         const twins = this._twins(r, base);
-        const skip = new Set(twins.map((t) => t.room.points[t.k]));
-        const others = this._plan.rooms.filter((x) => x !== r).flatMap((x) => x.points).filter((o) => !skip.has(o));
+        const others = this._otherCorners(r, twins);
         this._press(e, { cat: "rooms", i: ri, v: k }, (dx, dz, pt, ev) => {
           let x = base[0] + dx, z = base[1] + dz;
-          const near = others.find((o) => Math.hypot(o[0] - x, o[1] - z) < 0.15);
-          [x, z] = near || [snap(x), snap(z)];
+          // onto another room's corner, else in line with other corners (walls), else the grid; Alt: grid only
+          const near = !ev?.altKey && others.find((o) => Math.hypot(o[0] - x, o[1] - z) < 0.15);
+          const nx = !ev?.altKey && !near && nearest([x], others.map((o) => o[0]));
+          const nz = !ev?.altKey && !near && nearest([z], others.map((o) => o[1]));
+          this._guides = [...(nx ? [{ x: nx.t }] : []), ...(nz ? [{ z: nz.t }] : [])];
+          [x, z] = near || [nx ? nx.t : snap(x), nz ? nz.t : snap(z)];
           r.points[k] = [r3(Math.max(0, x)), r3(Math.max(0, z))];
           if (!ev?.altKey) for (const t of twins) t.room.points[t.k] = [...r.points[k]];
         });
       });
     });
+  }
+
+  // corners of the other rooms on this floor, except the shared ones that move along (`twins`)
+  _otherCorners(r, twins) {
+    const skip = new Set(twins.map((t) => t.room.points[t.k]));
+    return this._plan.rooms.filter((x) => x !== r && this._on(x)).flatMap((x) => x.points).filter((o) => !skip.has(o));
   }
 
   // corners of other rooms on this floor that sit on `pt` (within 2 cm): [{room, k}]
@@ -1431,7 +1477,7 @@ class FnsFloorplanPanel extends HTMLElement {
     const side = this.shadowRoot.querySelector(".side");
     const sel = this._sel, o = this._get();
     if (!o && this._mode === "rooms") {
-      side.innerHTML = `<h2>Místnosti, okna a dveře</h2><p class="hint">Klepni na místnost: táhnutím ji posuneš celou, za modré body táhneš rohy (přichytí se k rohům sousedních místností), poloprůhledné body mezi rohy přidají nový roh.<br><br>Okno nebo dveře vybereš klepnutím a táhnutím posuneš po stěně. U vybraných dveří přehodí ⇄ panty a ⇅ směr otevírání. Nové přidáš v panelu vybrané místnosti.<br><br>Společný roh sousedních místností se posouvá s oběma místnostmi naráz; s Alt jen ten jeden.</p>`;
+      side.innerHTML = `<h2>Místnosti, okna a dveře</h2><p class="hint">Klepni na místnost: táhnutím ji posuneš celou, za modré body táhneš rohy (přichytí se k rohům sousedních místností), za stěnu ji celou posuneš ven nebo dovnitř (stěny a rohy se přichytí k sousedním místnostem, Alt to vypne), poloprůhledné body mezi rohy přidají nový roh.<br><br>Okno nebo dveře vybereš klepnutím a táhnutím posuneš po stěně. U vybraných dveří přehodí ⇄ panty a ⇅ směr otevírání. Nové přidáš v panelu vybrané místnosti.<br><br>Společný roh sousedních místností se posouvá s oběma místnostmi naráz; s Alt jen ten jeden.</p>`;
       this._bgUI(side);
       return;
     }
@@ -1439,7 +1485,7 @@ class FnsFloorplanPanel extends HTMLElement {
     if (sel?.cat === "rooms") return this._roomForm(side, o);
     if (sel?.cat === "openings") return this._openingForm(side, o);
     if (!o) {
-      side.innerHTML = `<h2>Úpravy půdorysu</h2><p class="hint">Klepni na světlo, spotřebič, senzor, text, nábytek nebo badge místnosti a uprav ho. Táhnutím ji přesuneš (mřížka 5 cm, s Ctrl nebo Shift jen v jedné ose), šipky posouvají vybraný prvek, Delete ho smaže. Ctrl+klik vybere víc prvků najednou (pak je jde táhnout spolu a seskupit), Ctrl+C / Ctrl+V kopíruje. Vybraný nábytek má úchyty na změnu velikosti a kolečko na otáčení. Při tažení se prvek přichytí k ose jiného prvku, ke středu místnosti nebo ke stěně (růžová čára); Alt přichycení vypne.<br><br>Prvky bez entity mají červený přerušovaný okraj, prvky skryté pravidlem jsou bledé.<br><br>Změny se na dashboardu projeví hned po uložení.</p>`;
+      side.innerHTML = `<h2>Úpravy půdorysu</h2><p class="hint">Klepni na světlo, spotřebič, senzor, text, nábytek nebo badge místnosti a uprav ho. Táhnutím ji přesuneš (mřížka 5 cm, s Ctrl nebo Shift jen v jedné ose), šipky posouvají vybraný prvek, Delete ho smaže. Ctrl+klik vybere víc prvků najednou (pak je jde táhnout spolu a seskupit), Ctrl+C / Ctrl+V kopíruje. Vybraný nábytek má úchyty na změnu velikosti a kolečko na otáčení (s Ctrl po 15°). Při tažení se prvek přichytí k ose jiného prvku, ke středu místnosti nebo ke stěně (růžová čára); Alt přichycení vypne.<br><br>Prvky bez entity mají červený přerušovaný okraj, prvky skryté pravidlem jsou bledé.<br><br>Změny se na dashboardu projeví hned po uložení.</p>`;
       return;
     }
     const field = (label, key, value, type = "text", extra = "") =>
