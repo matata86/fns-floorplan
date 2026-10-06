@@ -1471,6 +1471,7 @@ class FnsFloorplanPanel extends HTMLElement {
         ${sel.g ? `<p class="hint">Svítidla jednoho světla v jedné místnosti jsou na kartě jeden prvek. Táhnutím posuneš všechna, změny platí pro všechna.</p>` : ""}
         ${this._sec("Základ", `<label>Typ</label><select data-k="type">${types.map((t) => `<option value="${t}" ${t === o.type ? "selected" : ""}>${esc(label(t))}</option>`).join("")}</select>
         ${field(light ? "Entita (světlo nebo spínač)" : o.type === "tv_wall" ? "Entita (media_player)" : dock ? "Entita (vacuum)" : "Entita (nepovinná, klepnutí otevře její detail)", "entity", o.entity || "", "text", 'list="ents"')}
+        ${dock ? `<label>Baterie (entita; prázdné = senzor baterie zařízení vysavače)</label><input data-k="battery" value="${esc(o.battery || "")}" placeholder="sensor.*_battery" list="ents">` : ""}
         ${dock ? this._vacPairing(o) : ""}
         ${light ? `<label>Osvětlení místnosti (v %; prázdné = 100, LED pásek 45, 15 = jen slabě)</label><input data-k="room_light" type="number" min="0" step="5" placeholder="100"
           value="${o.room_light === false ? 15 : typeof o.room_light === "number" ? Math.round(o.room_light * 100) : ""}">` : ""}
@@ -1491,6 +1492,7 @@ class FnsFloorplanPanel extends HTMLElement {
         ${field("Název", "name", o.name || "")}
         ${field("Entita", "entity", o.entity || "", "text", 'list="ents"')}
         ${o.kind === "generic" && DOMAIN_HINT[dom] ? `<p class="hint">${DOMAIN_HINT[dom]}</p>` : ""}
+        ${dom === "vacuum" ? `<label>Baterie (entita; prázdné = senzor baterie zařízení vysavače)</label><input data-k="battery" value="${esc(o.battery || "")}" placeholder="sensor.*_battery" list="ents">` : ""}
         <label class="chk"><input type="checkbox" data-k="sheet_hide" ${o.sheet_hide ? "checked" : ""}> nezobrazovat v panelu místnosti</label>
         ${o.kind === "media" ? `<label class="chk"><input type="checkbox" data-k="cover" ${o.cover === false ? "" : "checked"}> obal alba nebo pořadu v odznaku (při přehrávání a pauze)</label>` : ""}`, true)}
         ${this._sec("Když běží", `<label>Běží, když je stav</label><input data-k="active" value="${esc(Array.isArray(o.active) ? o.active.join(", ") : o.active ? JSON.stringify(o.active) : "")}" placeholder="${o.kind === "media" ? "playing" : "on, run"}">
