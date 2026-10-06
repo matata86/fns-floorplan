@@ -1,10 +1,10 @@
-<p align="center"><img src="docs/assets/logo.svg" alt="FNS Floorplan logo" width="96"></p>
+<p align="center"><img src="https://raw.githubusercontent.com/matata86/fns-floorplan/master/custom_components/fns_floorplan/brand/icon.png" alt="FNS Floorplan logo" width="96"></p>
 
 # FNS Floorplan
 
 [![HACS Custom](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://hacs.xyz)
 [![GitHub release](https://img.shields.io/github/v/release/matata86/fns-floorplan)](https://github.com/matata86/fns-floorplan/releases)
-[![License: MIT](https://img.shields.io/github/license/matata86/fns-floorplan)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/matata86/fns-floorplan/blob/master/LICENSE)
 [![Home Assistant](https://img.shields.io/badge/Home%20Assistant-2025.1%2B-blue.svg)](https://www.home-assistant.io)
 [![Ko-fi](https://img.shields.io/badge/Ko--fi-support-ff5e5b?logo=ko-fi&logoColor=white)](https://ko-fi.com/matata86)
 [![PayPal](https://img.shields.io/badge/PayPal-donate-00457C?logo=paypal&logoColor=white)](https://paypal.me/matata86)
@@ -17,7 +17,7 @@ An animated 2D floor plan for Home Assistant that shows the live state of your h
 
 > Inspired by [NeonPlan 3D](https://github.com/Mastershort/neonplan3d), a 3D floor plan card for Home Assistant. FNS Floorplan takes the idea to an animated 2D plan with its own editor, and a NeonPlan 3D building can be imported (see [Quick start](https://matata86.github.io/fns-floorplan/quick-start/#coming-from-neonplan-3d)).
 
-![An animated floor plan with lights, doors and a robot vacuum](docs/assets/screenshots/en/card-overview.png)
+![An animated floor plan with lights, doors and a robot vacuum](https://raw.githubusercontent.com/matata86/fns-floorplan/master/docs/assets/screenshots/en/card-overview.png)
 
 **[Live demo](https://matata86.github.io/fns-floorplan/demo/)** (the real card with fake states, no Home Assistant needed)
 
@@ -25,9 +25,9 @@ An animated 2D floor plan for Home Assistant that shows the live state of your h
 
 ## See it move
 
-![A door opening on the plan](docs/assets/screenshots/gif/door-opening.gif)
-![Lights switching on in their colour](docs/assets/screenshots/gif/lights-on.gif)
-![Dragging a wall in the editor](docs/assets/screenshots/gif/drag-wall.gif)
+![A door opening on the plan](https://raw.githubusercontent.com/matata86/fns-floorplan/master/docs/assets/screenshots/gif/door-opening.gif)
+![Lights switching on in their colour](https://raw.githubusercontent.com/matata86/fns-floorplan/master/docs/assets/screenshots/gif/lights-on.gif)
+![Dragging a wall in the editor](https://raw.githubusercontent.com/matata86/fns-floorplan/master/docs/assets/screenshots/gif/drag-wall.gif)
 
 ## Features
 
@@ -144,4 +144,4 @@ If FNS Floorplan saves you time, you can support its development:
 
 ## License
 
-[MIT](LICENSE)
+[MIT](https://github.com/matata86/fns-floorplan/blob/master/LICENSE)
