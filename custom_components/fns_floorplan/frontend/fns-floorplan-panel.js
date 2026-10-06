@@ -1800,7 +1800,7 @@ class FnsFloorplanPanel extends HTMLElement {
     // rule icons: HA's icon picker with its list and search (typing "none" still works)
     if (customElements.get("ha-icon-picker")) side.querySelectorAll('input[data-k$=":icon"]').forEach((inp) => {
       const pick = document.createElement("ha-icon-picker");
-      Object.assign(pick, { hass: this._hass, value: inp.value, label: "Ikona", helper: "prázdné = podle prvku, none = bez ikony" });
+      Object.assign(pick, { hass: this._hass, value: inp.value, label: "Ikona", helper: "prázdné = podle prvku" });
       pick.dataset.k = inp.dataset.k;
       pick.addEventListener("value-changed", (e) => { e.stopPropagation(); set(inp.dataset.k, e.detail.value || "", pick); });
       inp.replaceWith(pick);
@@ -1987,7 +1987,11 @@ class FnsFloorplanPanel extends HTMLElement {
         : this._fxPicker(`ro:${i}:fx`, r.fx === "none" ? "" : r.fx, "bez animace", "none", FURNITURE[o.type]?.[1] || "mdiShapeOutline", `ro:${i}:progress`, r.progress, "žádná", "Animace kruhu", r.progress_total).replace(/<button class="fxt[^"]*" data-fx="none"[\s\S]*?<\/button>/, ""))}</div>`);
       if (fields.includes("hide")) parts.push(`<label class="chk"><input type="checkbox" data-k="ro:${i}:hide" ${r.hide ? "checked" : ""}> skrýt</label>`);
       if (o.points) parts.push(`<span>Průhlednost</span><input type="number" step="0.05" min="0" max="1" data-k="ro:${i}:opacity" value="${r.opacity ?? ""}" placeholder="0,14" style="width:70px">`);
-      if (fields.includes("icon")) parts.push(`<input type="text" data-k="ro:${i}:icon" value="${esc(r.icon || "")}" placeholder="ikona, např. mdi:timer-sand (none = bez ikony)">`);
+      // the icon picker cannot take "none": a button next to it hides the icon, another brings the picker back
+      if (fields.includes("icon")) parts.push(r.icon === "none"
+        ? `<div class="icon-row" style="flex:1 1 100%"><span class="hint" style="flex:1">Ikona: bez ikony</span><button class="mini" data-a="ra:icon:${i}:" data-icon="mdi:restore" title="Vrátit ikonu">Vrátit</button></div>`
+        : `<div class="icon-row" style="flex:1 1 100%"><input type="text" data-k="ro:${i}:icon" value="${esc(r.icon || "")}" placeholder="ikona, např. mdi:timer-sand">
+          <button class="mini" data-a="ra:icon:${i}:none" data-icon="mdi:eye-off-outline" title="Bez ikony">Bez ikony</button></div>`);
       if (fields.includes("text")) parts.push(`<input type="text" data-k="ro:${i}:text" value="${esc(r.text || "")}" placeholder="text (může být šablona {{ … }})">`);
       return `<div class="outc">${parts.join("")}</div>`;
     };
@@ -2118,6 +2122,7 @@ class FnsFloorplanPanel extends HTMLElement {
     else if (op === "up" && n > 0) [rules[n - 1], rules[n]] = [rules[n], rules[n - 1]];
     else if (op === "down" && n < rules.length - 1) [rules[n + 1], rules[n]] = [rules[n], rules[n + 1]];
     else if (op === "cadd") rules[n].if = [...[].concat(rules[n].if || []), { entity: own, state: "on" }];
+    else if (op === "icon") { if (j) rules[n].icon = j; else delete rules[n].icon; }
     else if (op === "cmode") {
       const c = [].concat(rules[n].if || []);
       if (j === "tpl" && !(c.length === 1 && c[0].template != null)) rules[n].if = [{ template: toJinja(c) }];
