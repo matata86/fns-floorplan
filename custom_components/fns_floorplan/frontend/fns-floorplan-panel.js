@@ -60,6 +60,20 @@ const SIZE_NAMES = { xs: "XS", s: "S", "": "M (výchozí)", l: "L", xl: "XL", xx
 const COLOR_NAMES = { red: "Červená", orange: "Oranžová", yellow: "Žlutá", green: "Zelená", blue: "Modrá", purple: "Fialová", pink: "Růžová", white: "Bílá", black: "Černá" };
 const ACTIONS = { "": "Výchozí", toggle: "Přepnout", "more-info": "Detail entity", "perform-action": "Zavolat akci", navigate: "Přejít na stránku", url: "Otevřít odkaz", none: "Nic" };
 const ACTION_KEYS = { tap: "Klepnutí", double_tap: "Dvojklik", hold: "Podržení" };
+// conditions of the entity form as one Jinja expression (all must hold; "any" = or)
+const toJinja = (conds) => {
+  const q = (v) => `'${String(v).replace(/'/g, "\\'")}'`;
+  const one = (c) => {
+    if (c.any) return "(" + c.any.map(one).join(" or ") + ")";
+    if (c.template != null) return "(" + String(c.template).replace(/^\s*\{\{|\}\}\s*$/g, "").trim() + ")";
+    const v = c.attribute ? `state_attr(${q(c.entity)}, ${q(c.attribute)})` : `states(${q(c.entity)})`;
+    if (c.above != null) return `${v} | float(0) > ${c.above}`;
+    if (c.below != null) return `${v} | float(0) < ${c.below}`;
+    const list = [].concat(c.state ?? c.state_not ?? ""), e = list.length > 1 ? `${v} in [${list.map(q).join(", ")}]` : `${v} == ${q(list[0])}`;
+    return c.state_not != null ? `not (${e})` : e;
+  };
+  return conds.length ? `{{ ${conds.map(one).join(" and ")} }}` : "";
+};
 const OPS = { state: "je", state_not: "není", above: "větší než", below: "menší než", template: "šablona (Jinja)" };
 // a point item (lamp, robot dock) has no size or rotation of its own
 const isPoint = (f) => (isLight(f) && f.type !== "led_strip") || f.type === "robot_vacuum";
@@ -205,6 +219,7 @@ svg { width: 100%; height: 100%; display: block; touch-action: none; user-select
 .rule { border: 1px solid var(--divider-color, #e0e0e0); border-radius: var(--ha-card-border-radius, 12px); padding: 8px 12px; margin-top: 8px; }
 .rule-h { display: flex; align-items: center; gap: 4px; font-weight: 600; font-size: 13px; }
 .rule-h span { flex: 1; }
+.cmode { display: flex; gap: 6px; margin: 8px 0 4px; }
 .mini { border: 1px solid var(--divider-color, #e0e0e0); background: var(--primary-background-color, #fafafa); color: var(--primary-text-color, #212121);
   border-radius: 6px; padding: 3px 8px; cursor: pointer; }
 .cond { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; padding-top: 6px; border-top: 1px dashed var(--divider-color, #e0e0e0); }
@@ -1587,11 +1602,14 @@ class FnsFloorplanPanel extends HTMLElement {
         ${light ? `<label>Osvětlení místnosti (v %; prázdné = 100, LED pásek 45, 15 = jen slabě)</label><input data-k="room_light" type="number" min="0" step="5" placeholder="100"
           value="${o.room_light === false ? 15 : typeof o.room_light === "number" ? Math.round(o.room_light * 100) : ""}">` : ""}
         ${light ? `<label class="chk"><input type="checkbox" data-k="sheet_hide" ${o.sheet_hide ? "checked" : ""}> nezobrazovat v panelu místnosti</label>` : ""}`, true)}
+        ${dock ? this._sec("Když běží (uklízí)", `<label>Barva, když uklízí</label>${this._colorPick("color_on", o.color_on)}
+        <p class="hint">Výchozí = barva stavu z motivu HA.</p>
+        ${this._fxPicker("fx", o.fx, "žádná (jen jízda)", "none", "mdiRobotVacuum", "progress", o.progress, "žádná", "Animace kruhu, když uklízí", o.progress_total).replace(/<button class="fxt[^"]*" data-fx="none"[\s\S]*?<\/button>/, "")}`) : ""}
         ${look.replace(/\s/g, "") ? this._sec("Vzhled", look) : ""}
-        ${this._sec("Rozměry a pozice", `${xz}
+        ${this._sec(dock ? "Kde stojí, když je v doku" : point ? "Pozice" : "Rozměry a pozice", `${xz}
         ${point ? "" : o.type === "led_strip" ? num("Délka (m)", "w", o.w) : `<div class="row2"><div>${num("Šířka (m)", "w", o.w)}</div><div>${num("Hloubka (m)", "d", o.d)}</div></div>`}
         ${point ? "" : rotation}
-        ${dock ? "" : this._layerField(o)}`)}
+        ${this._layerField(o)}${dock ? `<p class="hint">Při jízdě je robot vždy nad nábytkem a pod světly a spotřebiči. Do popředí = když stojí (v doku nebo v místnosti), je nad nimi.</p>` : ""}`)}
         ${this._actionsUI(o, light ? { tap: "Přepnout", hold: "Detail entity" } : { tap: "Detail entity" })}
         ${this._rulesUI(o, o.type === "led_strip" ? ["color", "fx", "hide"] : light || dock ? ["color", "fx", "icon", "hide"] : ["color", "glow", "fx", "icon", "hide"])}`;
     } else if (sel.cat === "devices") {
@@ -1760,7 +1778,7 @@ class FnsFloorplanPanel extends HTMLElement {
         n.innerHTML = `<ha-icon icon="${esc(icon)}"></ha-icon>`;
       } else {
         n = document.createElement("ha-button");
-        n.setAttribute("appearance", b.classList.contains("mini") ? "plain" : "filled");
+        n.setAttribute("appearance", b.classList.contains("mini") && !b.classList.contains("on") ? "plain" : "filled");
         n.setAttribute("size", "small");
         if (b.classList.contains("del")) n.setAttribute("variant", "danger");
         n.textContent = text;
@@ -1793,6 +1811,13 @@ class FnsFloorplanPanel extends HTMLElement {
       ed.addEventListener("focusout", () => ed.dispatchEvent(new Event("change")));
       ta.replaceWith(ed);
     }
+    if (customElements.get("ha-code-editor")) side.querySelectorAll("textarea[data-jinja]").forEach((t) => {
+      const ed = document.createElement("ha-code-editor");
+      Object.assign(ed, { hass: this._hass, mode: "jinja2", linewrap: true, autocompleteEntities: true, value: t.value });
+      ed.dataset.k = t.dataset.k;
+      ed.addEventListener("focusout", () => ed.dispatchEvent(new Event("change")));
+      t.replaceWith(ed);
+    });
     side.querySelectorAll(".fxpick .fxt").forEach((b) => b.addEventListener("click", () => set(b.closest(".fxpick").dataset.fxKey, b.dataset.fx, b)));
     side.querySelectorAll("[data-sec]").forEach((el) => {
       const rec = (open) => ((this._secOpen ||= {})[el.dataset.sec] = open);
@@ -1966,11 +1991,16 @@ class FnsFloorplanPanel extends HTMLElement {
     const list = rules.map((r, i) => {
       const conds = [].concat(r.if || []);
       const simple = conds.every((c) => !c.any);
+      // the condition is either the entity form or one Jinja template (and / or / anything), true = the settings below apply
+      const tplMode = conds.length === 1 && conds[0].template != null;
+      const mode = `<div class="cmode"><button class="mini${tplMode ? "" : " on"}" data-a="ra:cmode:${i}:form">Podle entit</button><button class="mini${tplMode ? " on" : ""}" data-a="ra:cmode:${i}:tpl">Šablona Jinja</button></div>`;
+      const tplUI = `<textarea data-k="rc:${i}:0:value" data-jinja spellcheck="false" placeholder="{{ is_state('vacuum.x', 'cleaning') and states('sensor.y') | float(0) > 20 }}">${esc(conds[0]?.template || "")}</textarea>
+        <p class="hint">Když šablona vyjde true (nebo on, yes, 1), platí nastavení níže.</p>`;
       // "+ podmínka" sits in the footer of the last condition, next to its delete icon
       const addCond = `<button data-a="ra:cadd:${i}" class="mini">+ podmínka</button>`;
       return `<div class="rule"><div class="rule-h"><span>Pravidlo ${i + 1}</span>
           <button data-a="ra:up:${i}" data-icon="mdi:arrow-up" title="Posunout výš" ${i ? "" : "disabled"}>↑</button><button data-a="ra:down:${i}" data-icon="mdi:arrow-down" title="Posunout níž" ${i < rules.length - 1 ? "" : "disabled"}>↓</button><button data-a="ra:ryaml:${i}" data-icon="${yr === i ? "mdi:form-select" : "mdi:code-braces"}" title="${yr === i ? "Zpět na formulář" : "Upravit v YAML"}">YAML</button><button data-a="ra:del:${i}" data-icon="mdi:delete" title="Smazat pravidlo">✕</button></div>
-        ${yr === i ? `<textarea data-k="rule_yaml:${i}" spellcheck="false">Načítám…</textarea>` : `${simple ? conds.map((c, j) => {
+        ${yr === i ? `<textarea data-k="rule_yaml:${i}" spellcheck="false">Načítám…</textarea>` : `${mode}${tplMode ? tplUI : simple ? conds.map((c, j) => {
           const op = opOf(c);
           return `<div class="cond">${op === "template" ? "" : `<input data-k="rc:${i}:${j}:entity" value="${esc(c.entity || "")}" placeholder="entita" data-label="Entita" list="ents">
               ${own && c.entity !== own ? `<button class="mini wide" data-a="ra:self:${i}:${j}" title="${esc(own)}">↳ tato entita</button>` : ""}
@@ -2085,7 +2115,12 @@ class FnsFloorplanPanel extends HTMLElement {
     else if (op === "up" && n > 0) [rules[n - 1], rules[n]] = [rules[n], rules[n - 1]];
     else if (op === "down" && n < rules.length - 1) [rules[n + 1], rules[n]] = [rules[n], rules[n + 1]];
     else if (op === "cadd") rules[n].if = [...[].concat(rules[n].if || []), { entity: own, state: "on" }];
-    else if (op === "cdel") { const c = [].concat(rules[n].if || []); c.splice(Number(j), 1); if (c.length) rules[n].if = c; else delete rules[n].if; }
+    else if (op === "cmode") {
+      const c = [].concat(rules[n].if || []);
+      if (j === "tpl" && !(c.length === 1 && c[0].template != null)) rules[n].if = [{ template: toJinja(c) }];
+      else if (j === "form" && c.length === 1 && c[0].template != null) rules[n].if = [{ entity: own, state: "on" }];
+      else return;
+    } else if (op === "cdel") { const c = [].concat(rules[n].if || []); c.splice(Number(j), 1); if (c.length) rules[n].if = c; else delete rules[n].if; }
     for (const t of targets) if (rules.length) t.rules = JSON.parse(JSON.stringify(rules)); else delete t.rules;
     this._changed();
   }
