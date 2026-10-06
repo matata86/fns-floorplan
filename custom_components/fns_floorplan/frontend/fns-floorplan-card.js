@@ -2326,7 +2326,7 @@ window.customCards = window.customCards || [];
 window.customCards.push({
   type: "fns-floorplan-card",
   name: "FNS Floorplan",
-  description: t("editor.description"),
+  get description() { return t("editor.description"); },
   preview: false,
 });
 console.info(`%c FNS-FLOORPLAN %c ${VERSION} `, "color:#fff;background:#6366f1;border-radius:3px 0 0 3px", "color:#6366f1;background:#eef");
@@ -2384,4 +2384,4 @@ function vacRoom(where, rooms, map = {}) {
   return rooms.find((r) => fold(r.name) === fold(where) || r.id === where) || null;
 }
 
-export { t, getLang, furnName, furnShape, fold, vacRoom, DOMAIN_DEV, progressFrom, timedFrom, MDI, COLORS, UI_COLORS, color, FURNITURE, lightIcon, SIZES, evalRules, resolveIcon, iconHtml, mdiPath, FX_SVG, STYLE };
+export { t, setLang, getLang, furnName, furnShape, fold, vacRoom, DOMAIN_DEV, progressFrom, timedFrom, MDI, COLORS, UI_COLORS, color, FURNITURE, lightIcon, SIZES, evalRules, resolveIcon, iconHtml, mdiPath, FX_SVG, STYLE };
