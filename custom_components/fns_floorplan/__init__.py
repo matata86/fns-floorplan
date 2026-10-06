@@ -2,7 +2,7 @@
 
 The plan (rooms, openings, furniture, lights, devices) is kept in the integration's
 own storage, read by the card over the websocket API and edited in the sidebar
-panel "Půdorys".
+panel "Floor plan" (named after the UI language).
 """
 
 from __future__ import annotations
@@ -32,6 +32,7 @@ DOMAIN = "fns_floorplan"
 STORAGE_VERSION = 1
 CARD_URL = "/fns_floorplan/fns-floorplan-card.js"
 PANEL_URL = "/fns_floorplan/fns-floorplan-panel.js"
+I18N_URL = "/fns_floorplan/fns-floorplan-i18n.js"
 PANEL_PATH = "fns-floorplan"
 DATA_STORE = "store"
 DATA_PLAN = "plan"
@@ -66,6 +67,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             [
                 StaticPathConfig(CARD_URL, os.path.join(base, "fns-floorplan-card.js"), True),
                 StaticPathConfig(PANEL_URL, os.path.join(base, "fns-floorplan-panel.js"), True),
+                StaticPathConfig(I18N_URL, os.path.join(base, "fns-floorplan-i18n.js"), True),
             ]
         )
         # the version in the query drops the browser cache whenever the integration updates
@@ -77,7 +79,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     frontend.async_register_built_in_panel(
         hass,
         component_name="custom",
-        sidebar_title="Půdorys",
+        sidebar_title={"cs": "Půdorys", "de": "Grundriss"}.get((hass.config.language or "")[:2], "Floor plan"),
         sidebar_icon="mdi:floor-plan",
         frontend_url_path=PANEL_PATH,
         config={"_panel_custom": {"name": "fns-floorplan-panel", "module_url": f"{PANEL_URL}?v={version}",

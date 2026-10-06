@@ -25,7 +25,7 @@ class FloorplanConfigFlow(ConfigFlow, domain=DOMAIN):
 
 
 class FloorplanOptionsFlow(OptionsFlow):
-    """Show or hide the Půdorys editor in the sidebar."""
+    """Show or hide the Floor plan editor in the sidebar."""
 
     async def async_step_init(self, user_input=None):
         if user_input is not None:

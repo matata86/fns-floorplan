@@ -16,7 +16,7 @@
         "title": "FNS Floorplan",
         "description": "The floor plan editor always opens at [{url}]({url}) or from the card editor, even when it is not in the sidebar.",
         "data": {
-          "sidebar": "Show the Půdorys editor in the sidebar"
+          "sidebar": "Show the Floor plan editor in the sidebar"
         }
       }
     }

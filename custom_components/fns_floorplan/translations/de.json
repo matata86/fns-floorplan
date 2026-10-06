@@ -1,0 +1,24 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "FNS Floorplan",
+        "description": "Fügt die animierte Grundriss-Karte (custom:fns-floorplan-card) hinzu."
+      }
+    },
+    "abort": {
+      "single_instance_allowed": "FNS Floorplan ist bereits eingerichtet."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "FNS Floorplan",
+        "description": "Den Grundriss-Editor erreichst du immer unter [{url}]({url}) oder über den Karten-Editor, auch wenn er nicht in der Seitenleiste angezeigt wird.",
+        "data": {
+          "sidebar": "Den Grundriss-Editor in der Seitenleiste anzeigen"
+        }
+      }
+    }
+  }
+}

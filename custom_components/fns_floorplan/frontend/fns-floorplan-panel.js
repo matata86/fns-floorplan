@@ -1,67 +1,39 @@
-// FNS Floorplan editor: the sidebar panel "Půdorys". Lights, appliances, sensors, furniture and
+// FNS Floorplan editor: the sidebar panel "Floor plan". Lights, appliances, sensors, furniture and
 // room labels can be dragged, assigned an entity, turned, resized, added and removed.
-// In the "Místnosti" mode rooms (corner points, whole rooms), windows and doors are edited.
+// In the "Rooms" mode rooms (corner points, whole rooms), windows and doors are edited.
 
 // icons, furniture types and the rules engine come from the card module (same URL, so loaded once)
-const { furnShape, vacRoom, MDI, COLORS, UI_COLORS, color, FURNITURE, lightIcon, SIZES, evalRules, resolveIcon, iconHtml, FX_SVG, DOMAIN_DEV, STYLE: CARD_STYLE } =
+const { t, setLang, getLang, furnName, furnShape, vacRoom, MDI, COLORS, UI_COLORS, color, FURNITURE, lightIcon, SIZES, evalRules, resolveIcon, iconHtml, FX_SVG, DOMAIN_DEV, STYLE: CARD_STYLE } =
   await import(new URL("./fns-floorplan-card.js", import.meta.url).href + new URL(import.meta.url).search);
 
-// what a generic item does by default, by its entity's domain (the behaviour itself is DOMAIN_DEV in the card)
-const DOMAIN_HINT = {
-  fan: "Běží, když je zapnutý; kruh se točí, text: otáčky v %.",
-  siren: "Běží, když je zapnutá; kruh bliká.",
-  input_boolean: "Běží, když je zapnutý.",
-  switch: "Běží, když je zapnutý.",
-  humidifier: "Běží, když je zapnutý; kruh dýchá, text: cílová vlhkost.",
-  water_heater: "Běží, když je zapnutý; kruh dýchá, text: cílová teplota.",
-  climate: "Běží, když topí nebo chladí; text: aktuální → cílová teplota.",
-  valve: "Běží, když je otevřený nebo se hýbe; text: poloha v %.",
-  cover: "Běží, když je otevřený nebo se hýbe; text: poloha v %.",
-  lawn_mower: "Běží při sekání; kruh jede po obvodu.",
-  vacuum: "Běží při úklidu a návratu na dok; kruh jede po obvodu.",
-  camera: "Běží při nahrávání a streamu; kruh jako radar.",
-  person: "Doma = běží; v odznaku fotka, mimo domov šedá a název zóny.",
-  device_tracker: "Doma = běží; v odznaku fotka, mimo domov šedá a název zóny.",
-  script: "Běží, když se vykonává; klepnutí skript spustí.",
-  scene: "Klepnutí scénu spustí, kruh krátce pípne.",
-  button: "Klepnutí tlačítko stiskne, kruh krátce pípne.",
-  input_button: "Klepnutí tlačítko stiskne, kruh krátce pípne.",
-  input_select: "Nikdy neběží; text: zvolená hodnota.",
-  select: "Nikdy neběží; text: zvolená hodnota.",
-  number: "Nikdy neběží; text: hodnota s jednotkou.",
-  input_number: "Nikdy neběží; text: hodnota s jednotkou.",
-  counter: "Nikdy neběží; text: hodnota.",
-  sensor: "Nikdy neběží; text: hodnota s jednotkou.",
-  weather: "Nikdy neběží; text: teplota.",
-  sun: "Běží, když je slunce nad obzorem.",
-  timer: "Běží, když odpočítává; kruh ukazuje zbývající čas z vlastní entity.",
-  binary_sensor: "Běží, když je sepnutý.",
+// key → label tables; the labels are looked up when read, so they follow a language change
+const tbl = (prefix, keys) => {
+  const o = {};
+  for (const k of keys) Object.defineProperty(o, k, { get: () => t(`${prefix}.${k || "default"}`), enumerable: true });
+  return o;
 };
+// what a generic item does by default is shown from t("domain_hint.<domain>") (the behaviour itself is DOMAIN_DEV in the card)
 
 const S = 80; // px per metre, same as the card
 const PAD = 40;
 const SNAP = 0.05; // metres
 const NS = "http://www.w3.org/2000/svg";
 
-// pickers list types by name (Czech order), the catch-all one last
-const byName = (keys, label, last) => keys.filter((k) => k !== last).sort((a, b) => label(a).localeCompare(label(b), "cs")).concat(keys.includes(last) ? [last] : []);
-const FURNITURE_TYPES = byName(Object.keys(FURNITURE), (k) => FURNITURE[k][0], "other");
-const LIGHT_TYPES = { lamp_spot: "Bodové světlo (směrové)", lamp_ceiling: "Stropní světlo", lamp_pendant: "Závěsné světlo", lamp_panel: "Panel", lamp_table: "Lampička", lamp_wall: "Nástěnné světlo", led_strip: "LED pásek" };
-const DEVICE_KINDS = {
-  fan: "Větrák", purifier: "Čistička", dishwasher: "Myčka", dryer: "Sušička", boiler: "Kotel", radiator: "Radiátor",
-  alarm: "Alarm (zabezpečení)", media: "TV / přehrávač", aquarium: "Akvárium (filtrace)", camera: "Kamera", fridge: "Lednice",
-  fireplace: "Krb", lock: "Zámek", generic: "Jiné zařízení (ikona entity)",
-};
-const DEVICE_FX = { ring: "rozbíhající kruh", radar: "radar", comet: "kometa po obvodu", countdown: "odpočet", spin: "načítání", orbit: "oběžnice", breath: "dýchání", blink: "blikání", heartbeat: "tep", shake: "zvonění", none: "bez animace kruhu" };
+// pickers list types by name (in the UI language), the catch-all one last
+const byName = (keys, label, last) => keys.filter((k) => k !== last).sort((a, b) => label(a).localeCompare(label(b), getLang())).concat(keys.includes(last) ? [last] : []);
+const furnTypes = () => byName(Object.keys(FURNITURE), furnName, "other");
+const LIGHT_TYPES = tbl("panel.light_type", ["lamp_spot", "lamp_ceiling", "lamp_pendant", "lamp_panel", "lamp_table", "lamp_wall", "led_strip"]);
+const DEVICE_KINDS = tbl("panel.device_kind", ["fan", "purifier", "dishwasher", "dryer", "boiler", "radiator", "alarm", "media", "aquarium", "camera", "fridge", "fireplace", "lock", "generic"]);
+const DEVICE_FX = tbl("panel.device_fx", ["ring", "radar", "comet", "countdown", "spin", "orbit", "breath", "blink", "heartbeat", "shake", "none"]);
 const DEVICE_ICON = {
   fan: "mdiFan", purifier: "mdiAirPurifier", dishwasher: "mdiDishwasher", dryer: "mdiTumbleDryer", boiler: "mdiWaterBoiler",
   radiator: "mdiRadiator", alarm: "mdiShieldOutline", media: "mdiCastVariant", generic: "mdiShapeOutline",
   aquarium: "mdiFishbowlOutline", camera: "mdiCctv", fridge: "mdiFridgeOutline", fireplace: "mdiFireplace", lock: "mdiLock",
 };
-const SIZE_NAMES = { xs: "XS", s: "S", "": "M (výchozí)", l: "L", xl: "XL", xxl: "XXL" };
-const COLOR_NAMES = { red: "Červená", orange: "Oranžová", yellow: "Žlutá", green: "Zelená", blue: "Modrá", purple: "Fialová", pink: "Růžová", white: "Bílá", black: "Černá" };
-const ACTIONS = { "": "Výchozí", toggle: "Přepnout", "more-info": "Detail entity", "perform-action": "Zavolat akci", navigate: "Přejít na stránku", url: "Otevřít odkaz", none: "Nic" };
-const ACTION_KEYS = { tap: "Klepnutí", double_tap: "Dvojklik", hold: "Podržení" };
+const SIZE_NAMES = tbl("panel.size", ["xs", "s", "", "l", "xl", "xxl"]);
+const COLOR_NAMES = tbl("panel.color", ["red", "orange", "yellow", "green", "blue", "purple", "pink", "white", "black"]);
+const ACTIONS = tbl("panel.action_opt", ["", "toggle", "more-info", "perform-action", "navigate", "url", "none"]);
+const ACTION_KEYS = tbl("panel.action_key", ["tap", "double_tap", "hold"]);
 // conditions of the entity form as one Jinja expression (all must hold; "any" = or)
 const toJinja = (conds) => {
   const q = (v) => `'${String(v).replace(/'/g, "\\'")}'`;
@@ -76,17 +48,17 @@ const toJinja = (conds) => {
   };
   return conds.length ? `{{ ${conds.map(one).join(" and ")} }}` : "";
 };
-const OPS = { state: "je", state_not: "není", above: "větší než", below: "menší než", template: "šablona (Jinja)" };
+const OPS = tbl("panel.op", ["state", "state_not", "above", "below", "template"]);
 // a point item (lamp, robot dock) has no size or rotation of its own
 const isPoint = (f) => (isLight(f) && f.type !== "led_strip") || f.type === "robot_vacuum";
-// what "+" can add: [label, factory]
+// what "+" can add: [label key, factory]
 // the add menu stays short: the light type and the device kind are picked in the item's form
 const ADD = [
-  ["Světlo (stropní, lampička, bodové, LED pásek…)", () => ({ cat: "furniture", item: { type: "lamp_ceiling", w: 0.3, d: 0.3, rotation: 0, entity: "" } })],
-  ["Zařízení (spotřebič, TV, alarm, zámek, kamera…)", () => ({ cat: "devices", item: { kind: "generic", name: "", entity: "" } })],
-  ["Senzor (pohyb, voda)", () => ({ cat: "sensors", item: { entity: "" } })],
-  ["Nábytek", () => ({ cat: "furniture", item: { type: "table", w: 1, d: 0.6, rotation: 0 } })],
-  ["Text", () => ({ cat: "texts", item: { entity: "" } })],
+  ["panel.add.light", () => ({ cat: "furniture", item: { type: "lamp_ceiling", w: 0.3, d: 0.3, rotation: 0, entity: "" } })],
+  ["panel.add.device", () => ({ cat: "devices", item: { kind: "generic", name: "", entity: "" } })],
+  ["panel.add.sensor", () => ({ cat: "sensors", item: { entity: "" } })],
+  ["panel.add.furniture", () => ({ cat: "furniture", item: { type: "table", w: 1, d: 0.6, rotation: 0 } })],
+  ["panel.add.text", () => ({ cat: "texts", item: { entity: "" } })],
 ];
 
 const ADD_ICONS = ["mdi:lightbulb", "mdi:devices", "mdi:motion-sensor", "mdi:sofa", "mdi:format-text"];
@@ -118,14 +90,14 @@ const centroid = (pts) => {
   return [cx / (3 * a), cz / (3 * a)];
 };
 
-const DOOR_STYLES = { interior: "Vnitřní", front: "Vchodové", glass: "Prosklené (balkón)", passage: "Jen otvor ve zdi" };
+const DOOR_STYLES = tbl("panel.door_style", ["interior", "front", "glass", "passage"]);
 // edge k of room r: start point, unit vector and length
 const edgeOf = (r, k) => {
   const a = r.points[k], c = r.points[(k + 1) % r.points.length];
   const L = Math.hypot(c[0] - a[0], c[1] - a[1]) || 1e-9;
   return { a, c, L, u: [(c[0] - a[0]) / L, (c[1] - a[1]) / L] };
 };
-const SIDE = (u) => (Math.abs(u[0]) > Math.abs(u[1]) ? (u[0] > 0 ? "horní" : "dolní") : u[1] > 0 ? "pravá" : "levá");
+const SIDE = (u) => (Math.abs(u[0]) > Math.abs(u[1]) ? (u[0] > 0 ? t("panel.side.top") : t("panel.side.bottom")) : u[1] > 0 ? t("panel.side.right") : t("panel.side.left"));
 const inPoly = ([x, z], pts) => {
   let c = false;
   for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) {
@@ -353,7 +325,9 @@ class FnsFloorplanPanel extends HTMLElement {
   set hass(hass) {
     const first = !this._hass;
     this._hass = hass;
+    const langChanged = setLang(hass.locale?.language || hass.language);
     if (first) this._load();
+    else if (langChanged && this._plan) { this._skeleton(); this._draw(); this._form(); } // every text follows the language
     const menu = this.shadowRoot.querySelector("ha-menu-button");
     if (menu) menu.hass = hass;
   }
@@ -383,7 +357,7 @@ class FnsFloorplanPanel extends HTMLElement {
       // right after an HA restart the integration may not be loaded yet: try again for a while
       this._tries = (this._tries || 0) + 1;
       this.shadowRoot.innerHTML = `<style>${STYLE}</style><div class="err"></div>`;
-      this.shadowRoot.querySelector(".err").textContent = this._tries < 30 ? "Čekám na integraci FNS Floorplan…" : `Plán nejde načíst: ${err.message || err.code || err}`;
+      this.shadowRoot.querySelector(".err").textContent = this._tries < 30 ? t("panel.waiting") : t("panel.load_failed", { err: err.message || err.code || err });
       if (this._tries < 30) setTimeout(() => this.isConnected && this._load(), 2000);
       return;
     }
@@ -429,33 +403,33 @@ class FnsFloorplanPanel extends HTMLElement {
     this.shadowRoot.innerHTML = `<style>${STYLE}</style><style>${scopeFx(CARD_STYLE)}</style>
 <div class="top">
   <ha-menu-button></ha-menu-button>
-  <h1>Půdorys</h1>
+  <h1>${t("panel.title")}</h1>
   <span class="state"></span>
-  ${nd("ha-tab-group") ? '<ha-tab-group class="modes"><ha-tab-group-tab slot="nav" panel="items">Vybavení</ha-tab-group-tab><ha-tab-group-tab slot="nav" panel="rooms">Místnosti</ha-tab-group-tab></ha-tab-group>' : '<div class="modes"><button data-m="items">Vybavení</button><button data-m="rooms">Místnosti</button></div>'}
-  ${nd("ha-selector") ? '<ha-selector class="level"></ha-selector>' : '<select class="level" title="Patro"></select>'}
-  ${nd("ha-dropdown") ? `<ha-dropdown class="add"><ha-button slot="trigger" appearance="filled" size="small" with-caret><ha-icon slot="start" icon="mdi:plus"></ha-icon><span class="lbl">Přidat</span></ha-button></ha-dropdown>` : '<select class="add"><option value="">+ Přidat</option></select>'}
-  <ha-icon-button class="undo" label="Zpět (Ctrl+Z)" disabled><ha-icon icon="mdi:undo"></ha-icon></ha-icon-button>
-  <ha-icon-button class="redo" label="Vpřed (Ctrl+Y)" disabled><ha-icon icon="mdi:redo"></ha-icon></ha-icon-button>
+  ${nd("ha-tab-group") ? `<ha-tab-group class="modes"><ha-tab-group-tab slot="nav" panel="items">${t("panel.mode_items")}</ha-tab-group-tab><ha-tab-group-tab slot="nav" panel="rooms">${t("panel.mode_rooms")}</ha-tab-group-tab></ha-tab-group>` : `<div class="modes"><button data-m="items">${t("panel.mode_items")}</button><button data-m="rooms">${t("panel.mode_rooms")}</button></div>`}
+  ${nd("ha-selector") ? '<ha-selector class="level"></ha-selector>' : `<select class="level" title="${t("panel.level")}"></select>`}
+  ${nd("ha-dropdown") ? `<ha-dropdown class="add"><ha-button slot="trigger" appearance="filled" size="small" with-caret><ha-icon slot="start" icon="mdi:plus"></ha-icon><span class="lbl">${t("panel.add")}</span></ha-button></ha-dropdown>` : `<select class="add"><option value="">+ ${t("panel.add")}</option></select>`}
+  <ha-icon-button class="undo" label="${t("panel.undo")}" disabled><ha-icon icon="mdi:undo"></ha-icon></ha-icon-button>
+  <ha-icon-button class="redo" label="${t("panel.redo")}" disabled><ha-icon icon="mdi:redo"></ha-icon></ha-icon-button>
   ${nd("ha-dropdown") ? `<ha-dropdown class="more" placement="bottom-end">
-    <ha-icon-button slot="trigger" label="Další akce"><ha-icon icon="mdi:dots-vertical"></ha-icon></ha-icon-button>
-    <ha-dropdown-item class="hist"><ha-icon slot="icon" icon="mdi:history"></ha-icon><span>Historie uložení</span></ha-dropdown-item>
-    <ha-dropdown-item class="check"><ha-icon slot="icon" icon="mdi:check-decagram-outline"></ha-icon><span>Kontrola entit</span></ha-dropdown-item>
-    <ha-dropdown-item class="revert" disabled><ha-icon slot="icon" icon="mdi:restore"></ha-icon><span>Zahodit změny</span></ha-dropdown-item>
+    <ha-icon-button slot="trigger" label="${t("panel.more")}"><ha-icon icon="mdi:dots-vertical"></ha-icon></ha-icon-button>
+    <ha-dropdown-item class="hist"><ha-icon slot="icon" icon="mdi:history"></ha-icon><span>${t("panel.history")}</span></ha-dropdown-item>
+    <ha-dropdown-item class="check"><ha-icon slot="icon" icon="mdi:check-decagram-outline"></ha-icon><span>${t("panel.check")}</span></ha-dropdown-item>
+    <ha-dropdown-item class="revert" disabled><ha-icon slot="icon" icon="mdi:restore"></ha-icon><span>${t("panel.revert")}</span></ha-dropdown-item>
     <wa-divider></wa-divider>
-    <ha-dropdown-item class="lvl-new"><ha-icon slot="icon" icon="mdi:plus"></ha-icon><span>Nové patro…</span></ha-dropdown-item>
-    <ha-dropdown-item class="lvl-ren"><ha-icon slot="icon" icon="mdi:rename"></ha-icon><span>Přejmenovat patro…</span></ha-dropdown-item>
-    <ha-dropdown-item class="lvl-del" variant="danger" hidden><ha-icon slot="icon" icon="mdi:delete"></ha-icon><span>Smazat patro…</span></ha-dropdown-item>
-  </ha-dropdown>` : `<ha-button class="hist" appearance="plain" title="Historie uložení">Historie</ha-button>
-  <ha-button class="check" appearance="plain" title="Kontrola entit">Kontrola</ha-button>
-  <ha-button class="revert" appearance="plain" disabled>Zahodit</ha-button>`}
-  <ha-button class="save" appearance="accent" disabled><ha-icon slot="start" icon="mdi:content-save"></ha-icon><span class="lbl">Uložit</span></ha-button>
+    <ha-dropdown-item class="lvl-new"><ha-icon slot="icon" icon="mdi:plus"></ha-icon><span>${t("panel.level_new")}</span></ha-dropdown-item>
+    <ha-dropdown-item class="lvl-ren"><ha-icon slot="icon" icon="mdi:rename"></ha-icon><span>${t("panel.level_rename")}</span></ha-dropdown-item>
+    <ha-dropdown-item class="lvl-del" variant="danger" hidden><ha-icon slot="icon" icon="mdi:delete"></ha-icon><span>${t("panel.level_delete")}</span></ha-dropdown-item>
+  </ha-dropdown>` : `<ha-button class="hist" appearance="plain" title="${t("panel.history")}">${t("panel.history_short")}</ha-button>
+  <ha-button class="check" appearance="plain" title="${t("panel.check")}">${t("panel.check_short")}</ha-button>
+  <ha-button class="revert" appearance="plain" disabled>${t("panel.revert_short")}</ha-button>`}
+  <ha-button class="save" appearance="accent" disabled><ha-icon slot="start" icon="mdi:content-save"></ha-icon><span class="lbl">${t("panel.save")}</span></ha-button>
 </div>
 <div class="main">
   <div class="stage"><svg preserveAspectRatio="xMidYMin meet"></svg>
-    <div class="zoom"><ha-icon-button data-z="in" label="Přiblížit"><ha-icon icon="mdi:plus"></ha-icon></ha-icon-button><ha-icon-button data-z="out" label="Oddálit"><ha-icon icon="mdi:minus"></ha-icon></ha-icon-button><ha-icon-button data-z="fit" label="Celý plán"><ha-icon icon="mdi:fit-to-screen-outline"></ha-icon></ha-icon-button></div></div>
-  <div class="grip" title="Táhni pro změnu šířky"></div>
+    <div class="zoom"><ha-icon-button data-z="in" label="${t("panel.zoom_in")}"><ha-icon icon="mdi:plus"></ha-icon></ha-icon-button><ha-icon-button data-z="out" label="${t("panel.zoom_out")}"><ha-icon icon="mdi:minus"></ha-icon></ha-icon-button><ha-icon-button data-z="fit" label="${t("panel.zoom_fit")}"><ha-icon icon="mdi:fit-to-screen-outline"></ha-icon></ha-icon-button></div></div>
+  <div class="grip" title="${t("panel.grip")}"></div>
   <div class="side"></div>
-  <ha-icon-button class="sheet-x" label="Zavřít"><ha-icon icon="mdi:close"></ha-icon></ha-icon-button>
+  <ha-icon-button class="sheet-x" label="${t("panel.close")}"><ha-icon icon="mdi:close"></ha-icon></ha-icon-button>
 </div>
 <datalist id="ents"></datalist>`;
     const $ = (s) => this.shadowRoot.querySelector(s);
@@ -470,7 +444,7 @@ class FnsFloorplanPanel extends HTMLElement {
     const acts = {
       hist: () => this._showHistory(),
       check: () => this._showCheck(),
-      revert: () => { if (confirm("Zahodit neuložené změny?")) this._load(); },
+      revert: () => { if (confirm(t("panel.revert_confirm"))) this._load(); },
       "lvl-new": () => this._levelAction("+new"),
       "lvl-ren": () => this._levelAction("+rename"),
       "lvl-del": () => this._levelAction("+delete"),
@@ -581,7 +555,7 @@ class FnsFloorplanPanel extends HTMLElement {
     this._sheet = true;
     if (v === "room") {
       const [cx, cz] = centroid(this._bounds()).map((v) => r3(snap(v)));
-      this._plan.rooms.push(this._stamp({ id: uid("room"), name: "Nová místnost", points: [[cx - 1, cz - 1], [cx + 1, cz - 1], [cx + 1, cz + 1], [cx - 1, cz + 1]], temperature: null, humidity: null }));
+      this._plan.rooms.push(this._stamp({ id: uid("room"), name: t("panel.new_room"), points: [[cx - 1, cz - 1], [cx + 1, cz - 1], [cx + 1, cz + 1], [cx - 1, cz + 1]], temperature: null, humidity: null }));
       this._mode = "rooms";
       this._sel = { cat: "rooms", i: this._plan.rooms.length - 1 };
       return this._changed();
@@ -626,7 +600,7 @@ class FnsFloorplanPanel extends HTMLElement {
 
   // floors: plan.levels [{id, name}]; a room or item without `level` is on the first floor
   _levels() {
-    return this._plan.levels?.length ? this._plan.levels : [{ id: "0", name: "Přízemí" }];
+    return this._plan.levels?.length ? this._plan.levels : [{ id: "0", name: t("card.ground_floor") }];
   }
 
   _on(x) {
@@ -647,15 +621,15 @@ class FnsFloorplanPanel extends HTMLElement {
     const sel = this.shadowRoot.querySelector(".level");
     const levels = this._levels();
     if (!levels.some((l) => String(l.id) === String(this._level))) this._level = levels[0].id;
-    // the floor actions live in the ⋮ menu; "Smazat patro" only for a non-first floor
+    // the floor actions live in the ⋮ menu; "Delete floor" only for a non-first floor
     this.shadowRoot.querySelector(".lvl-del")?.toggleAttribute("hidden", !(levels.length > 1 && String(this._level) !== String(levels[0].id)));
     if (sel.localName === "ha-selector") {
-      Object.assign(sel, { hass: this._hass, selector: { select: { mode: "dropdown", options: levels.map((l) => ({ value: String(l.id), label: l.name })) } }, label: "Patro", required: true, value: String(this._level) });
+      Object.assign(sel, { hass: this._hass, selector: { select: { mode: "dropdown", options: levels.map((l) => ({ value: String(l.id), label: l.name })) } }, label: t("panel.level"), required: true, value: String(this._level) });
       return;
     }
     sel.innerHTML = levels.map((l) => `<option value="${esc(l.id)}">${esc(l.name)}</option>`).join("") +
-      '<option value="+new">＋ Nové patro…</option><option value="+rename">Přejmenovat patro…</option>' +
-      (levels.length > 1 && String(this._level) !== String(levels[0].id) ? '<option value="+delete">Smazat patro…</option>' : "");
+      `<option value="+new">＋ ${t("panel.level_new")}</option><option value="+rename">${t("panel.level_rename")}</option>` +
+      (levels.length > 1 && String(this._level) !== String(levels[0].id) ? `<option value="+delete">${t("panel.level_delete")}</option>` : "");
     sel.value = String(this._level);
   }
 
@@ -663,18 +637,18 @@ class FnsFloorplanPanel extends HTMLElement {
     const levels = this._levels();
     const cur = levels.find((l) => String(l.id) === String(this._level));
     if (v === "+new") {
-      const name = prompt("Název nového patra", `${levels.length}. patro`);
+      const name = prompt(t("panel.level_name_prompt"), t("panel.level_default", { n: levels.length }));
       if (!name) return this._fillLevels();
       this._plan.levels = [...levels, { id: uid("lvl"), name }];
       this._level = this._plan.levels.at(-1).id;
       this._mode = "rooms"; // an empty floor starts with drawing rooms
     } else if (v === "+rename") {
-      const name = prompt("Nový název patra", cur.name);
+      const name = prompt(t("panel.level_rename_prompt"), cur.name);
       if (!name) return this._fillLevels();
       this._plan.levels = levels.map((l) => (l === cur ? { ...l, name } : l));
     } else if (v === "+delete") {
       const rooms = this._roomsHere(), n = rooms.length + ["furniture", "devices", "sensors", "texts"].reduce((t, k) => t + this._plan[k].filter((x) => this._on(x)).length, 0);
-      if (!confirm(`Smazat patro ${cur.name}${n ? ` i s ${n} místnostmi a prvky` : ""}?`)) return this._fillLevels();
+      if (!confirm(n ? t("panel.level_delete_confirm_n", { name: cur.name, n }) : t("panel.level_delete_confirm", { name: cur.name }))) return this._fillLevels();
       const ids = new Set(rooms.map((r) => r.id));
       this._plan.openings = this._plan.openings.filter((o) => !ids.has(o.room_id));
       for (const id of ids) delete this._plan.labels[id];
@@ -811,9 +785,9 @@ class FnsFloorplanPanel extends HTMLElement {
             el("title", {}, h).textContent = title;
             h.addEventListener("pointerdown", (e) => { e.stopPropagation(); fn(); this._changed(); });
           };
-          flip(hx, hz, "⇄", "Panty na druhou stranu", () => (o.hinge = o.hinge === "right" ? "left" : "right"));
+          flip(hx, hz, "⇄", t("panel.flip_hinge"), () => (o.hinge = o.hinge === "right" ? "left" : "right"));
           const [mx, mz] = P([g.H[0] + (g.along[0] + g.nn[0]) * g.w * 0.45, g.H[1] + (g.along[1] + g.nn[1]) * g.w * 0.45]);
-          flip(mx, mz, "⇅", "Otevírat na druhou stranu", () => (o.swing = o.swing === "out" ? "in" : "out"));
+          flip(mx, mz, "⇅", t("panel.flip_swing"), () => (o.swing = o.swing === "out" ? "in" : "out"));
         }
       }
       if (o.blind) {
@@ -959,7 +933,7 @@ class FnsFloorplanPanel extends HTMLElement {
       const a = ((f.rotation || 0) * Math.PI) / 180, [cx, cz] = P([f.x, f.z]), [hx, hz] = P([f.x + Math.cos(a) * 1.2, f.z + Math.sin(a) * 1.2]);
       el("line", { x1: cx, y1: cz, x2: hx, y2: hz, class: "rot-line" }, svg);
       const h = el("circle", { cx: hx, cy: hz, r: 7, class: "rot-h" }, svg);
-      el("title", {}, h).textContent = "Směr svícení";
+      el("title", {}, h).textContent = t("panel.beam_dir");
       h.addEventListener("pointerdown", (e) => this._press(e, this._sel, (dx, dz, p, ev) => {
         const deg = (Math.atan2(p[1] - f.z, p[0] - f.x) * 180) / Math.PI, st = ev?.ctrlKey || ev?.metaKey ? 15 : 1;
         f.rotation = (((Math.round(deg / st) * st) % 360) + 360) % 360;
@@ -1032,7 +1006,7 @@ class FnsFloorplanPanel extends HTMLElement {
     const [ax, az] = P(toW(f, 0, top)), [rx, rz] = P(toW(f, 0, top - 0.35));
     el("line", { x1: ax, y1: az, x2: rx, y2: rz, class: "rot-line" }, svg);
     const h = el("circle", { cx: rx, cy: rz, r: 7, class: "rot-h" }, svg);
-    el("title", {}, h).textContent = "Otočit (s Ctrl po 15°)";
+    el("title", {}, h).textContent = t("panel.rotate_hint");
     h.addEventListener("pointerdown", (e) => this._press(e, sel, (dx, dz, p, ev) => {
       const deg = (Math.atan2(p[1] - f.z, p[0] - f.x) * 180) / Math.PI + 90, st = ev?.ctrlKey || ev?.metaKey ? 15 : 1;
       f.rotation = (((Math.round(deg / st) * st) % 360) + 360) % 360;
@@ -1094,7 +1068,7 @@ class FnsFloorplanPanel extends HTMLElement {
         el("line", { x1: A[0], y1: A[1], x2: B[0], y2: B[1], class: "wall-ang" + cls }, svg);
         const m = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2], d = Math.hypot(c0[0] - m[0], c0[1] - m[1]) || 1;
         const [tx, tz] = P([m[0] + ((c0[0] - m[0]) / d) * 0.25, m[1] + ((c0[1] - m[1]) / d) * 0.25]);
-        el("text", { x: tx, y: tz + 4, "text-anchor": "middle", class: "ang-t" + cls }, svg).textContent = ok ? "rovně" : ang + "°";
+        el("text", { x: tx, y: tz + 4, "text-anchor": "middle", class: "ang-t" + cls }, svg).textContent = ok ? t("panel.straight") : ang + "°";
       }
     }
     r.points.forEach((p, k) => {
@@ -1193,9 +1167,9 @@ class FnsFloorplanPanel extends HTMLElement {
     const want = this._mode === "rooms" ? "rooms" : "items";
     if (dd.dataset.for === want) return;
     dd.dataset.for = want;
-    const entries = want === "rooms" ? [["room", "Místnost", ""]] : ADD.map(([l], i) => [String(i), l, ADD_ICONS[i]]);
+    const entries = want === "rooms" ? [["room", t("panel.room"), ""]] : ADD.map(([l], i) => [String(i), t(l), ADD_ICONS[i]]);
     if (dd.localName === "select") {
-      dd.innerHTML = '<option value="">+ Přidat</option>' + entries.map(([v, l]) => `<option value="${v}">${l}</option>`).join("");
+      dd.innerHTML = `<option value="">+ ${t("panel.add")}</option>` + entries.map(([v, l]) => `<option value="${v}">${l}</option>`).join("");
       return;
     }
     dd.querySelectorAll("ha-dropdown-item").forEach((i) => i.remove());
@@ -1372,7 +1346,7 @@ class FnsFloorplanPanel extends HTMLElement {
   // everything in the plan that points to a missing or unavailable entity: [{name, text, sel, level, mode}]
   _problems() {
     const out = [], states = this._hass.states, plan = this._plan, first = this._levels()[0].id;
-    const bad = (id) => (!(id in states) ? "entita neexistuje" : ["unavailable", "unknown"].includes(states[id].state) ? "nedostupná" : null);
+    const bad = (id) => (!(id in states) ? t("panel.check_missing") : ["unavailable", "unknown"].includes(states[id].state) ? t("panel.check_unavailable") : null);
     const add = (name, text, sel, level, mode = "items") => out.push({ name, text, sel, level: level ?? first, mode });
     const check = (id, name, sel, level, mode, empty) => {
       if (!id) return empty && add(name, empty, sel, level, mode);
@@ -1382,30 +1356,30 @@ class FnsFloorplanPanel extends HTMLElement {
     const rules = (o, name, sel, mode) => {
       const walk = (c) => {
         if (c.any) c.any.forEach(walk);
-        else if (c.entity && !(c.entity in states)) add(name, `pravidlo: entita neexistuje (${c.entity})`, sel, o.level, mode);
+        else if (c.entity && !(c.entity in states)) add(name, t("panel.check_rule_missing", { id: c.entity }), sel, o.level, mode);
       };
       for (const r of o.rules || []) [].concat(r.if || []).forEach(walk);
     };
     plan.furniture.forEach((f, i) => {
-      const light = isLight(f), name = light ? LIGHT_TYPES[f.type] || f.type : FURNITURE[f.type]?.[0] || f.type, sel = { cat: "furniture", i };
-      check(f.entity, name, sel, f.level, "items", light && "bez entity");
+      const light = isLight(f), name = light ? LIGHT_TYPES[f.type] || f.type : FURNITURE[f.type] ? furnName(f.type) : f.type, sel = { cat: "furniture", i };
+      check(f.entity, name, sel, f.level, "items", light && t("panel.check_no_entity"));
       rules(f, name, sel, "items");
     });
     plan.devices.forEach((d, i) => {
-      const name = d.name || DEVICE_KINDS[d.kind] || d.entity || "Zařízení", sel = { cat: "devices", i };
-      check(d.entity, name, sel, d.level, "items", "bez entity");
+      const name = d.name || DEVICE_KINDS[d.kind] || d.entity || t("panel.device"), sel = { cat: "devices", i };
+      check(d.entity, name, sel, d.level, "items", t("panel.check_no_entity"));
       rules(d, name, sel, "items");
     });
-    plan.sensors.forEach((s, i) => check(s.entity, s.entity || "Senzor", { cat: "sensors", i }, s.level, "items", "bez entity"));
-    plan.texts.forEach((t, i) => {
-      const name = t.text || t.entity || "Text", sel = { cat: "texts", i };
-      if (!t.entity && !t.text) add(name, "bez entity i textu", sel, t.level);
-      else if (t.entity) check(t.entity, name, sel, t.level, "items");
-      rules(t, name, sel, "items");
+    plan.sensors.forEach((s, i) => check(s.entity, s.entity || t("panel.sensor"), { cat: "sensors", i }, s.level, "items", t("panel.check_no_entity")));
+    plan.texts.forEach((x, i) => {
+      const name = x.text || x.entity || "Text", sel = { cat: "texts", i };
+      if (!x.entity && !x.text) add(name, t("panel.check_no_entity_text"), sel, x.level);
+      else if (x.entity) check(x.entity, name, sel, x.level, "items");
+      rules(x, name, sel, "items");
     });
     plan.openings?.forEach((o, i) => {
       const r = plan.rooms.find((x) => x.id === o.room_id);
-      const name = `${o.type === "window" ? "Okno" : "Dveře"} (${r?.name || "?"})`, sel = { cat: "openings", i };
+      const name = `${o.type === "window" ? t("panel.window") : t("panel.door")} (${r?.name || "?"})`, sel = { cat: "openings", i };
       for (const k of ["contact", "blind", "lock"]) if (o[k]) check(o[k], name, sel, r?.level, "rooms");
     });
     plan.rooms.forEach((r, i) => {
@@ -1417,10 +1391,10 @@ class FnsFloorplanPanel extends HTMLElement {
     if (vdock || plan.vacuum) {
       const vsel = vdock ? { cat: "furniture", i: plan.furniture.indexOf(vdock) } : null, vlevel = vdock?.level;
       const vsensor = vdock?.room_sensor || plan.vacuum?.room_sensor;
-      for (const id of [vdock?.entity || plan.vacuum?.entity, vsensor]) if (id) check(id, "Vysavač", vsel, vlevel, "items");
+      for (const id of [vdock?.entity || plan.vacuum?.entity, vsensor]) if (id) check(id, t("panel.vacuum"), vsel, vlevel, "items");
       // every room name the sensor can report needs a plan room (pairing or same name)
       for (const n of states[vsensor]?.attributes?.options || []) {
-        if (!vdock?.room_map?.[n] && !vacRoom(n, plan.rooms, {})) add("Vysavač", `místnost „${n}“ není spárovaná`, vsel, vlevel);
+        if (!vdock?.room_map?.[n] && !vacRoom(n, plan.rooms, {})) add(t("panel.vacuum"), t("panel.check_room_unpaired", { name: n }), vsel, vlevel);
       }
     }
     return out;
@@ -1433,15 +1407,15 @@ class FnsFloorplanPanel extends HTMLElement {
     this._sheet = true;
     this._draw();
     const side = this.shadowRoot.querySelector(".side");
-    side.innerHTML = `<h2>${title}</h2>${hint ? `<p class="hint">${hint}</p>` : ""}<div class="list"></div><div class="actions"><button data-a="close">Zavřít</button></div>`;
+    side.innerHTML = `<h2>${title}</h2>${hint ? `<p class="hint">${hint}</p>` : ""}<div class="list"></div><div class="actions"><button data-a="close">${t("panel.close")}</button></div>`;
     side.querySelector('[data-a="close"]').addEventListener("click", () => { this._sidePage = null; this._form(); });
     return side.querySelector(".list");
   }
 
   _showCheck() {
-    const list = this._sideHead("check", "Kontrola entit");
+    const list = this._sideHead("check", t("panel.check"));
     const probs = this._problems();
-    if (!probs.length) list.innerHTML = '<p class="hint">Vše v pořádku.</p>';
+    if (!probs.length) list.innerHTML = `<p class="hint">${t("panel.check_ok")}</p>`;
     probs.forEach((p) => {
       const b = document.createElement("button");
       b.className = "prob";
@@ -1456,22 +1430,22 @@ class FnsFloorplanPanel extends HTMLElement {
   }
 
   async _showHistory() {
-    const list = this._sideHead("history", "Historie uložení", "Posledních 20 uložení. Načtená verze se otevře v editoru jako neuložená změna — uložíš ji tlačítkem Uložit, nebo ji zahodíš.");
+    const list = this._sideHead("history", t("panel.history"), t("panel.history_hint"));
     let rows;
     try {
       rows = await this._hass.callWS({ type: "fns_floorplan/history/list" });
     } catch (err) {
-      list.innerHTML = `<p class="err">Historie nejde načíst: ${esc(err.message || err.code || err)}</p>`;
+      list.innerHTML = `<p class="err">${esc(t("card.history_failed", { err: err.message || err.code || err }))}</p>`;
       return;
     }
     if (this._sidePage !== "history") return;
-    if (!rows.length) list.innerHTML = '<p class="hint">Zatím nic.</p>';
+    if (!rows.length) list.innerHTML = `<p class="hint">${t("panel.history_empty")}</p>`;
     for (const h of rows) {
       const row = document.createElement("div");
       row.className = "hist-row";
-      row.innerHTML = `<span><b>#${h.rev}</b> ${esc(new Date(h.saved_at).toLocaleString("cs-CZ"))}<br><small>${h.rooms} místností, ${h.items} prvků</small></span><button class="mini">Načíst do editoru</button>`;
+      row.innerHTML = `<span><b>#${h.rev}</b> ${esc(new Date(h.saved_at).toLocaleString(getLang()))}<br><small>${t("panel.history_row", { rooms: h.rooms, items: h.items })}</small></span><button class="mini">${t("panel.history_load")}</button>`;
       row.querySelector("button").addEventListener("click", async () => {
-        if (this._dirty && !confirm("Zahodit neuložené změny a načíst tuto verzi?")) return;
+        if (this._dirty && !confirm(t("panel.history_discard_confirm"))) return;
         try {
           const old = await this._hass.callWS({ type: "fns_floorplan/history/get", rev: h.rev });
           const rev = this._plan.rev;
@@ -1482,7 +1456,7 @@ class FnsFloorplanPanel extends HTMLElement {
           this._sel = null; this._multi = null; this._sidePage = null;
           this._changed();
         } catch (err) {
-          alert(`Verzi nejde načíst: ${err.message || err.code || err}`);
+          alert(t("panel.version_failed", { err: err.message || err.code || err }));
         }
       });
       list.appendChild(row);
@@ -1494,12 +1468,12 @@ class FnsFloorplanPanel extends HTMLElement {
     const lvl = String(this._level), bg = this._plan.backgrounds?.[lvl];
     const box = document.createElement("div");
     const num = (k, label, step) => `<label>${label}</label><input type="number" step="${step}" data-bg="${k}" value="${bg[k] ?? ""}">`;
-    box.innerHTML = `<h3>Podklad patra</h3>
+    box.innerHTML = `<h3>${t("panel.bg_title")}</h3>
       <input type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml">
-      ${bg ? `<div class="row2"><div>${num("width", "Šířka (m)", 0.05)}</div><div>${num("left", "Vlevo (m)", 0.05)}</div></div>${num("top", "Nahoře (m)", 0.05)}
-        <label>Průhlednost</label><input type="range" min="0.1" max="1" step="0.05" data-bg="opacity" value="${bg.opacity ?? 0.4}">
-        <div class="actions"><button data-a="bgdel" class="del">Odebrat podklad</button></div>` : ""}
-      <p class="hint">Obrázek půdorysu (PNG, JPG, WebP, SVG) jen pro obkreslení v editoru, na kartě se nezobrazí. PDF nejdřív ulož jako obrázek.</p>`;
+      ${bg ? `<div class="row2"><div>${num("width", t("panel.bg_width"), 0.05)}</div><div>${num("left", t("panel.bg_left"), 0.05)}</div></div>${num("top", t("panel.bg_top"), 0.05)}
+        <label>${t("panel.bg_opacity")}</label><input type="range" min="0.1" max="1" step="0.05" data-bg="opacity" value="${bg.opacity ?? 0.4}">
+        <div class="actions"><button data-a="bgdel" class="del">${t("panel.bg_remove")}</button></div>` : ""}
+      <p class="hint">${t("panel.bg_hint")}</p>`;
     side.appendChild(box);
     box.querySelector("input[type=file]").addEventListener("change", async (e) => {
       const file = e.target.files[0];
@@ -1514,7 +1488,7 @@ class FnsFloorplanPanel extends HTMLElement {
         (this._plan.backgrounds ||= {})[lvl] = { url, left: 0, top: 0, width: r3(this._bounds()[2][0]) || 10, opacity: 0.4 };
         this._changed();
       } catch (err) {
-        alert(`Nahrání podkladu selhalo: ${err.message || err}`);
+        alert(t("panel.bg_upload_failed", { err: err.message || err }));
       }
     });
     box.querySelectorAll("[data-bg]").forEach((inp) => inp.addEventListener("change", () => {
@@ -1530,7 +1504,7 @@ class FnsFloorplanPanel extends HTMLElement {
         delete this._plan.backgrounds[lvl];
         this._changed();
       } catch (err) {
-        alert(`Odebrání podkladu selhalo: ${err.message || err}`);
+        alert(t("panel.bg_remove_failed", { err: err.message || err }));
       }
     });
   }
@@ -1543,10 +1517,10 @@ class FnsFloorplanPanel extends HTMLElement {
     $(".revert").disabled = !this._dirty;
     const n = this._problems().length;
     const ct = $(".check span"); // menu item text, or the plain button
-    if (ct) ct.textContent = n ? `Kontrola entit (${n})` : "Kontrola entit";
-    else $(".check").textContent = n ? `Kontrola (${n})` : "Kontrola";
+    if (ct) ct.textContent = n ? t("panel.check_n", { n }) : t("panel.check");
+    else $(".check").textContent = n ? t("panel.check_short_n", { n }) : t("panel.check_short");
     $(".more")?.classList.toggle("warn", n > 0);
-    $(".state").textContent = this._dirty ? "Neuložené změny" : "";
+    $(".state").textContent = this._dirty ? t("panel.state_dirty") : "";
   }
 
   // properties of the selected item
@@ -1562,7 +1536,7 @@ class FnsFloorplanPanel extends HTMLElement {
     const side = this.shadowRoot.querySelector(".side");
     const sel = this._sel, o = this._get();
     if (!o && this._mode === "rooms") {
-      side.innerHTML = `<h2>Místnosti, okna a dveře</h2><p class="hint">Klepni na místnost: táhnutím ji posuneš celou, za modré body táhneš rohy (přichytí se k rohům sousedních místností; s Ctrl jdou stěny po 15°, zelená = zcela rovně; u stěn je jejich délka), za stěnu ji celou posuneš ven nebo dovnitř (stěny a rohy se přichytí k sousedním místnostem, Alt to vypne), poloprůhledné body mezi rohy přidají nový roh.<br><br>Okno nebo dveře vybereš klepnutím a táhnutím posuneš po stěně, i na stěnu jiné místnosti. Ctrl+C / Ctrl+X / Ctrl+V kopíruje a vyjímá místnost i s jejími okny a dveřmi. U vybraných dveří přehodí ⇄ panty a ⇅ směr otevírání. Nové přidáš v panelu vybrané místnosti.<br><br>Společný roh sousedních místností se posouvá s oběma místnostmi naráz; s Alt jen ten jeden.</p>`;
+      side.innerHTML = `<h2>${t("panel.f.rooms_title")}</h2><p class="hint">${t("panel.f.rooms_hint")}</p>`;
       this._bgUI(side);
       return;
     }
@@ -1570,95 +1544,96 @@ class FnsFloorplanPanel extends HTMLElement {
     if (sel?.cat === "rooms") return this._roomForm(side, o);
     if (sel?.cat === "openings") return this._openingForm(side, o);
     if (!o) {
-      side.innerHTML = `<h2>Úpravy půdorysu</h2><p class="hint">Klepni na světlo, spotřebič, senzor, text, nábytek nebo badge místnosti a uprav ho. Táhnutím ji přesuneš (mřížka 5 cm, s Ctrl nebo Shift jen v jedné ose), šipky posouvají vybraný prvek, Delete ho smaže. Ctrl+klik vybere víc prvků najednou (pak je jde táhnout spolu a seskupit), Ctrl+C / Ctrl+V kopíruje, Ctrl+X vyjme. Vybraný nábytek má úchyty na změnu velikosti a kolečko na otáčení (s Ctrl po 15°). Při tažení se prvek přichytí k ose jiného prvku, ke středu místnosti nebo ke stěně (růžová čára); Alt přichycení vypne.<br><br>Prvky bez entity mají červený přerušovaný okraj, prvky skryté pravidlem jsou bledé.<br><br>Změny se na dashboardu projeví hned po uložení.</p>`;
+      side.innerHTML = `<h2>${t("panel.f.items_title")}</h2><p class="hint">${t("panel.f.items_hint")}</p>`;
       return;
     }
     const field = (label, key, value, type = "text", extra = "") =>
       `<label>${label}</label><input data-k="${key}" type="${type}" value="${esc(value)}" ${extra}>`;
     const num = (label, key, value) => field(label, key, value ?? "", "number", 'step="0.05"');
     const xz = `<div class="row2"><div>${num("X (m)", "x", o.x)}</div><div>${num("Z (m)", "z", o.z)}</div></div>${this._placeField()}`;
-    const rotation = `<label>Otočení (°)</label><input data-k="rotation" type="number" step="1" value="${o.rotation || 0}">
+    const rotation = `<label>${t("panel.f.rotation")}</label><input data-k="rotation" type="number" step="1" value="${o.rotation || 0}">
         <div class="rot"><button data-a="rot-15">−15°</button><button data-a="rot15">+15°</button><button data-a="rot90">+90°</button></div>`;
     let html = "";
     if (sel.cat === "labels") {
-      html = `<h2>Badge místnosti: ${esc(o.room.name)}</h2><p class="hint">Přetáhni ho, kam patří. Co ukazuje, nastavíš u místnosti v režimu Místnosti.</p>
+      html = `<h2>${t("panel.f.badge_title", { name: esc(o.room.name) })}</h2><p class="hint">${t("panel.f.badge_hint")}</p>
         ${xz}
-        <label>Otočení (°)</label><input data-k="rotation" type="number" step="1" value="${o.room.label_rotation || 0}">
+        <label>${t("panel.f.rotation")}</label><input data-k="rotation" type="number" step="1" value="${o.room.label_rotation || 0}">
         <div class="rot"><button data-a="rot-15">−15°</button><button data-a="rot15">+15°</button><button data-a="rot90">+90°</button></div>
-        <div class="actions"><button data-a="auto">Vrátit doprostřed místnosti</button></div>`;
+        <div class="actions"><button data-a="auto">${t("panel.f.badge_center")}</button></div>`;
     } else if (sel.cat === "furniture") {
       const light = isLight(o), point = isPoint(o), dock = o.type === "robot_vacuum";
-      const types = light ? byName(Object.keys(LIGHT_TYPES), (k) => LIGHT_TYPES[k]) : FURNITURE_TYPES;
-      const label = (t) => (light ? LIGHT_TYPES[t] : FURNITURE[t]?.[0] || t);
-      const look = `${o.type === "led_strip" ? `<label>Směr světla</label><select data-k="glow_side">
-          <option value="" ${!o.glow_side ? "selected" : ""}>Všemi směry</option>
-          <option value="1" ${o.glow_side === 1 ? "selected" : ""}>Na jednu stranu (podle náhledu)</option>
-          <option value="-1" ${o.glow_side === -1 ? "selected" : ""}>Na druhou stranu</option></select>` : ""}
-        ${point || light ? "" : `<label>Barva</label>${this._colorPick("color", o.color)}`}
-        ${o.type === "lamp_spot" ? `${rotation.replace("Otočení (°)", "Směr svícení (°, 0 = doprava, 90 = dolů)")}<label>Šířka kužele (°)</label><input data-k="beam" type="number" min="5" max="180" step="5" value="${o.beam || 40}">` : ""}
+      const types = light ? byName(Object.keys(LIGHT_TYPES), (k) => LIGHT_TYPES[k]) : furnTypes();
+      const label = (ty) => (light ? LIGHT_TYPES[ty] : FURNITURE[ty] ? furnName(ty) : ty);
+      const look = `${o.type === "led_strip" ? `<label>${t("panel.f.glow_side")}</label><select data-k="glow_side">
+          <option value="" ${!o.glow_side ? "selected" : ""}>${t("panel.f.glow_all")}</option>
+          <option value="1" ${o.glow_side === 1 ? "selected" : ""}>${t("panel.f.glow_one")}</option>
+          <option value="-1" ${o.glow_side === -1 ? "selected" : ""}>${t("panel.f.glow_other")}</option></select>` : ""}
+        ${point || light ? "" : `<label>${t("panel.f.color")}</label>${this._colorPick("color", o.color)}`}
+        ${o.type === "lamp_spot" ? `${rotation.replace(t("panel.f.rotation"), t("panel.f.beam_rotation"))}<label>${t("panel.f.beam_width")}</label><input data-k="beam" type="number" min="5" max="180" step="5" value="${o.beam || 40}">` : ""}
         ${o.type === "led_strip" ? "" : this._iconField(o, light ? lightIcon(o.type) : FURNITURE[o.type]?.[1])}
         ${point ? this._sizeField(o) : ""}`;
-      html = `<h2>${esc(label(o.type))}${sel.g ? ` <span class="hint">(${sel.g.length} svítidla jednoho světla)</span>` : ""}</h2>
-        ${sel.g ? `<p class="hint">Svítidla jednoho světla v jedné místnosti jsou na kartě jeden prvek. Táhnutím posuneš všechna, změny platí pro všechna.</p>` : ""}
-        ${this._sec("Základ", `<label>Typ</label><select data-k="type" data-search>${types.map((t) => `<option value="${t}" ${t === o.type ? "selected" : ""}>${esc(label(t))}</option>`).join("")}</select>
-        ${field(light ? "Entita (světlo nebo spínač)" : o.type === "tv_wall" ? "Entita (media_player)" : dock ? "Entita (vacuum)" : "Entita (nepovinná, klepnutí otevře její detail)", "entity", o.entity || "", "text", 'list="ents"')}
-        ${dock ? `<label>Baterie (entita; prázdné = senzor baterie zařízení vysavače)</label><input data-k="battery" value="${esc(o.battery || "")}" placeholder="sensor.*_battery" list="ents">` : ""}
+      html = `<h2>${esc(label(o.type))}${sel.g ? ` <span class="hint">${t("panel.f.group_count", { n: sel.g.length })}</span>` : ""}</h2>
+        ${sel.g ? `<p class="hint">${t("panel.f.group_hint")}</p>` : ""}
+        ${this._sec(t("panel.f.sec_basic"), `<label>${t("panel.f.type")}</label><select data-k="type" data-search>${types.map((t) => `<option value="${t}" ${t === o.type ? "selected" : ""}>${esc(label(t))}</option>`).join("")}</select>
+        ${field(light ? t("panel.f.entity_light") : o.type === "tv_wall" ? t("panel.f.entity_tv") : dock ? t("panel.f.entity_vac") : t("panel.f.entity_opt"), "entity", o.entity || "", "text", 'list="ents"')}
+        ${dock ? `<label>${t("panel.f.battery")}</label><input data-k="battery" value="${esc(o.battery || "")}" placeholder="sensor.*_battery" list="ents">` : ""}
         ${dock ? this._vacPairing(o) : ""}
-        ${light ? `<label>Osvětlení místnosti (v %; prázdné = 100, LED pásek 45, 15 = jen slabě)</label><input data-k="room_light" type="number" min="0" step="5" placeholder="100"
+        ${light ? `<label>${t("panel.f.room_light")}</label><input data-k="room_light" type="number" min="0" step="5" placeholder="100"
           value="${o.room_light === false ? 15 : typeof o.room_light === "number" ? Math.round(o.room_light * 100) : ""}">` : ""}
-        ${light || dock ? `<label class="chk"><input type="checkbox" data-k="sheet_hide" ${o.sheet_hide ? "checked" : ""}> nezobrazovat v panelu místnosti</label>` : ""}`, true)}
-        ${dock ? this._sec("Když běží (uklízí)", `<label>Barva, když uklízí</label>${this._colorPick("color_on", o.color_on)}
-        <p class="hint">Výchozí = barva stavu z motivu HA.</p>
-        ${this._fxPicker("fx", o.fx, "žádná (jen jízda)", "none", "mdiRobotVacuum", "progress", o.progress, "žádná", "Animace kruhu, když uklízí", o.progress_total).replace(/<button class="fxt[^"]*" data-fx="none"[\s\S]*?<\/button>/, "")}`) : ""}
-        ${look.replace(/\s/g, "") ? this._sec("Vzhled", look) : ""}
-        ${this._sec(dock ? "Kde stojí, když je v doku" : point ? "Pozice" : "Rozměry a pozice", `${xz}
-        ${point ? "" : o.type === "led_strip" ? num("Délka (m)", "w", o.w) : `<div class="row2"><div>${num("Šířka (m)", "w", o.w)}</div><div>${num("Hloubka (m)", "d", o.d)}</div></div>`}
+        ${light || dock ? `<label class="chk"><input type="checkbox" data-k="sheet_hide" ${o.sheet_hide ? "checked" : ""}> ${t("panel.f.sheet_hide")}</label>` : ""}`, true)}
+        ${dock ? this._sec(t("panel.f.sec_running_vac"), `<label>${t("panel.f.color_cleaning")}</label>${this._colorPick("color_on", o.color_on)}
+        <p class="hint">${t("panel.f.state_color_hint")}</p>
+        ${this._fxPicker("fx", o.fx, t("panel.f.fx_none_drive"), "none", "mdiRobotVacuum", "progress", o.progress, t("panel.f.none_lc"), t("panel.f.fx_title_cleaning"), o.progress_total).replace(/<button class="fxt[^"]*" data-fx="none"[\s\S]*?<\/button>/, "")}`) : ""}
+        ${look.replace(/\s/g, "") ? this._sec(t("panel.f.sec_look"), look) : ""}
+        ${this._sec(dock ? t("panel.f.sec_dock") : point ? t("panel.f.sec_pos") : t("panel.f.sec_dims"), `${xz}
+        ${point ? "" : o.type === "led_strip" ? num(t("panel.f.length"), "w", o.w) : `<div class="row2"><div>${num(t("panel.f.width"), "w", o.w)}</div><div>${num(t("panel.f.depth"), "d", o.d)}</div></div>`}
         ${point ? "" : rotation}
-        ${this._layerField(o)}${dock ? `<p class="hint">Při jízdě je robot vždy nad nábytkem a pod světly a spotřebiči. Do popředí = když stojí (v doku nebo v místnosti), je nad nimi.</p>` : ""}`)}
-        ${this._actionsUI(o, light ? { tap: "Přepnout", hold: "Detail entity" } : { tap: "Detail entity" })}
+        ${this._layerField(o)}${dock ? `<p class="hint">${t("panel.f.dock_layer_hint")}</p>` : ""}`)}
+        ${this._actionsUI(o, light ? { tap: ACTIONS.toggle, hold: ACTIONS["more-info"] } : { tap: ACTIONS["more-info"] })}
         ${this._rulesUI(o, o.type === "led_strip" ? ["color", "fx", "hide"] : light || dock ? ["color", "fx", "icon", "hide"] : ["color", "glow", "fx", "icon", "hide"])}`;
     } else if (sel.cat === "devices") {
       // domain defaults of a generic item: hint, default ring, default tap
       const dom = o.kind === "generic" ? String(o.entity || "").split(".")[0] : "", dd = DOMAIN_DEV[dom];
       const domFx = typeof dd?.fx === "string" ? dd.fx : "", domTap = dd?.tap?.("")?.perform_action || "";
-      html = `<h2>${DEVICE_KINDS[o.kind] || "Spotřebič"}</h2>
-        ${this._sec("Základ", `<label>Druh</label><select data-k="kind" data-search>${byName(Object.keys(DEVICE_KINDS), (k) => DEVICE_KINDS[k], "generic").map((k) => [k, DEVICE_KINDS[k]]).map(([k, v]) => `<option value="${k}" ${k === o.kind ? "selected" : ""}>${v}</option>`).join("")}</select>
-        ${field("Název", "name", o.name || "")}
-        ${field("Entita", "entity", o.entity || "", "text", 'list="ents"')}
-        ${o.kind === "generic" && DOMAIN_HINT[dom] ? `<p class="hint">${DOMAIN_HINT[dom]}</p>` : ""}
-        ${dom === "vacuum" ? `<label>Baterie (entita; prázdné = senzor baterie zařízení vysavače)</label><input data-k="battery" value="${esc(o.battery || "")}" placeholder="sensor.*_battery" list="ents">` : ""}
-        <label class="chk"><input type="checkbox" data-k="sheet_hide" ${o.sheet_hide ? "checked" : ""}> nezobrazovat v panelu místnosti</label>
-        ${o.kind === "media" ? `<label class="chk"><input type="checkbox" data-k="cover" ${o.cover === false ? "" : "checked"}> obal alba nebo pořadu v odznaku (při přehrávání a pauze)</label>` : ""}`, true)}
-        ${this._sec("Když běží", `<label>Běží, když je stav</label><input data-k="active" value="${esc(Array.isArray(o.active) ? o.active.join(", ") : o.active ? JSON.stringify(o.active) : "")}" placeholder="${o.kind === "media" ? "playing" : "on, run"}">
-        <p class="hint">Čárkou víc stavů, nebo {"above": 20}.</p>
-        ${field("Text, když běží", "text_on", o.text_on || "")}
-        <label>Barva, když běží</label>${this._colorPick("color_on", o.color_on)}
-        <p class="hint">Výchozí = stejná jako Barva; obě výchozí = barva stavu z motivu.</p>
-        ${this._fxPicker("fx", o.fx, o.kind === "alarm" ? "výchozí (střeženo radar, zabezpečování načítání, poplach blikání)" : domFx ? `výchozí (${DEVICE_FX[domFx].split(" ")[0]})` : "výchozí (rozbíhající kruh)", o.kind === "alarm" ? "radar" : domFx || "ring", DEVICE_ICON[o.kind] || "mdiShapeOutline", "progress", o.progress, undefined, undefined, o.progress_total)}`, true)}
-        ${this._sec("Vzhled", `${field("Text pod ikonou", "text", o.text || "")}
-        <p class="hint">Může být šablona, např. {{ states('sensor.x') }} °C.</p>
-        <label>Barva</label>${this._colorPick("color", o.color)}
+      const hintKey = `domain_hint.${dom}`, hasHint = t(hintKey) !== hintKey;
+      html = `<h2>${DEVICE_KINDS[o.kind] || t("panel.appliance")}</h2>
+        ${this._sec(t("panel.f.sec_basic"), `<label>${t("panel.f.kind")}</label><select data-k="kind" data-search>${byName(Object.keys(DEVICE_KINDS), (k) => DEVICE_KINDS[k], "generic").map((k) => [k, DEVICE_KINDS[k]]).map(([k, v]) => `<option value="${k}" ${k === o.kind ? "selected" : ""}>${v}</option>`).join("")}</select>
+        ${field(t("panel.f.name"), "name", o.name || "")}
+        ${field(t("panel.f.entity"), "entity", o.entity || "", "text", 'list="ents"')}
+        ${o.kind === "generic" && hasHint ? `<p class="hint">${t(hintKey)}</p>` : ""}
+        ${dom === "vacuum" ? `<label>${t("panel.f.battery")}</label><input data-k="battery" value="${esc(o.battery || "")}" placeholder="sensor.*_battery" list="ents">` : ""}
+        <label class="chk"><input type="checkbox" data-k="sheet_hide" ${o.sheet_hide ? "checked" : ""}> ${t("panel.f.sheet_hide")}</label>
+        ${o.kind === "media" ? `<label class="chk"><input type="checkbox" data-k="cover" ${o.cover === false ? "" : "checked"}> ${t("panel.f.cover_chk")}</label>` : ""}`, true)}
+        ${this._sec(t("panel.f.sec_running"), `<label>${t("panel.f.active_state")}</label><input data-k="active" value="${esc(Array.isArray(o.active) ? o.active.join(", ") : o.active ? JSON.stringify(o.active) : "")}" placeholder="${o.kind === "media" ? "playing" : "on, run"}">
+        <p class="hint">${t("panel.f.active_hint")}</p>
+        ${field(t("panel.f.text_on"), "text_on", o.text_on || "")}
+        <label>${t("panel.f.color_on")}</label>${this._colorPick("color_on", o.color_on)}
+        <p class="hint">${t("panel.f.color_on_hint")}</p>
+        ${this._fxPicker("fx", o.fx, o.kind === "alarm" ? t("panel.f.fx_alarm_def") : domFx ? t("panel.f.fx_def_x", { fx: DEVICE_FX[domFx].split(" ")[0] }) : t("panel.f.fx_def_ring"), o.kind === "alarm" ? "radar" : domFx || "ring", DEVICE_ICON[o.kind] || "mdiShapeOutline", "progress", o.progress, undefined, undefined, o.progress_total)}`, true)}
+        ${this._sec(t("panel.f.sec_look"), `${field(t("panel.f.text_below_icon"), "text", o.text || "")}
+        <p class="hint">${t("panel.f.template_hint")}</p>
+        <label>${t("panel.f.color")}</label>${this._colorPick("color", o.color)}
         ${this._iconField(o, DEVICE_ICON[o.kind])}
         ${this._sizeField(o)}`)}
-        ${this._sec("Pozice", `${xz}
+        ${this._sec(t("panel.f.sec_pos"), `${xz}
         ${this._layerField(o)}`)}
-        ${this._actionsUI(o, { tap: domTap ? (domTap.includes("press") ? "Stisknout" : "Spustit") : "Detail entity" })}
+        ${this._actionsUI(o, { tap: domTap ? (domTap.includes("press") ? t("panel.f.act_press") : t("panel.f.act_run")) : ACTIONS["more-info"] })}
         ${this._rulesUI(o, ["color", "glow", "animate", "fx", "text", "icon", "wave", "hide"])}`;
     } else if (sel.cat === "texts") {
-      html = `<h2>Text</h2><p class="hint">Ukáže stav entity (s jednotkou), nebo vlastní text. Text může být šablona, třeba {{ states('sensor.x') }}.</p>
-        ${this._sec("Základ", `${field("Entita", "entity", o.entity || "", "text", 'list="ents"')}
-        ${field("Vlastní text (místo stavu)", "text", o.text || "")}`, true)}
-        ${this._sec("Vzhled", `<label>Barva textu</label>${this._colorPick("color", o.color)}
-        <label>Pozadí</label>${this._colorPick("background", o.background, true)}
+      html = `<h2>Text</h2><p class="hint">${t("panel.f.text_hint")}</p>
+        ${this._sec(t("panel.f.sec_basic"), `${field(t("panel.f.entity"), "entity", o.entity || "", "text", 'list="ents"')}
+        ${field(t("panel.f.custom_text"), "text", o.text || "")}`, true)}
+        ${this._sec(t("panel.f.sec_look"), `<label>${t("panel.f.text_color")}</label>${this._colorPick("color", o.color)}
+        <label>${t("panel.f.background")}</label>${this._colorPick("background", o.background, true)}
         ${this._sizeField(o)}`)}
-        ${this._sec("Pozice", `${xz}${rotation}`)}
-        ${this._actionsUI(o, { tap: "Detail entity" })}
+        ${this._sec(t("panel.f.sec_pos"), `${xz}${rotation}`)}
+        ${this._actionsUI(o, { tap: ACTIONS["more-info"] })}
         ${this._rulesUI(o, ["color", "background", "text", "hide"])}`;
     } else {
-      html = `<h2>Senzor</h2><p class="hint">Pohyb a přítomnost dělají vlnky, voda (třída moisture) rozbliká místnost.</p>
-        ${field("Entita (binary_sensor)", "entity", o.entity || "", "text", 'list="ents"')}${xz}${this._layerField(o)}`;
+      html = `<h2>${t("panel.sensor")}</h2><p class="hint">${t("panel.f.sensor_hint")}</p>
+        ${field(t("panel.f.entity_bs"), "entity", o.entity || "", "text", 'list="ents"')}${xz}${this._layerField(o)}`;
     }
-    if (sel.cat !== "labels") html += `<div class="actions"><button data-a="dup">Duplikovat</button><button data-a="del" class="del">Smazat</button></div>`;
+    if (sel.cat !== "labels") html += `<div class="actions"><button data-a="dup">${t("panel.f.duplicate")}</button><button data-a="del" class="del">${t("panel.f.delete")}</button></div>`;
     side.innerHTML = html;
     this._bind(side, (k, v, inp) => this._set(k, v, inp), (a) => this._action(a));
     this._afterForm(side);
@@ -1675,30 +1650,30 @@ class FnsFloorplanPanel extends HTMLElement {
   // dock: vacuum room sensor and the table "room name in the vacuum" -> "room in the plan"
   _vacPairing(o) {
     const sensor = o.room_sensor || this._plan.vacuum?.room_sensor || "", s = this._hass.states[sensor], cur = s?.state;
-    const names = [...new Set([...(s?.attributes?.options || []), ...Object.keys(o.room_map || {}), ...(cur && !["unknown", "unavailable"].includes(cur) ? [cur] : []), ...(this._vacExtra || [])])].sort((a, b) => a.localeCompare(b, "cs"));
+    const names = [...new Set([...(s?.attributes?.options || []), ...Object.keys(o.room_map || {}), ...(cur && !["unknown", "unavailable"].includes(cur) ? [cur] : []), ...(this._vacExtra || [])])].sort((a, b) => a.localeCompare(b, getLang()));
     const rooms = this._plan.rooms;
     const rows = names.map((name) => {
       const auto = vacRoom(name, rooms, {}), val = o.room_map?.[name] || "";
-      return `<div class="vrow${name === cur ? " cur" : ""}"><select data-k="rm:${esc(name)}" data-label="${esc(name)}${name === cur ? " (teď)" : ""}">
-        <option value="" ${val === "" ? "selected" : ""}>automaticky (${esc(auto ? auto.name : "nespárováno")})</option>
-        <option value="__none" ${val === "__none" ? "selected" : ""}>nepárovat</option>
+      return `<div class="vrow${name === cur ? " cur" : ""}"><select data-k="rm:${esc(name)}" data-label="${esc(name)}${name === cur ? " " + t("panel.f.vp_now") : ""}">
+        <option value="" ${val === "" ? "selected" : ""}>${esc(t("panel.f.vp_auto", { name: auto ? auto.name : t("panel.f.vp_unpaired") }))}</option>
+        <option value="__none" ${val === "__none" ? "selected" : ""}>${t("panel.f.vp_none")}</option>
         ${rooms.map((r) => `<option value="${esc(r.id)}" ${val === r.id ? "selected" : ""}>${esc(r.name)}</option>`).join("")}</select></div>`;
     }).join("");
-    return this._sec("Párování místností", `<input data-k="room_sensor" value="${esc(sensor)}" data-label="Senzor místnosti" placeholder="sensor.*_current_room" list="ents">
-      <p class="hint">Senzor, který hlásí, kde vysavač právě uklízí (u Roborocku sensor.*_current_room).</p>
-      ${sensor ? `${rows}<input data-k="rm_add" data-label="Přidat název místnosti ve vysavači" placeholder="např. Hall">` : `<p class="hint">Nejdřív vyber senzor místnosti.</p>`}`, true);
+    return this._sec(t("panel.f.sec_pairing"), `<input data-k="room_sensor" value="${esc(sensor)}" data-label="${t("panel.f.vp_sensor")}" placeholder="sensor.*_current_room" list="ents">
+      <p class="hint">${t("panel.f.vp_hint")}</p>
+      ${sensor ? `${rows}<input data-k="rm_add" data-label="${t("panel.f.vp_add")}" placeholder="${t("panel.f.vp_add_ph")}">` : `<p class="hint">${t("panel.f.vp_first")}</p>`}`, true);
   }
 
   // swaps plain inputs and selects for HA's ha-selector (same data-k, same set callback)
   // tile picker of the circle animations, each tile plays its animation with the card's own CSS
   // a countdown tile adds an entity field (progKey) that drives the arc; defText names the default tile, title the label above
-  _fxPicker(key, value, defLabel, defFx, iconName, progKey, progValue, defText = "výchozí", title = "Animace kruhu, když běží", total) {
+  _fxPicker(key, value, defLabel, defFx, iconName, progKey, progValue, defText = t("panel.f.default_lc"), title = t("panel.f.fx_title"), total) {
     const tile = (v, anim, text, title) => `<button class="fxt${(value || "") === v ? " on" : ""}" data-fx="${v}" title="${esc(title)}">
       <svg viewBox="-34 -34 68 68" width="56" height="56"><g class="dev on dev-generic" data-fx="${anim}"><circle r="17" class="badge"/><circle r="17" class="ring"/><g class="fx">${FX_SVG[anim] || ""}</g><g class="icon">${iconHtml(null, 20, iconName, "glyph")}</g></g></svg>
       <span>${text}</span></button>`;
-    const prog = value === "countdown" && progKey ? `<input data-k="${progKey}" value="${esc(progValue || "")}" placeholder="timer, % průběhu, zbývající čas nebo čas konce" data-label="Průběh odpočtu (entita)" list="ents">
-      <input data-k="${progKey}_total" type="number" min="0" step="0.5" value="${total ?? ""}" data-label="Doba (min)">
-      <p class="hint">Entita, nebo jen doba: odpočet pak běží od chvíle, kdy stav nastal. U entity se zbývajícím časem je doba celková délka. Bez obojího se kruh jen dekorativně opakuje.</p>` : "";
+    const prog = value === "countdown" && progKey ? `<input data-k="${progKey}" value="${esc(progValue || "")}" placeholder="${t("panel.f.fx_prog_ph")}" data-label="${t("panel.f.fx_prog_label")}" list="ents">
+      <input data-k="${progKey}_total" type="number" min="0" step="0.5" value="${total ?? ""}" data-label="${t("panel.f.fx_total")}">
+      <p class="hint">${t("panel.f.fx_prog_hint")}</p>` : "";
     return `<label>${title}</label><div class="app fxapp" data-mode="day"><div class="fxpick" data-fx-key="${key}">${tile("", defFx, defText, defLabel)}${Object.entries(DEVICE_FX).map(([k, t]) => tile(k, k, t.split(" ")[0], t)).join("")}</div></div>${prog}`;
   }
 
@@ -1710,7 +1685,7 @@ class FnsFloorplanPanel extends HTMLElement {
       const v = raw === "" ? "state" : raw === "none" ? "none" : raw.match(/^var\(--([a-z-]+)-color\)$/)?.[1] ?? raw;
       if (v !== "state" && v !== "none" && !UI_COLORS.has(v)) return;
       const prev = box.previousElementSibling;
-      let label = "Barva";
+      let label = t("panel.f.color");
       if (prev && (prev.tagName === "LABEL" || prev.tagName === "SPAN")) { label = prev.textContent.trim(); prev.remove(); }
       const h = document.createElement("ha-selector");
       Object.assign(h, { hass: this._hass, selector: { ui_color: { include_state: true, include_none: box.hasAttribute("data-none"), default_color: "state" } }, label, value: v, required: false });
@@ -1803,7 +1778,7 @@ class FnsFloorplanPanel extends HTMLElement {
     // rule icons: HA's icon picker with its list and search (typing "none" still works)
     if (customElements.get("ha-icon-picker")) side.querySelectorAll('input[data-k$=":icon"]').forEach((inp) => {
       const pick = document.createElement("ha-icon-picker");
-      Object.assign(pick, { hass: this._hass, value: inp.value, label: "Ikona", helper: "prázdné = podle prvku" });
+      Object.assign(pick, { hass: this._hass, value: inp.value, label: t("panel.f.icon"), helper: t("panel.f.icon_helper_item") });
       pick.dataset.k = inp.dataset.k;
       pick.addEventListener("value-changed", (e) => { e.stopPropagation(); set(inp.dataset.k, e.detail.value || "", pick); });
       inp.replaceWith(pick);
@@ -1841,7 +1816,7 @@ class FnsFloorplanPanel extends HTMLElement {
       const pick = document.createElement("ha-icon-picker");
       pick.hass = this._hass;
       pick.value = inp.value;
-      Object.assign(pick, { label: "Ikona", placeholder: inp.placeholder, helper: "prázdné = výchozí" });
+      Object.assign(pick, { label: t("panel.f.icon"), placeholder: inp.placeholder, helper: t("panel.f.icon_helper_default") });
       pick.addEventListener("value-changed", (e) => this._set("icon", e.detail.value || ""));
       // the default of a generic item is its entity's own icon: show that one in the empty picker
       const o = this._get(), so = o && !o.icon && o.kind === "generic" && this._hass.states[o.entity];
@@ -1869,9 +1844,9 @@ class FnsFloorplanPanel extends HTMLElement {
     const items = this._picked().map(([, o]) => o);
     const groups = new Set(items.map((o) => o.group));
     const one = groups.size === 1 && !groups.has(undefined);
-    side.innerHTML = `<h2>Vybráno ${this._multi.length} prvků</h2>
-      <p class="hint">Ctrl+klik přidá nebo odebere další prvek. Táhnutím nebo šipkami posuneš všechny najednou, Ctrl+C / Ctrl+V je zkopíruje, Delete smaže. ${one ? "Prvky tvoří skupinu: klepnutí na kterýkoli vybere celou skupinu." : "Seskupené prvky se pak vybírají a táhnou vždy spolu."}</p>
-      <div class="actions">${one ? "" : '<button data-a="group">Seskupit</button>'}${[...groups].some(Boolean) ? '<button data-a="ungroup">Zrušit skupinu</button>' : ""}<button data-a="mdel" class="del">Smazat</button></div>`;
+    side.innerHTML = `<h2>${t("panel.f.multi_title", { n: this._multi.length })}</h2>
+      <p class="hint">${t("panel.f.multi_hint")} ${one ? t("panel.f.multi_group_one") : t("panel.f.multi_group_none")}</p>
+      <div class="actions">${one ? "" : `<button data-a="group">${t("panel.f.group")}</button>`}${[...groups].some(Boolean) ? `<button data-a="ungroup">${t("panel.f.ungroup")}</button>` : ""}<button data-a="mdel" class="del">${t("panel.f.delete")}</button></div>`;
     side.querySelectorAll("[data-a]").forEach((btn) => btn.addEventListener("click", () => {
       const a = btn.dataset.a;
       if (a === "group") { const id = uid("grp"); for (const o of items) o.group = id; }
@@ -1898,17 +1873,17 @@ class FnsFloorplanPanel extends HTMLElement {
 
   _iconField(o, fallback) {
     const def = fallback ? "mdi:" + fallback.slice(3).replace(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase() : "";
-    if (o.icon === "none") return `<label>Ikona</label><div class="icon-row"><span class="hint" style="flex:1">bez ikony</span><button class="mini" data-a="icon-reset">Vrátit výchozí</button></div>`;
-    return `<label>Ikona (prázdná = výchozí)</label><div class="icon-row"><ha-icon icon="${esc(o.icon || def)}"></ha-icon>
-      <input data-k="icon" value="${esc(o.icon || "")}" placeholder="${esc(def || "mdi:…")}">${o.icon ? `<button class="mini" data-a="icon-reset" data-icon="mdi:restore" title="Výchozí ikona">✕</button>` : ""}
-      <button class="mini" data-a="icon-none" data-icon="mdi:eye-off-outline" title="Bez ikony">Bez ikony</button></div>`;
+    if (o.icon === "none") return `<label>${t("panel.f.icon")}</label><div class="icon-row"><span class="hint" style="flex:1">${t("panel.f.icon_none_state")}</span><button class="mini" data-a="icon-reset">${t("panel.f.icon_restore")}</button></div>`;
+    return `<label>${t("panel.f.icon_label")}</label><div class="icon-row"><ha-icon icon="${esc(o.icon || def)}"></ha-icon>
+      <input data-k="icon" value="${esc(o.icon || "")}" placeholder="${esc(def || "mdi:…")}">${o.icon ? `<button class="mini" data-a="icon-reset" data-icon="mdi:restore" title="${t("panel.f.icon_default_title")}">✕</button>` : ""}
+      <button class="mini" data-a="icon-none" data-icon="mdi:eye-off-outline" title="${t("panel.f.icon_none_btn")}">${t("panel.f.icon_none_btn")}</button></div>`;
   }
 
   // quick placement inside the item's room: corners, sides, middle
   _placeField() {
     const PLACE_ICONS = { tl: "mdi:arrow-top-left", t: "mdi:arrow-up", tr: "mdi:arrow-top-right", l: "mdi:arrow-left", c: "mdi:circle-small", r: "mdi:arrow-right", bl: "mdi:arrow-bottom-left", b: "mdi:arrow-down", br: "mdi:arrow-bottom-right" };
     const cells = [["tl", "↖"], ["t", "↑"], ["tr", "↗"], ["l", "←"], ["c", "•"], ["r", "→"], ["bl", "↙"], ["b", "↓"], ["br", "↘"]];
-    return `<label>Umístit v místnosti</label><div class="place">${cells.map(([k, g]) => `<button data-a="place:${k}" data-icon="${PLACE_ICONS[k]}" title="${k === "c" ? "Střed místnosti" : "K okraji místnosti"}">${g}</button>`).join("")}</div>`;
+    return `<label>${t("panel.f.place_label")}</label><div class="place">${cells.map(([k, g]) => `<button data-a="place:${k}" data-icon="${PLACE_ICONS[k]}" title="${k === "c" ? t("panel.f.place_center") : t("panel.f.place_edge")}">${g}</button>`).join("")}</div>`;
   }
 
   _place(where) {
@@ -1931,21 +1906,21 @@ class FnsFloorplanPanel extends HTMLElement {
   }
 
   _sizeField(o) {
-    return `<label>Velikost</label><select data-k="size">${Object.entries(SIZE_NAMES).map(([k, v]) => `<option value="${k}" ${(o.size || "") === k ? "selected" : ""}>${v}</option>`).join("")}</select>`;
+    return `<label>${t("panel.f.size")}</label><select data-k="size">${Object.entries(SIZE_NAMES).map(([k, v]) => `<option value="${k}" ${(o.size || "") === k ? "selected" : ""}>${v}</option>`).join("")}</select>`;
   }
 
   _layerField() {
-    return `<label>Pořadí při překrytí</label><div class="layers">
-      <button data-a="layer:top" data-icon="mdi:arrange-bring-to-front" title="Do popředí">Do popředí</button><button data-a="layer:bottom" data-icon="mdi:arrange-send-to-back" title="Do pozadí">Do pozadí</button></div>`;
+    return `<label>${t("panel.f.layer")}</label><div class="layers">
+      <button data-a="layer:top" data-icon="mdi:arrange-bring-to-front" title="${t("panel.f.to_front")}">${t("panel.f.to_front")}</button><button data-a="layer:bottom" data-icon="mdi:arrange-send-to-back" title="${t("panel.f.to_back")}">${t("panel.f.to_back")}</button></div>`;
   }
 
   // a colour: one of the named colours or any picked one; `none` offers a transparent background
   _colorPick(key, value, none = false) {
     const custom = value && !COLORS[value] && value !== "none";
     return `<div class="outc colorpick" style="margin-top:0" data-color="${key}" data-value="${esc(value || "")}" ${none ? "data-none" : ""}><select data-k="${key}">
-      <option value="">Výchozí</option>${none ? `<option value="none" ${value === "none" ? "selected" : ""}>Žádné</option>` : ""}
+      <option value="">${t("panel.f.default")}</option>${none ? `<option value="none" ${value === "none" ? "selected" : ""}>${t("panel.f.none")}</option>` : ""}
       ${Object.entries(COLOR_NAMES).map(([k, v]) => `<option value="${k}" ${value === k ? "selected" : ""}>${v}</option>`).join("")}
-      <option value="custom" ${custom ? "selected" : ""}>Vlastní…</option></select>
+      <option value="custom" ${custom ? "selected" : ""}>${t("panel.f.custom")}</option></select>
       <input type="color" data-k="${key}" value="${custom ? esc(value) : "#ff0000"}" ${custom ? "" : "hidden"}></div>`;
   }
 
@@ -1954,17 +1929,17 @@ class FnsFloorplanPanel extends HTMLElement {
     const rows = Object.entries(ACTION_KEYS).map(([k, label]) => {
       const a = o[k + "_action"] || {};
       const cur = a.action || "";
-      const def = defaults[k] ? `Výchozí (${defaults[k]})` : "Výchozí (nic)";
+      const def = defaults[k] ? t("panel.f.def_x", { x: defaults[k] }) : t("panel.f.def_nothing");
       let more = "";
       if (cur === "perform-action") more = `<input data-k="act:${k}:perform_action" value="${esc(a.perform_action || a.service || "")}" placeholder="light.turn_on">
-        <input data-k="act:${k}:data" value="${esc(a.data ? JSON.stringify(a.data) : "")}" placeholder="data v YAML, např. entity_id: light.x">`;
+        <input data-k="act:${k}:data" value="${esc(a.data ? JSON.stringify(a.data) : "")}" placeholder="${t("panel.f.act_data_ph")}">`;
       else if (cur === "navigate") more = `<input data-k="act:${k}:navigation_path" value="${esc(a.navigation_path || "")}" placeholder="/lovelace/0">`;
       else if (cur === "url") more = `<input data-k="act:${k}:url_path" value="${esc(a.url_path || "")}" placeholder="https://…">`;
-      else if (cur === "more-info" || cur === "toggle") more = `<input data-k="act:${k}:entity" value="${esc(a.entity || "")}" placeholder="jiná entita (nepovinné)" list="ents">`;
-      return `<label>${label}</label><select data-k="act:${k}:action">${Object.entries(ACTIONS).map(([v, t]) => `<option value="${v}" ${v === cur ? "selected" : ""}>${v ? t : def}</option>`).join("")}</select>${more}`;
+      else if (cur === "more-info" || cur === "toggle") more = `<input data-k="act:${k}:entity" value="${esc(a.entity || "")}" placeholder="${t("panel.f.act_entity_ph")}" list="ents">`;
+      return `<label>${label}</label><select data-k="act:${k}:action">${Object.entries(ACTIONS).map(([v, txt]) => `<option value="${v}" ${v === cur ? "selected" : ""}>${v ? txt : def}</option>`).join("")}</select>${more}`;
     }).join("");
     const set = Object.keys(ACTION_KEYS).some((k) => o[k + "_action"]);
-    return this._sec("Akce (klepnutí, dvojklik, podržení)", rows, set, "Akce");
+    return this._sec(t("panel.f.actions_title"), rows, set, "Akce");
   }
 
   // colour rules as a form: each rule has conditions (all must hold) and what it changes; YAML for the rest
@@ -1980,22 +1955,22 @@ class FnsFloorplanPanel extends HTMLElement {
     const valOf = (c, op) => (op === "template" ? c.template : [].concat(c[op] ?? "").join(", "));
     const out = (i, r) => {
       const parts = [];
-      if (fields.includes("color")) parts.push(`<span>${fields.includes("background") ? "Text" : "Barva"}</span>${this._colorPick(`ro:${i}:color`, r.color)}`);
-      if (fields.includes("background")) parts.push(`<span>Pozadí</span>${this._colorPick(`ro:${i}:background`, r.background, true)}`);
-      if (fields.includes("wave") && o.kind === "radiator") parts.push(`<span>Vlny</span>${this._colorPick(`ro:${i}:wave`, r.wave)}`);
-      if (fields.includes("glow")) parts.push(`<label class="chk"><input type="checkbox" data-k="ro:${i}:glow" ${r.glow ? "checked" : ""}> záře</label>`);
-      if (fields.includes("animate")) parts.push(`<select data-k="ro:${i}:animate" data-label="Animace"><option value="">animace podle stavu</option><option value="true" ${r.animate === true ? "selected" : ""}>animovat</option><option value="false" ${r.animate === false ? "selected" : ""}>neanimovat</option></select>`);
-      if (fields.includes("fx")) parts.push(`<div style="flex:1 1 100%">${(o.kind ? this._fxPicker(`ro:${i}:fx`, r.fx, "podle prvku", o.kind === "alarm" ? "radar" : "ring", DEVICE_ICON[o.kind] || "mdiShapeOutline", `ro:${i}:progress`, r.progress, "podle prvku", "Animace kruhu", r.progress_total)
+      if (fields.includes("color")) parts.push(`<span>${fields.includes("background") ? "Text" : t("panel.f.color")}</span>${this._colorPick(`ro:${i}:color`, r.color)}`);
+      if (fields.includes("background")) parts.push(`<span>${t("panel.f.background")}</span>${this._colorPick(`ro:${i}:background`, r.background, true)}`);
+      if (fields.includes("wave") && o.kind === "radiator") parts.push(`<span>${t("panel.rule.wave")}</span>${this._colorPick(`ro:${i}:wave`, r.wave)}`);
+      if (fields.includes("glow")) parts.push(`<label class="chk"><input type="checkbox" data-k="ro:${i}:glow" ${r.glow ? "checked" : ""}> ${t("panel.rule.glow")}</label>`);
+      if (fields.includes("animate")) parts.push(`<select data-k="ro:${i}:animate" data-label="${t("panel.rule.anim_label")}"><option value="">${t("panel.rule.anim_state")}</option><option value="true" ${r.animate === true ? "selected" : ""}>${t("panel.rule.anim_on")}</option><option value="false" ${r.animate === false ? "selected" : ""}>${t("panel.rule.anim_off")}</option></select>`);
+      if (fields.includes("fx")) parts.push(`<div style="flex:1 1 100%">${(o.kind ? this._fxPicker(`ro:${i}:fx`, r.fx, t("panel.f.fx_by_item"), o.kind === "alarm" ? "radar" : "ring", DEVICE_ICON[o.kind] || "mdiShapeOutline", `ro:${i}:progress`, r.progress, t("panel.f.fx_by_item"), t("panel.f.fx_title_rule"), r.progress_total)
         // lights, strips, the dock and furniture have no animation of their own: empty = none
-        : this._fxPicker(`ro:${i}:fx`, r.fx === "none" ? "" : r.fx, "bez animace", "none", FURNITURE[o.type]?.[1] || "mdiShapeOutline", `ro:${i}:progress`, r.progress, "žádná", "Animace kruhu", r.progress_total).replace(/<button class="fxt[^"]*" data-fx="none"[\s\S]*?<\/button>/, ""))}</div>`);
-      if (fields.includes("hide")) parts.push(`<label class="chk"><input type="checkbox" data-k="ro:${i}:hide" ${r.hide ? "checked" : ""}> skrýt</label>`);
-      if (o.points) parts.push(`<span>Průhlednost</span><input type="number" step="0.05" min="0" max="1" data-k="ro:${i}:opacity" value="${r.opacity ?? ""}" placeholder="0,14" style="width:70px">`);
+        : this._fxPicker(`ro:${i}:fx`, r.fx === "none" ? "" : r.fx, t("panel.f.fx_no_anim"), "none", FURNITURE[o.type]?.[1] || "mdiShapeOutline", `ro:${i}:progress`, r.progress, t("panel.f.none_lc"), t("panel.f.fx_title_rule"), r.progress_total).replace(/<button class="fxt[^"]*" data-fx="none"[\s\S]*?<\/button>/, ""))}</div>`);
+      if (fields.includes("hide")) parts.push(`<label class="chk"><input type="checkbox" data-k="ro:${i}:hide" ${r.hide ? "checked" : ""}> ${t("panel.rule.hide")}</label>`);
+      if (o.points) parts.push(`<span>${t("panel.bg_opacity")}</span><input type="number" step="0.05" min="0" max="1" data-k="ro:${i}:opacity" value="${r.opacity ?? ""}" placeholder="${t("panel.rule.opacity_ph")}" style="width:70px">`);
       // the icon picker cannot take "none": a button next to it hides the icon, another brings the picker back
       if (fields.includes("icon")) parts.push(r.icon === "none"
-        ? `<div class="icon-row" style="flex:1 1 100%"><span class="hint" style="flex:1">Ikona: bez ikony</span><button class="mini" data-a="ra:icon:${i}:" data-icon="mdi:restore" title="Vrátit ikonu">Vrátit</button></div>`
-        : `<div class="icon-row" style="flex:1 1 100%"><input type="text" data-k="ro:${i}:icon" value="${esc(r.icon || "")}" placeholder="ikona, např. mdi:timer-sand">
-          <button class="mini" data-a="ra:icon:${i}:none" data-icon="mdi:eye-off-outline" title="Bez ikony">Bez ikony</button></div>`);
-      if (fields.includes("text")) parts.push(`<input type="text" data-k="ro:${i}:text" value="${esc(r.text || "")}" placeholder="text (může být šablona {{ … }})">`);
+        ? `<div class="icon-row" style="flex:1 1 100%"><span class="hint" style="flex:1">${t("panel.rule.icon_none")}</span><button class="mini" data-a="ra:icon:${i}:" data-icon="mdi:restore" title="${t("panel.rule.icon_restore_title")}">${t("panel.rule.restore")}</button></div>`
+        : `<div class="icon-row" style="flex:1 1 100%"><input type="text" data-k="ro:${i}:icon" value="${esc(r.icon || "")}" placeholder="${t("panel.rule.icon_ph")}">
+          <button class="mini" data-a="ra:icon:${i}:none" data-icon="mdi:eye-off-outline" title="${t("panel.f.icon_none_btn")}">${t("panel.f.icon_none_btn")}</button></div>`);
+      if (fields.includes("text")) parts.push(`<input type="text" data-k="ro:${i}:text" value="${esc(r.text || "")}" placeholder="${t("panel.rule.text_ph")}">`);
       return `<div class="outc">${parts.join("")}</div>`;
     };
     const list = rules.map((r, i) => {
@@ -2003,34 +1978,34 @@ class FnsFloorplanPanel extends HTMLElement {
       const simple = conds.every((c) => !c.any);
       // the condition is either the entity form or one Jinja template (and / or / anything), true = the settings below apply
       const tplMode = conds.length === 1 && conds[0].template != null;
-      const mode = `<div class="cmode"><button class="${tplMode ? "" : "on"}" data-a="ra:cmode:${i}:form">Podle entit</button><button class="${tplMode ? "on" : ""}" data-a="ra:cmode:${i}:tpl">Šablona Jinja</button></div>`;
+      const mode = `<div class="cmode"><button class="${tplMode ? "" : "on"}" data-a="ra:cmode:${i}:form">${t("panel.rule.by_entities")}</button><button class="${tplMode ? "on" : ""}" data-a="ra:cmode:${i}:tpl">${t("panel.rule.jinja")}</button></div>`;
       const tplUI = `<textarea data-k="rc:${i}:0:value" data-jinja spellcheck="false" placeholder="{{ is_state('vacuum.x', 'cleaning') and states('sensor.y') | float(0) > 20 }}">${esc(conds[0]?.template || "")}</textarea>
-        <p class="hint">Když šablona vyjde true (nebo on, yes, 1), platí nastavení níže.</p>`;
-      // "+ podmínka" sits in the footer of the last condition, next to its delete icon
-      const addCond = `<button data-a="ra:cadd:${i}" class="mini">+ podmínka</button>`;
-      return `<div class="rule"><div class="rule-h"><span>Pravidlo ${i + 1}</span>
-          <button data-a="ra:up:${i}" data-icon="mdi:arrow-up" title="Posunout výš" ${i ? "" : "disabled"}>↑</button><button data-a="ra:down:${i}" data-icon="mdi:arrow-down" title="Posunout níž" ${i < rules.length - 1 ? "" : "disabled"}>↓</button><button data-a="ra:ryaml:${i}" data-icon="${yr === i ? "mdi:form-select" : "mdi:code-braces"}" title="${yr === i ? "Zpět na formulář" : "Upravit v YAML"}">YAML</button><button data-a="ra:del:${i}" data-icon="mdi:delete" title="Smazat pravidlo">✕</button></div>
-        ${yr === i ? `<textarea data-k="rule_yaml:${i}" spellcheck="false">Načítám…</textarea>` : `${mode}${tplMode ? tplUI : simple ? conds.map((c, j) => {
+        <p class="hint">${t("panel.rule.tpl_hint")}</p>`;
+      // "+ condition" sits in the footer of the last condition, next to its delete icon
+      const addCond = `<button data-a="ra:cadd:${i}" class="mini">${t("panel.rule.add_cond")}</button>`;
+      return `<div class="rule"><div class="rule-h"><span>${t("panel.rule.n", { n: i + 1 })}</span>
+          <button data-a="ra:up:${i}" data-icon="mdi:arrow-up" title="${t("panel.rule.up")}" ${i ? "" : "disabled"}>↑</button><button data-a="ra:down:${i}" data-icon="mdi:arrow-down" title="${t("panel.rule.down")}" ${i < rules.length - 1 ? "" : "disabled"}>↓</button><button data-a="ra:ryaml:${i}" data-icon="${yr === i ? "mdi:form-select" : "mdi:code-braces"}" title="${yr === i ? t("panel.rule.back_form") : t("panel.rule.edit_yaml")}">YAML</button><button data-a="ra:del:${i}" data-icon="mdi:delete" title="${t("panel.rule.delete")}">✕</button></div>
+        ${yr === i ? `<textarea data-k="rule_yaml:${i}" spellcheck="false">${t("panel.rule.loading")}</textarea>` : `${mode}${tplMode ? tplUI : simple ? conds.map((c, j) => {
           const op = opOf(c);
-          return `<div class="cond">${op === "template" ? "" : `<input data-k="rc:${i}:${j}:entity" value="${esc(c.entity || "")}" placeholder="entita" data-label="Entita" list="ents">
-              ${own && c.entity !== own ? `<button class="mini wide" data-a="ra:self:${i}:${j}" title="${esc(own)}">↳ tato entita</button>` : ""}
-              <input data-k="rc:${i}:${j}:attribute" value="${esc(c.attribute || "")}" placeholder="jinak stav" data-label="Atribut">`}
-            <select data-k="rc:${i}:${j}:op" data-label="Podmínka">${Object.entries(OPS).map(([k, v]) => `<option value="${k}" ${k === op ? "selected" : ""}>${v}</option>`).join("")}</select>
-            <input data-k="rc:${i}:${j}:value" value="${esc(valOf(c, op))}" placeholder="${op === "template" ? "{{ is_state('timer.x', 'active') }}" : op === "state" || op === "state_not" ? "on, open" : "20"}" data-label="Hodnota" ${op === "template" ? 'class="wide"' : ""}>
-            <div class="cond-foot">${j === conds.length - 1 ? addCond : ""}<span class="sp"></span><button data-a="ra:cdel:${i}:${j}" data-icon="mdi:delete-outline" title="Smazat podmínku">✕</button></div></div>`;
-        }).join("") + (conds.length ? "" : `<div class="cond-foot">${addCond}<span class="hint">bez podmínky platí vždy</span></div>`)
-          : `<p class="hint">Pravidlo s podmínkou „nebo“ (any) uprav v YAML (tlačítko { } nahoře).</p>`}
+          return `<div class="cond">${op === "template" ? "" : `<input data-k="rc:${i}:${j}:entity" value="${esc(c.entity || "")}" placeholder="${t("panel.rule.entity_ph")}" data-label="${t("panel.f.entity")}" list="ents">
+              ${own && c.entity !== own ? `<button class="mini wide" data-a="ra:self:${i}:${j}" title="${esc(own)}">${t("panel.rule.self")}</button>` : ""}
+              <input data-k="rc:${i}:${j}:attribute" value="${esc(c.attribute || "")}" placeholder="${t("panel.rule.attr_ph")}" data-label="${t("panel.rule.attr")}">`}
+            <select data-k="rc:${i}:${j}:op" data-label="${t("panel.rule.cond")}">${Object.entries(OPS).map(([k, v]) => `<option value="${k}" ${k === op ? "selected" : ""}>${v}</option>`).join("")}</select>
+            <input data-k="rc:${i}:${j}:value" value="${esc(valOf(c, op))}" placeholder="${op === "template" ? "{{ is_state('timer.x', 'active') }}" : op === "state" || op === "state_not" ? "on, open" : "20"}" data-label="${t("panel.rule.value")}" ${op === "template" ? 'class="wide"' : ""}>
+            <div class="cond-foot">${j === conds.length - 1 ? addCond : ""}<span class="sp"></span><button data-a="ra:cdel:${i}:${j}" data-icon="mdi:delete-outline" title="${t("panel.rule.del_cond")}">✕</button></div></div>`;
+        }).join("") + (conds.length ? "" : `<div class="cond-foot">${addCond}<span class="hint">${t("panel.rule.no_cond")}</span></div>`)
+          : `<p class="hint">${t("panel.rule.any_hint")}</p>`}
         ${out(i, r)}`}</div>`;
     }).join("");
-    return this._sec(`Pravidla: barvy, skrytí${fields.includes("icon") ? ", ikona" : ""}${rules.length ? ` (${rules.length})` : ""}`, `
-      <p class="hint">Pro každou vlastnost platí první pravidlo, jehož podmínky platí.</p>${list}
-      <div class="actions"><button data-a="ra:add">+ pravidlo</button>${ai ? `<button data-a="ra:ai">${this._ai ? "Skrýt AI" : "Navrhnout s AI"}</button>` : ""}</div>
-      ${ai && this._ai ? `<div class="ai-ask"><input data-k="rules_ai" value="${esc(this._aiText || "")}" data-label="Co má pravidlo dělat" placeholder="např. červeně, když je otevřené okno a topí se">
-        <div class="actions"><button data-a="ra:aigo" ${this._aiBusy ? "disabled" : ""}>${this._aiBusy ? "AI přemýšlí…" : "Navrhnout"}</button></div></div>
+    return this._sec(`${t("panel.rule.head")}${fields.includes("icon") ? t("panel.rule.head_icon") : ""}${rules.length ? ` (${rules.length})` : ""}`, `
+      <p class="hint">${t("panel.rule.intro")}</p>${list}
+      <div class="actions"><button data-a="ra:add">${t("panel.rule.add")}</button>${ai ? `<button data-a="ra:ai">${this._ai ? t("panel.rule.ai_hide") : t("panel.rule.ai_suggest_btn")}</button>` : ""}</div>
+      ${ai && this._ai ? `<div class="ai-ask"><input data-k="rules_ai" value="${esc(this._aiText || "")}" data-label="${t("panel.rule.ai_ask")}" placeholder="${t("panel.rule.ai_ph")}">
+        <div class="actions"><button data-a="ra:aigo" ${this._aiBusy ? "disabled" : ""}>${this._aiBusy ? t("panel.rule.ai_thinking") : t("panel.rule.ai_go")}</button></div></div>
         ${this._aiErr ? `<p class="hint err">${esc(this._aiErr)}</p>` : ""}` : ""}
-      ${draft ? `<p class="hint">Návrh od AI (${esc(ai)}). Zkontroluj ho a potvrď, zatím se nic nezměnilo.</p>` : ""}
-      ${draft ? `<textarea data-k="rules_yaml" spellcheck="false" placeholder="- if:\n    - entity: binary_sensor.x\n      state: \"on\"\n  color: red">Načítám…</textarea>` : ""}
-      ${draft ? `<div class="actions"><button data-a="ra:aiok">Použít návrh</button><button data-a="ra:aino">Zahodit</button></div>` : ""}`, rules.length > 0 || draft, "Pravidla");
+      ${draft ? `<p class="hint">${t("panel.rule.ai_draft", { ai: esc(ai) })}</p>` : ""}
+      ${draft ? `<textarea data-k="rules_yaml" spellcheck="false" placeholder="- if:\n    - entity: binary_sensor.x\n      state: \"on\"\n  color: red">${t("panel.rule.loading")}</textarea>` : ""}
+      ${draft ? `<div class="actions"><button data-a="ra:aiok">${t("panel.rule.ai_apply")}</button><button data-a="ra:aino">${t("panel.revert_short")}</button></div>` : ""}`, rules.length > 0 || draft, "Pravidla");
   }
 
   // rule, action and look fields shared by every kind of item; true when the key was one of them
@@ -2144,7 +2119,7 @@ class FnsFloorplanPanel extends HTMLElement {
   // ask HA's AI Task for rules from a plain-language request; the answer opens as a draft in the YAML editor
   async _aiSuggest(targets) {
     const ask = (this._aiText || "").trim();
-    if (!ask) { this._aiErr = "Napiš, co má pravidlo dělat."; return this._form(); }
+    if (!ask) { this._aiErr = t("panel.rule.ai_empty"); return this._form(); }
     const o = targets[0], fields = this._ruleFields || [], hass = this._hass;
     const own = this._ownEntity(o), so = hass.states[own];
     const OUT = { color: "color: colour of the item (or its text when background is allowed)", background: "background: badge background colour",
@@ -2193,9 +2168,9 @@ Request (may be in Czech): ${ask}`;
       let data = (await hass.callWS({ type: "fns_floorplan/yaml/parse", text })).data;
       if (data && typeof data === "object" && !Array.isArray(data)) data = [data];
       // no list = the AI explains why it can't do it; show that as it is
-      if (!Array.isArray(data)) this._aiErr = `AI: ${typeof data === "string" ? data : "nevrátila seznam pravidel."}`;
+      if (!Array.isArray(data)) this._aiErr = t("panel.rule.ai_answer", { text: typeof data === "string" ? data : t("panel.rule.ai_no_list") });
       else { this._aiDraft = Array.isArray(data) && !text.trimStart().startsWith("-") ? (await hass.callWS({ type: "fns_floorplan/yaml/dump", data })).text : text; this._aiFor = o; }
-    } catch (err) { this._aiErr = `Návrh se nepovedl: ${err.message || err}`; }
+    } catch (err) { this._aiErr = t("panel.rule.ai_failed", { err: err.message || err }); }
     this._aiBusy = false;
     this._form();
   }
@@ -2204,9 +2179,9 @@ Request (may be in Czech): ${ask}`;
   async _aiApply(targets) {
     let data;
     try { data = (await this._hass.callWS({ type: "fns_floorplan/yaml/parse", text: this._aiDraft })).data; }
-    catch (err) { this._aiErr = `Chyba v YAML: ${err.message || err}`; return this._form(); }
+    catch (err) { this._aiErr = t("panel.rule.yaml_error", { err: err.message || err }); return this._form(); }
     if (data && typeof data === "object" && !Array.isArray(data)) data = [data];
-    if (!Array.isArray(data)) { this._aiErr = "Návrh musí být seznam pravidel."; return this._form(); }
+    if (!Array.isArray(data)) { this._aiErr = t("panel.rule.must_list"); return this._form(); }
     for (const t of targets) if (data.length) t.rules = JSON.parse(JSON.stringify(data)); else delete t.rules;
     this._aiDraft = null; this._aiErr = "";
     this._changed();
@@ -2214,30 +2189,30 @@ Request (may be in Czech): ${ask}`;
 
   _roomForm(side, r) {
     const v = this._sel.v;
-    const walls = r.points.map((_, k) => { const e = edgeOf(r, k); return `<option value="${k}">Stěna ${k + 1} – ${SIDE(e.u)}, ${e.L.toFixed(2).replace(".", ",")} m</option>`; }).join("");
+    const walls = r.points.map((_, k) => { const e = edgeOf(r, k); return `<option value="${k}">${t("panel.room.wall", { n: k + 1, side: SIDE(e.u), len: e.L.toFixed(2).replace(".", ",") })}</option>`; }).join("");
     const info = r.label_info ?? ["temperature", "humidity"];
     const extra = info.filter((k) => k !== "temperature" && k !== "humidity");
-    side.innerHTML = `<h2>Místnost</h2>
-      <label>Název</label><input data-k="name" value="${esc(r.name)}">
-      <input type="text" data-k="r:icon" value="${esc(r.icon || "")}" placeholder="ikona v panelu místnosti, např. mdi:sofa">
-      <label>Teplota (entita)</label><input data-k="temperature" value="${esc(r.temperature || "")}" list="ents">
-      <label>Vlhkost (entita)</label><input data-k="humidity" value="${esc(r.humidity || "")}" list="ents">
-      ${this._sec("Badge místnosti", `<label class="chk"><input type="checkbox" data-k="label_show" ${r.label_hidden ? "" : "checked"}> zobrazit badge</label>
+    side.innerHTML = `<h2>${t("panel.room")}</h2>
+      <label>${t("panel.f.name")}</label><input data-k="name" value="${esc(r.name)}">
+      <input type="text" data-k="r:icon" value="${esc(r.icon || "")}" placeholder="${t("panel.room.icon_ph")}">
+      <label>${t("panel.room.temp")}</label><input data-k="temperature" value="${esc(r.temperature || "")}" list="ents">
+      <label>${t("panel.room.hum")}</label><input data-k="humidity" value="${esc(r.humidity || "")}" list="ents">
+      ${this._sec(t("panel.room.badge_sec"), `<label class="chk"><input type="checkbox" data-k="label_show" ${r.label_hidden ? "" : "checked"}> ${t("panel.room.show_badge")}</label>
         <fieldset class="badge-opts" ${r.label_hidden ? "disabled" : ""}>
-        <label class="chk"><input type="checkbox" data-k="label_name" ${r.label_name === false ? "" : "checked"}> název místnosti</label>
-        <label class="chk"><input type="checkbox" data-k="label_t" ${info.includes("temperature") ? "checked" : ""}> teplota</label>
-        <label class="chk"><input type="checkbox" data-k="label_h" ${info.includes("humidity") ? "checked" : ""}> vlhkost</label>
-        <label>Další údaje pod názvem (entita nebo šablona, každá na řádek)</label>
+        <label class="chk"><input type="checkbox" data-k="label_name" ${r.label_name === false ? "" : "checked"}> ${t("panel.room.show_name")}</label>
+        <label class="chk"><input type="checkbox" data-k="label_t" ${info.includes("temperature") ? "checked" : ""}> ${t("panel.room.show_temp")}</label>
+        <label class="chk"><input type="checkbox" data-k="label_h" ${info.includes("humidity") ? "checked" : ""}> ${t("panel.room.show_hum")}</label>
+        <label>${t("panel.room.extra")}</label>
         <textarea data-k="label_extra" spellcheck="false" style="min-height:60px" placeholder="sensor.co2_obyvak">${esc(extra.join("\n"))}</textarea>
         </fieldset>`, true)}
-      ${v != null ? `<div class="row2"><div><label>Roh ${v + 1}: X (m)</label><input data-k="vx" type="number" step="0.05" value="${r.points[v][0]}"></div><div><label>Z (m)</label><input data-k="vz" type="number" step="0.05" value="${r.points[v][1]}"></div></div>
-        <div class="actions"><button data-a="delv" ${r.points.length <= 3 ? "disabled" : ""}>Smazat roh ${v + 1}</button></div>` : `<p class="hint">Rohů: ${r.points.length}. Klepnutím na roh ho vybereš.</p>`}
-      <label>Další entity v panelu místnosti (každá na řádek; světla a spínače s přepínačem)</label>
+      ${v != null ? `<div class="row2"><div><label>${t("panel.room.corner", { n: v + 1 })}</label><input data-k="vx" type="number" step="0.05" value="${r.points[v][0]}"></div><div><label>Z (m)</label><input data-k="vz" type="number" step="0.05" value="${r.points[v][1]}"></div></div>
+        <div class="actions"><button data-a="delv" ${r.points.length <= 3 ? "disabled" : ""}>${t("panel.room.del_corner", { n: v + 1 })}</button></div>` : `<p class="hint">${t("panel.room.corners", { n: r.points.length })}</p>`}
+      <label>${t("panel.room.sheet_extra")}</label>
       <textarea data-k="sheet_extra" spellcheck="false" style="min-height:60px" placeholder="switch.zasuvka_pracovna">${esc((r.sheet_extra || []).join("\n"))}</textarea>
-      <label>Přidat na stěnu</label><select data-k="wall">${walls}</select>
-      <div class="actions"><button data-a="adddoor">+ Dveře</button><button data-a="addwin">+ Okno</button></div>
-      ${this._rulesUI(r, ["color", "glow", "hide"]).replace("Pravidla: barvy, skrytí", "Pravidla: podbarvení, skrytí badge")}
-      <div class="actions"><button data-a="delroom" class="del">Smazat místnost</button></div>`;
+      <label>${t("panel.room.add_wall")}</label><select data-k="wall">${walls}</select>
+      <div class="actions"><button data-a="adddoor">${t("panel.room.add_door")}</button><button data-a="addwin">${t("panel.room.add_win")}</button></div>
+      ${this._rulesUI(r, ["color", "glow", "hide"]).replace(t("panel.rule.head"), t("panel.rule.head_room"))}
+      <div class="actions"><button data-a="delroom" class="del">${t("panel.room.delete")}</button></div>`;
     this._bind(side, async (k, val, inp) => {
       if (await this._setShared([r], k, val, inp)) return;
       if (k === "wall") return (this._wall = Number(val));
@@ -2258,7 +2233,7 @@ Request (may be in Czech): ${ask}`;
       if (a.startsWith("ra:")) return this._ruleAction([r], a);
       if (a === "delv") { this._removeCorner(r, v); this._sel = { cat: "rooms", i: this._sel.i }; }
       else if (a === "delroom") {
-        if (!confirm(`Smazat místnost ${r.name} i s jejími okny a dveřmi?`)) return;
+        if (!confirm(t("panel.room.delete_confirm", { name: r.name }))) return;
         this._plan.openings = this._plan.openings.filter((o) => o.room_id !== r.id);
         delete this._plan.labels[r.id];
         this._plan.rooms.splice(this._sel.i, 1);
@@ -2281,20 +2256,20 @@ Request (may be in Czech): ${ask}`;
     const r = this._plan.rooms.find((x) => x.id === o.room_id), L = r ? edgeOf(r, o.edge).L : 0;
     const win = o.type === "window";
     const opt = (k, val, cur) => `<option value="${k}" ${k === cur ? "selected" : ""}>${val}</option>`;
-    side.innerHTML = `<h2>${win ? "Okno" : "Dveře"}</h2><p class="hint">${esc(r?.name || "")}, stěna ${o.edge + 1} (${L.toFixed(2).replace(".", ",")} m). Táhnutím ho posuneš po stěně, ⇄ přehodí panty, ⇅ směr otevírání.</p>
-      <label>Druh</label><select data-k="type">${opt("door", "Dveře", o.type)}${opt("window", "Okno", o.type)}</select>
-      ${win ? "" : `<label>Provedení</label><select data-k="style">${Object.entries(DOOR_STYLES).map(([k, val]) => opt(k, val, o.style || "interior")).join("")}</select>`}
-      <div class="row2"><div><label>Šířka (m)</label><input data-k="width" type="number" step="0.05" value="${o.width}"></div><div><label>Od začátku stěny (m)</label><input data-k="offset" type="number" step="0.05" value="${o.offset}"></div></div>
-      ${o.style === "passage" ? "" : `<div class="row2"><div><label>Panty (z místnosti)</label><select data-k="hinge">${opt("left", "Vlevo", o.hinge || "left")}${opt("right", "Vpravo", o.hinge)}</select></div>
-        <div><label>Otevírá se</label><select data-k="swing">${opt("in", "Dovnitř", o.swing || "in")}${opt("out", "Ven", o.swing)}</select></div></div>
-      <label>Kontakt (binary_sensor; ${win || o.style === "glass" ? "bez něj zůstane zavřené" : "dveře bez něj jsou pootevřené na 45°"})</label><input data-k="contact" value="${esc(o.contact || "")}" list="ents">
-      <label>Roleta (cover, nepovinné)</label><input data-k="blind" value="${esc(o.blind || "")}" list="ents">
-      ${o.blind ? `<div class="row2"><div><label>Roleta je</label><select data-k="blind_side">${opt("in", "Uvnitř", o.blind_side || "in")}${opt("out", "Venku", o.blind_side)}</select></div>
-        <div><label class="chk" style="margin-top:30px"><input type="checkbox" data-k="blind_invert" ${o.blind_invert ? "checked" : ""}> pozice obráceně</label></div></div>` : ""}
-      ${win ? "" : `<label>Zámek (lock, nepovinné; klepnutí na odznak otevře jeho detail)</label><input data-k="lock" value="${esc(o.lock || "")}" list="ents">`}
-      <label class="chk"><input type="checkbox" data-k="sheet_hide" ${o.sheet_hide ? "checked" : ""}> nezobrazovat v panelu místnosti</label>
-      ${this._actionsUI(o, { tap: o.blind ? "Detail rolety" : o.contact ? "Detail kontaktu" : "" })}`}
-      <div class="actions"><button data-a="del" class="del">Smazat</button></div>`;
+    side.innerHTML = `<h2>${win ? t("panel.window") : t("panel.door")}</h2><p class="hint">${t("panel.open.intro", { room: esc(r?.name || ""), n: o.edge + 1, len: L.toFixed(2).replace(".", ",") })}</p>
+      <label>${t("panel.f.kind")}</label><select data-k="type">${opt("door", t("panel.door"), o.type)}${opt("window", t("panel.window"), o.type)}</select>
+      ${win ? "" : `<label>${t("panel.open.style")}</label><select data-k="style">${Object.entries(DOOR_STYLES).map(([k, val]) => opt(k, val, o.style || "interior")).join("")}</select>`}
+      <div class="row2"><div><label>${t("panel.f.width")}</label><input data-k="width" type="number" step="0.05" value="${o.width}"></div><div><label>${t("panel.open.offset")}</label><input data-k="offset" type="number" step="0.05" value="${o.offset}"></div></div>
+      ${o.style === "passage" ? "" : `<div class="row2"><div><label>${t("panel.open.hinge")}</label><select data-k="hinge">${opt("left", t("panel.open.left"), o.hinge || "left")}${opt("right", t("panel.open.right"), o.hinge)}</select></div>
+        <div><label>${t("panel.open.swing")}</label><select data-k="swing">${opt("in", t("panel.open.in"), o.swing || "in")}${opt("out", t("panel.open.out"), o.swing)}</select></div></div>
+      <label>${t("panel.open.contact", { note: win || o.style === "glass" ? t("panel.open.contact_shut") : t("panel.open.contact_door") })}</label><input data-k="contact" value="${esc(o.contact || "")}" list="ents">
+      <label>${t("panel.open.blind")}</label><input data-k="blind" value="${esc(o.blind || "")}" list="ents">
+      ${o.blind ? `<div class="row2"><div><label>${t("panel.open.blind_is")}</label><select data-k="blind_side">${opt("in", t("panel.open.inside"), o.blind_side || "in")}${opt("out", t("panel.open.outside"), o.blind_side)}</select></div>
+        <div><label class="chk" style="margin-top:30px"><input type="checkbox" data-k="blind_invert" ${o.blind_invert ? "checked" : ""}> ${t("panel.open.blind_invert")}</label></div></div>` : ""}
+      ${win ? "" : `<label>${t("panel.open.lock")}</label><input data-k="lock" value="${esc(o.lock || "")}" list="ents">`}
+      <label class="chk"><input type="checkbox" data-k="sheet_hide" ${o.sheet_hide ? "checked" : ""}> ${t("panel.f.sheet_hide")}</label>
+      ${this._actionsUI(o, { tap: o.blind ? t("panel.f.act_blind_detail") : o.contact ? t("panel.f.act_contact_detail") : "" })}`}
+      <div class="actions"><button data-a="del" class="del">${t("panel.f.delete")}</button></div>`;
     this._bind(side, async (k, val, inp) => {
       if (await this._setShared([o], k, val, inp)) return;
       if (k === "sheet_hide") { if (val) o.sheet_hide = true; else delete o.sheet_hide; }
@@ -2515,11 +2490,11 @@ Request (may be in Czech): ${ask}`;
       this._plan.rev = res.rev;
       this._dirty = false;
       this._status();
-      this.shadowRoot.querySelector(".state").textContent = "Uloženo";
+      this.shadowRoot.querySelector(".state").textContent = t("panel.saved");
     } catch (err) {
       btn.disabled = false;
-      if (err.code === "conflict") alert("Plán mezitím změnil někdo jiný. Načti ho znovu (Zahodit) a změny zopakuj.");
-      else alert(`Uložení selhalo: ${err.message || err.code || err}`);
+      if (err.code === "conflict") alert(t("panel.conflict"));
+      else alert(t("panel.save_failed", { err: err.message || err.code || err }));
     }
   }
 }
