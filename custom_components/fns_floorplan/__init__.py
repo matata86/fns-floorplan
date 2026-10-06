@@ -72,8 +72,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         add_extra_js_url(hass, f"{CARD_URL}?v={version}")
     except RuntimeError:  # already registered after a reload of the entry
         pass
-    # the editor is always reachable from the integration's Configure button (config_panel_domain)
-    # and from the card editor; the sidebar entry is optional
+    # the integration's Configure button opens the options (sidebar on / off); the editor itself is
+    # always reachable at /fns-floorplan, from the options form and from the card editor
     frontend.async_register_built_in_panel(
         hass,
         component_name="custom",
@@ -83,7 +83,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         config={"_panel_custom": {"name": "fns-floorplan-panel", "module_url": f"{PANEL_URL}?v={version}",
                                   "embed_iframe": False, "trust_external": False}},
         require_admin=True,
-        config_panel_domain=DOMAIN,
         show_in_sidebar=entry.options.get(CONF_SIDEBAR, True),
         update=True,
     )

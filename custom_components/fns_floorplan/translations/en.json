@@ -14,7 +14,7 @@
     "step": {
       "init": {
         "title": "FNS Floorplan",
-        "description": "The floor plan editor always opens from the integration's Configure button, from the card editor or at [{url}]({url}).",
+        "description": "The floor plan editor always opens at [{url}]({url}) or from the card editor, even when it is not in the sidebar.",
         "data": {
           "sidebar": "Show the Půdorys editor in the sidebar"
         }

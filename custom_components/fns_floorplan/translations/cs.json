@@ -14,7 +14,7 @@
     "step": {
       "init": {
         "title": "FNS Floorplan",
-        "description": "Editor půdorysu otevřeš vždy tlačítkem Konfigurovat na stránce integrace, z editoru karty nebo přímo na [{url}]({url}).",
+        "description": "Editor půdorysu otevřeš vždy na [{url}]({url}) nebo z editoru karty, i když není v postranním panelu.",
         "data": {
           "sidebar": "Zobrazit editor Půdorys v postranním panelu"
         }
