@@ -1,0 +1,25 @@
+:root {
+  /* Home Assistant default theme colours the card reads */
+  --primary-color: #03a9f4; --accent-color: #ff9800; --primary-text-color: #212121; --secondary-text-color: #727272; --text-primary-color: #fff;
+  --card-background-color: #fff; --divider-color: rgba(0,0,0,.12); --disabled-text-color: #bdbdbd;
+  --red-color: #f44336; --pink-color: #e91e63; --purple-color: #926bc7; --deep-purple-color: #6e41ab; --indigo-color: #3f51b5; --blue-color: #2196f3;
+  --light-blue-color: #03a9f4; --cyan-color: #00bcd4; --teal-color: #009688; --green-color: #4caf50; --light-green-color: #8bc34a; --lime-color: #cddc39;
+  --yellow-color: #ffeb3b; --amber-color: #ffc107; --orange-color: #ff9800; --deep-orange-color: #ff6f22; --brown-color: #795548; --light-grey-color: #bdbdbd;
+  --grey-color: #9e9e9e; --dark-grey-color: #606060; --blue-grey-color: #607d8b; --black-color: #000; --white-color: #fff;
+  --state-icon-color: #44739e; --state-active-color: var(--amber-color); --state-inactive-color: var(--grey-color); --state-unavailable-color: #bdbdbd;
+  --state-alarm_control_panel-armed_away-color: var(--green-color); --state-alarm_control_panel-armed_home-color: var(--green-color);
+  --state-alarm_control_panel-arming-color: var(--orange-color); --state-alarm_control_panel-pending-color: var(--orange-color);
+  --state-alarm_control_panel-triggered-color: var(--red-color); --state-alarm_control_panel-disarmed-color: var(--indigo-color);
+  --state-binary_sensor-active-color: var(--amber-color); --state-camera-active-color: var(--blue-color); --state-climate-heat-color: var(--deep-orange-color);
+  --state-climate-cool-color: var(--blue-color); --state-cover-active-color: var(--purple-color); --state-fan-active-color: var(--cyan-color);
+  --state-humidifier-on-color: var(--blue-color); --state-lawn_mower-active-color: var(--green-color); --state-light-active-color: var(--amber-color);
+  --state-lock-jammed-color: var(--red-color); --state-lock-locked-color: var(--green-color); --state-lock-unlocked-color: var(--red-color);
+  --state-media_player-active-color: var(--light-blue-color); --state-person-home-color: var(--green-color); --state-person-not_home-color: var(--grey-color);
+  --state-device_tracker-home-color: var(--green-color); --state-siren-active-color: var(--red-color); --state-sun-above_horizon-color: var(--amber-color);
+  --state-sun-below_horizon-color: var(--indigo-color); --state-switch-active-color: var(--amber-color); --state-timer-active-color: var(--amber-color);
+  --state-vacuum-active-color: var(--teal-color); --state-vacuum-docked-color: var(--green-color); --state-valve-active-color: var(--blue-color); --state-water_heater-active-color: var(--orange-color);
+  --state-input_boolean-active-color: var(--amber-color); --state-script-active-color: var(--amber-color); --state-automation-active-color: var(--amber-color);
+}
+:root[data-theme="dark"] {
+  --primary-text-color: #e1e1e1; --secondary-text-color: #9b9b9b; --card-background-color: #1c1c1c; --divider-color: rgba(225,225,225,.12); color-scheme: dark;
+}

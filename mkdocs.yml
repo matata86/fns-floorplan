@@ -1,0 +1,101 @@
+site_name: FNS Floorplan
+site_url: https://matata86.github.io/fns-floorplan/
+site_description: An animated 2D floor plan card and editor for Home Assistant
+repo_url: https://github.com/matata86/fns-floorplan
+repo_name: matata86/fns-floorplan
+edit_uri: edit/master/docs/
+exclude_docs: |
+  assets/screenshots/README.md
+copyright: Copyright &copy; 2026 matata86, MIT license
+
+theme:
+  name: material
+  logo: assets/logo.svg
+  favicon: assets/logo.svg
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: amber
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: amber
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - navigation.footer
+    - search.suggest
+    - search.highlight
+    - toc.follow
+    - content.code.copy
+    - content.tabs.link
+
+plugins:
+  - search
+  - i18n:
+      docs_structure: folder
+      reconfigure_material: true
+      languages:
+        - locale: en
+          default: true
+          name: English
+          build: true
+        - locale: cs
+          name: Čeština
+          build: true
+        - locale: de
+          name: Deutsch
+          build: true
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.highlight
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.snippets
+
+extra_css:
+  - assets/extra.css
+
+nav:
+  - Home: index.md
+  - Getting started:
+      - Installation: installation.md
+      - Quick start: quick-start.md
+  - Editor:
+      - Overview: editor/index.md
+      - Rooms: editor/rooms.md
+      - Doors and windows: editor/openings.md
+      - Items: editor/items.md
+      - Rules: editor/rules.md
+  - Features:
+      - Card: card.md
+      - Room panel: room-panel.md
+      - Robot vacuum: robot-vacuum.md
+      - History and check: history.md
+  - Reference:
+      - Plan format: reference/plan-format.md
+      - Websocket API: reference/websocket-api.md
+  - FAQ: faq.md
+  - Changelog: changelog.md
+  - Live demo: https://matata86.github.io/fns-floorplan/demo/

@@ -1,0 +1,16 @@
+.md-typeset img {
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.18);
+}
+.md-typeset img[src$=".svg"][alt*="logo"] {
+  box-shadow: none;
+}
+.md-typeset figure {
+  margin: 1.2em 0;
+}
+.md-typeset figcaption {
+  font-size: 0.8rem;
+  opacity: 0.75;
+  text-align: center;
+  margin-top: 0.4em;
+}

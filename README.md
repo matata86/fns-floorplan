@@ -1,80 +1,129 @@
+<p align="center"><img src="docs/assets/logo.svg" alt="FNS Floorplan logo" width="96"></p>
+
 # FNS Floorplan
 
-An animated 2D floor plan card for Home Assistant that shows the live state of the home: lights glowing in their colour, doors and windows swinging open, motion ripples, water leaks, a robot vacuum driving through the room it reports, appliances with animated icons (fan, air purifier, dishwasher, dryer, boiler, radiator, aquarium, fireplace), an alarm panel that tints the whole flat when triggered, media players with the playing title, cameras, free text items and room climate.
+[![HACS Custom](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://hacs.xyz)
+[![GitHub release](https://img.shields.io/github/v/release/matata86/fns-floorplan)](https://github.com/matata86/fns-floorplan/releases)
+[![License: MIT](https://img.shields.io/github/license/matata86/fns-floorplan)](LICENSE)
+[![Home Assistant](https://img.shields.io/badge/Home%20Assistant-2025.1%2B-blue.svg)](https://www.home-assistant.io)
+
+An animated 2D floor plan for Home Assistant that shows the live state of your home: lights glowing in their colour, doors and windows swinging open, motion ripples, water leaks, a robot vacuum driving through the room it reports, appliances with animated icons, an alarm that tints the whole flat when triggered, media players with the playing title, cameras, free text items and room climate. You draw the plan in a built-in editor, no YAML needed.
+
+> Inspired by [NeonPlan 3D](https://github.com/Mastershort/neonplan3d), a 3D floor plan card for Home Assistant. FNS Floorplan takes the idea to an animated 2D plan with its own editor, and a NeonPlan 3D building can be imported (see [Quick start](https://matata86.github.io/fns-floorplan/quick-start/#coming-from-neonplan-3d)).
+
+![An animated floor plan with lights, doors and a robot vacuum](docs/assets/screenshots/en/card-overview.png)
+
+**[Live demo](https://matata86.github.io/fns-floorplan/demo/)** (the real card with fake states, no Home Assistant needed)
+
+**Documentation:** [English](https://matata86.github.io/fns-floorplan/) | [Česky](https://matata86.github.io/fns-floorplan/cs/) | [Deutsch](https://matata86.github.io/fns-floorplan/de/)
+
+## Features
+
+**Card**
+- Lights follow their colour or colour temperature, brightness scales the glow; LED strips glow in the real colour of the light.
+- Doors and windows with a contact sensor swing open and pulse for a few seconds after opening; blinds and locks are drawn at the opening.
+- Motion, occupancy and presence sensors send out ripples, moisture sensors pulse a water leak chip.
+- Appliances with animated icons: fan, air purifier, dishwasher, dryer, boiler, radiator, aquarium, fireplace, fridge, camera, lock, alarm, media player, and "other device" that behaves by the domain of its entity.
+- Several floors with floor tabs, day / night look (by the sun or by the Home Assistant theme), automatic rotation on narrow screens.
+- Temperature and humidity overlays tint the rooms; a day replay bar replays the last 24 hours from the Home Assistant history.
+
+**Room panel**
+- Tap a room: an off-canvas panel slides in and looks like an area dashboard with a thermostat, lights with brightness, cameras, windows and doors, switches, devices, sensors and other entities of that room.
+
+**Editor** (sidebar panel "Floor plan")
+- Draw rooms by dragging corners and whole walls, with snapping to neighbours, shared walls, wall length labels and 15 degree angle snap.
+- Add, slide and configure doors and windows; drag them to another room's wall.
+- Place lights, LED strips, appliances, sensors, text items and over 30 furniture types; resize and rotate with handles.
+- Multi-select, copy / cut / paste, groups, layers, undo / redo, snap guides, tracing image under each floor.
+- Edit anything as a form or as YAML; native Home Assistant fields and pickers.
+
+**Rules**
+- Conditional colours, glow, icons, text, hiding, ring animations and countdowns on any item, by entity states or by Jinja templates.
+- Optional AI Task assistant that drafts rules from a sentence.
+
+**Robot vacuum**
+- The dock item drives through the room reported by the vacuum, through doors, tours the whole floor when the room is unknown, shows the battery as a ring.
+
+**History and checks**
+- The last 20 saved plans can be restored; a check lists missing and unavailable entities.
 
 ## Installation
-1. Add this repository to HACS as a custom repository (category *Integration*) and install **FNS Floorplan**.
+
+1. In HACS open the three-dot menu, **Custom repositories**, add `https://github.com/matata86/fns-floorplan` with category **Integration**, then install **FNS Floorplan**.
 2. Restart Home Assistant.
-3. Settings → Devices & services → Add integration → **FNS Floorplan**.
-4. Save a plan (see below) and add the card:
+3. **Settings, Devices & services, Add integration, FNS Floorplan.**
+4. Optional: click **Configure** on the integration to show or hide the editor in the sidebar. The editor is always reachable at `/fns-floorplan`.
+
+Requires Home Assistant 2025.1.0 or newer. Manual installation: copy `custom_components/fns_floorplan` into your `config/custom_components` folder. Details: [Installation](https://matata86.github.io/fns-floorplan/installation/).
+
+## Quick start
+
+1. Open **Floor plan** in the sidebar (admins only).
+2. Switch to **Rooms**, add a room and drag its corners to the shape you need; add doors and windows.
+3. Switch back to the items mode, **Add** lights, appliances, sensors and furniture, assign an entity to each.
+4. **Save**.
+5. Add the card to a dashboard:
 
 ```yaml
 type: custom:fns-floorplan-card
-mode: auto         # auto (follows sun.sun) | day | night
-rotate: auto       # auto | true | false — narrow cards turn a wide plan by 90°
+mode: auto
+rotate: auto
 ```
 
-## Editing
-The integration adds a **Půdorys** (floor plan) panel to the sidebar for admins. Drag lights, LED strips, appliances, sensors, text items, furniture and room labels; select one to set its entity, icon, size, stacking order, tap / double tap / hold actions and rules (a form, or YAML); resize and rotate furniture with handles; add, duplicate or delete items and save. Fixtures of one light in one room are edited as one item. In the **Místnosti** (rooms) mode drag room corners (they snap to neighbouring corners), add or remove corners, move whole rooms, and add, slide and configure windows and doors (flip the hinge side and the swing direction right on the plan).
+Step by step: [Quick start](https://matata86.github.io/fns-floorplan/quick-start/).
 
-Ctrl+click selects several items to drag, nudge, copy (Ctrl+C / Ctrl+V) or delete together; **Seskupit** stores a `group` so the items are always picked together. The editor keeps the last 20 saved plans (**Historie**), lists missing or unavailable entities (**Kontrola**), shows snap guides while dragging (Alt turns them off), moves a corner shared by neighbouring rooms with both rooms, and can show a tracing image under each floor. The editor opens from the sidebar (optional, see the integration's options) or from the integration's **Configure** button.
+## Card options
 
-The editor exchanges YAML with Home Assistant over `fns_floorplan/yaml/parse` and `fns_floorplan/yaml/dump`.
+| Option | Values | Default | Description |
+|--------|--------|---------|-------------|
+| `mode` | `auto`, `ha`, `day`, `night` | `auto` | `auto` follows `sun.sun`, `ha` follows the Home Assistant light / dark theme |
+| `rotate` | `auto`, `true`, `false` | `auto` | `auto` turns a wide plan by 90 degrees on a narrow card (under 600 px) |
+| `level` | floor id | first floor | Default floor of a plan with more floors |
+| `tools` | `true`, `false` | `true` | `false` hides the temperature / humidity / replay buttons |
+
+More: [Card](https://matata86.github.io/fns-floorplan/card/).
 
 ## The plan
-The plan lives in the integration's storage and is saved over the websocket API:
 
-```json
-{"type": "fns_floorplan/plan/save", "plan": { ... }, "rev": 3}
-```
-
-With `rev` the save only succeeds when it matches the stored revision (otherwise error `conflict`); every save increments it.
-
-Coordinates are metres, `x` to the right and `z` down.
+The plan lives in the integration's storage (`.storage/fns_floorplan`) and is edited in the panel. Coordinates are metres, `x` to the right and `z` down.
 
 | Key | Content |
 |-----|---------|
-| `rooms` | `id`, `name`, `points`, `temperature`, `humidity`, `sheet_extra` (more entities for the room panel); label options `label_info` (list of `temperature`, `humidity`, entity ids or templates), `label_name: false`, `label_hidden: true`, `label_rotation` |
-| `openings` | `id`, `room_id`, `edge`, `offset`, `width`, `type` (door/window), `style` (`passage` = opening only), `hinge` (left/right), `swing` (in/out), `contact`, `blind` (a `cover` entity drawn as a bar along the window, as long as the blind is closed; `blind_side: out` puts it outside the wall, `blind_invert` for blinds that report 100 as closed), `lock` (a lock entity shown at the door) |
-| `furniture` | `id`, `type`, `x`, `z`, `rotation`, `w`, `d`; lights (`lamp_*`, `led_strip`) carry `entity` and optional `room_light` (share of the room glow, 1 = 100 %); `lamp_spot` shines a cone towards `rotation` (0 = right, 90 = down) `beam` degrees wide (default 40); `tv_wall` with a media player; `robot_vacuum` marks the dock |
-| `sensors` | binary sensors with `entity`, `x`, `z` — motion/occupancy/presence ripple, moisture pulses red |
-| `vacuum` | `entity`, `room_sensor` (a sensor whose state is the room name) |
-| `devices` | `kind`, `name`, `entity`, `x`, `z`, `active` (list of states or `{"above": n}`), `text` (always), `text_on` (while running; both may be templates such as `{{ states('sensor.x') }}`), `color` / `color_on` (idle / running; without them the entity's state colour from the Home Assistant theme) |
-| `texts` | `entity` or `text` (plain or a `{{ }}` template), `x`, `z`, `rotation`, `size`, `color`, `background` (`none` for no background) |
-| `rules` | on every item: conditional colours, hiding and icons, see below |
+| `rooms` | `id`, `name`, `points`, `temperature`, `humidity`, `sheet_extra` (more entities for the room panel); label options `label_info`, `label_name: false`, `label_hidden: true`, `label_rotation` |
+| `openings` | `id`, `room_id`, `edge`, `offset`, `width`, `type` (door / window), `style` (`passage` = opening only), `hinge`, `swing`, `contact`, `blind`, `blind_side`, `blind_invert`, `lock` |
+| `furniture` | `id`, `type`, `x`, `z`, `rotation`, `w`, `d`; lights (`lamp_*`, `led_strip`) carry `entity` and optional `room_light`; `lamp_spot` has `beam`; `tv_wall` with a media player; `robot_vacuum` marks the dock |
+| `sensors` | binary sensors with `entity`, `x`, `z` |
+| `devices` | `kind`, `name`, `entity`, `x`, `z`, `active`, `text`, `text_on`, `color`, `color_on` |
+| `texts` | `entity` or `text` (plain or a `{{ }}` template), `x`, `z`, `rotation`, `size`, `color`, `background` |
+| `rules` | on every item: conditional colours, hiding, icons, ring animations |
 | `labels` | `{room_id: [x, z]}` to place a room label by hand |
 | `outdoor` | room id whose temperature shows as the outside temperature |
-| `levels` | floors `[{id, name}]`; rooms and items carry `level` (none = the first floor), openings follow their room |
+| `levels` | floors `[{id, name}]`; rooms and items carry `level` (none = the first floor) |
 
-Device kinds: `fan`, `purifier`, `dishwasher`, `dryer`, `boiler`, `radiator` (heat waves rise while it animates), `alarm` (shield by state; the flat pulses red when triggered and orange while arming), `media` (TV, speaker or Kodi icon, sound waves and the title while playing, the cover art inside the badge while playing or paused; `cover: false` turns it off), `aquarium`, `camera`, `fridge`, `fireplace`, `generic` (the entity's own icon).
+Optional on any item: `icon` (any `mdi:` icon or `none`), `size` (`xs`, `s`, `m`, `l`, `xl`, `xxl`), `layer`, `sheet_hide`, and `tap_action`, `double_tap_action`, `hold_action` in Home Assistant's action format.
 
-Optional on any item: `icon` (any `mdi:` icon), `size` (`xs`, `s`, `m`, `l`, `xl`, `xxl`), `layer` (stacking order within its kind), `sheet_hide` (leave it out of the room panel), and `tap_action`, `double_tap_action`, `hold_action` in Home Assistant's format (`toggle`, `more-info`, `perform-action` with `perform_action` and `data`, `navigate`, `url`, `none`). Doors and windows take actions too (default: the contact's details). Doors without a contact are drawn ajar at 45°.
+Full reference with types and defaults: [Plan format](https://matata86.github.io/fns-floorplan/reference/plan-format/).
 
-### Rules
-`rules` is an ordered list of `{if: [conditions], color, glow, animate, wave, text, tint, opacity, hide, icon, background}`. For each field the first rule whose conditions all hold and which sets that field wins; a rule without `if` is the default.
+## Websocket API
 
-A condition is `{entity, attribute?, state | state_not | above | below}` (`state` may be a list), `{template: "{{ … }}"}` (a Jinja template rendered live by Home Assistant), or `{any: [conditions]}` for OR. A `text` containing `{{ }}` is a template as well. Colours: `red`, `orange`, `yellow`, `green`, `blue`, `purple`, `pink`, `white`, `black` or any CSS colour.
+All commands are Home Assistant websocket commands of the integration.
 
-```json
-{"kind": "radiator", "entity": "climate.living_room", "x": 9.3, "z": 2.1, "rules": [
-  {"if": [{"entity": "switch.boost_living_room", "state": "on"}], "color": "yellow"},
-  {"if": [{"any": [{"entity": "binary_sensor.window", "state": "on"}, {"entity": "binary_sensor.door", "state": "on"}]}], "color": "blue"},
-  {"if": [{"entity": "switch.valve_living_room", "state": "on"}], "color": "orange", "animate": true, "wave": "red"},
-  {"animate": false}
-]}
-```
+| Command | Admin | Purpose |
+|---------|-------|---------|
+| `fns_floorplan/plan/get` | no | Returns the stored plan (`{}` before the first save) |
+| `fns_floorplan/plan/save` `{plan, rev?}` | yes | Replaces the whole plan, returns `{ok, rev}` |
+| `fns_floorplan/plan/subscribe` | no | Sends the plan now and after every save |
+| `fns_floorplan/history/list` | yes | Lists the last 20 saved revisions |
+| `fns_floorplan/history/get` `{rev}` | yes | Returns one stored revision |
+| `fns_floorplan/yaml/parse` `{text}` | yes | YAML to data |
+| `fns_floorplan/yaml/dump` `{data}` | yes | Data to YAML |
 
-On a device `color` tints the icon, `animate` overrides `active`, `wave` colours the radiator's waves and `text` replaces the text under the icon. On a room `tint` shades the floor (`opacity`, default 0.14). On furniture `color` tints the outline. `glow` adds a glow everywhere, `hide` hides the item (a room's label), `icon` swaps its icon.
+With `rev`, a save only succeeds when it matches the stored revision, otherwise the error `conflict` is returned; every save increments `rev`. Details and examples: [Websocket API](https://matata86.github.io/fns-floorplan/reference/websocket-api/).
 
-`tools/import_neonplan.py` converts a [NeonPlan 3D](https://github.com/Mastershort/neonplan3d) building into this format.
+## Support
 
-## Interaction
-- Lights follow their colour temperature or colour; brightness scales the glow.
-- Doors and windows with a contact swing open; they pulse for a few seconds after opening.
-- Tap a light to toggle it, hold it for its details (unless other actions are set).
-- Tap an appliance, the vacuum, a door or a window for its details.
-- LED strips glow in the light's real colour.
-- Tap a room for a panel with its lights, windows, doors and appliances.
-- With more floors the card shows floor tabs; the card option `level` picks the default floor.
-- Card tools (top right): tint rooms by temperature or humidity, and ⏱ replay of the last 24 hours from the Home Assistant history. Card option `tools: false` hides them.
-- Card option `mode`: `auto` (by the sun), `day`, `night` or `ha` (follows the Home Assistant light/dark theme).
+Questions, bugs and feature requests: [GitHub issues](https://github.com/matata86/fns-floorplan/issues). The [FAQ](https://matata86.github.io/fns-floorplan/faq/) covers the common problems.
+
+## License
+
+[MIT](LICENSE)

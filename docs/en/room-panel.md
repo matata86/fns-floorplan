@@ -1,0 +1,42 @@
+# Room panel
+
+Tap a room on the card and an **off-canvas panel** slides in from the right edge of the screen. It looks like an area dashboard of Home Assistant: the theme background, a header with the room icon, name, temperature and humidity, and tiles in two columns. Close it with the cross, ++esc++ or a click outside.
+
+![The room panel with a thermostat, lights and a camera](../assets/screenshots/en/room-panel.png){ loading=lazy }
+
+## Sections
+
+The panel is built from Home Assistant's own tile cards, so it looks like the rest of your dashboards. A tile click opens the details, the icon toggles things that can be toggled.
+
+| Section | What goes there |
+|---------|-----------------|
+| **Thermostat** | `climate` entities: target temperature minus and plus (sent after 0.7 s), current temperature, state, HVAC modes |
+| **Lights** | Lights placed in the room, with brightness inline next to the name |
+| **Cameras** | Live camera pictures |
+| **Windows & doors** | Openings of the room with a contact |
+| **Switches** | `switch` and `input_boolean` |
+| **Devices** | Appliances (a lock gets lock commands, a vacuum gets vacuum commands) |
+| **Sensors** | Sensors of the room |
+| **Other** | Everything else |
+
+Only items that are **placed in the room** and the entities in `sheet_extra` are shown. Home Assistant areas are not added automatically. The robot vacuum appears in the room with its dock.
+
+## Choosing what shows
+
+- `sheet_extra`: a list of extra entities of a room (a field in the room's form). `light`, `switch`, `fan`, `input_boolean`, `humidifier` and `siren` get a switch, other entities a row with the state.
+- `sheet_hide: true` on any item (light, appliance, window, door, lock, robot) leaves it out.
+- The room `icon` appears in the header.
+
+```yaml
+rooms:
+  - id: living_room
+    name: Living room
+    icon: mdi:sofa
+    temperature: sensor.living_room_temperature
+    sheet_extra:
+      - climate.living_room
+      - camera.living_room
+      - switch.tv_plug
+```
+
+Back to [Card](card.md).
