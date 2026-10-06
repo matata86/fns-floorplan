@@ -4,102 +4,172 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>FNS Floorplan live demo</title>
+<link rel="icon" href="data:,">
 <style>
 __HA_THEME__
-:root { --bg: #f4f5f9; --fg: #1d2033; --muted: #61667f; --line: #dde0ea; --accent: #4f46e5; --surface: #fff; }
-:root[data-theme="dark"] { --bg: #12141d; --fg: #e6e8f2; --muted: #9aa0b8; --line: #2c3042; --accent: #8c9eff; --surface: #1b1e2a; }
 * { box-sizing: border-box; }
-body { margin: 0; background: var(--bg); color: var(--fg); font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
-.wrap { max-width: 980px; margin: 0 auto; padding: 16px; }
-header { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-bottom: 12px; }
-header h1 { font-size: 20px; margin: 0; flex: 1 1 auto; }
-header a { color: var(--accent); }
-.bar { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
-button, .seg a { font: 500 14px system-ui, sans-serif; color: var(--fg); background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 7px 12px; cursor: pointer; text-decoration: none; }
-button[aria-pressed="true"] { background: var(--accent); color: #fff; border-color: var(--accent); }
-button:focus-visible, .seg a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.seg { display: inline-flex; }
-.seg a { border-radius: 0; margin-left: -1px; }
-.seg a:first-child { border-radius: 8px 0 0 8px; margin-left: 0; }
-.seg a:last-child { border-radius: 0 8px 8px 0; }
-.seg a[aria-current="true"] { background: var(--accent); color: #fff; border-color: var(--accent); }
-.card { background: var(--card-background-color); border: 1px solid var(--line); border-radius: 12px; padding: 4px; }
-.hint { color: var(--muted); font-size: 13px; margin-top: 12px; }
+html, body { margin: 0; }
+body { background: var(--primary-background-color); color: var(--primary-text-color); font: 14px/1.4 var(--ha-font-family-body); min-height: 100vh; -webkit-font-smoothing: antialiased; }
+button { font: inherit; color: inherit; }
+button:focus-visible, a:focus-visible { outline: 2px solid var(--primary-color); outline-offset: 2px; }
+
+/* top app bar as in Home Assistant */
+.appbar { position: sticky; top: 0; z-index: 5; height: 56px; display: flex; align-items: center; gap: 4px; padding: 0 8px 0 4px;
+  background: var(--app-header-background-color); border-bottom: var(--app-header-border-bottom); }
+.appbar h1 { flex: 1; margin: 0 0 0 4px; font-size: 20px; font-weight: 400; letter-spacing: .01em; }
+.ibtn { width: 40px; height: 40px; border: 0; background: none; border-radius: 50%; display: grid; place-items: center; cursor: pointer; color: var(--primary-text-color); --mdc-icon-size: 24px; }
+.ibtn:hover { background: color-mix(in srgb, var(--primary-text-color) 8%, transparent); }
+span.ibtn { cursor: default; color: var(--secondary-text-color); }
+span.ibtn:hover { background: none; }
+.langs { display: flex; margin: 0 4px; border: 1px solid var(--divider-color); border-radius: 18px; padding: 2px; }
+.langs a { padding: 5px 10px; border-radius: 16px; color: var(--secondary-text-color); text-decoration: none; font-size: 12px; font-weight: 500; }
+.langs a[aria-current="true"] { background: var(--primary-color); color: var(--text-primary-color); }
+
+/* dashboard view */
+.view { display: grid; grid-template-columns: min(900px, calc((100vh - 168px) * 0.98)) 300px; gap: 16px; justify-content: center; align-items: start; padding: 16px 16px 8px; }
+.hacard { background: var(--card-background-color); border: var(--ha-card-border-width) solid var(--ha-card-border-color); border-radius: var(--ha-card-border-radius); box-shadow: var(--ha-card-box-shadow, none); overflow: hidden; }
+#card fns-floorplan-card { display: block; }
+.panel { padding: 14px 16px 16px; }
+.panel h2 { margin: 0 0 2px; font-size: 16px; font-weight: 500; }
+.panel p { margin: 0 0 12px; color: var(--secondary-text-color); font-size: 12px; }
+.chips { display: grid; grid-template-columns: 1fr; gap: 6px; }
+.chip { display: flex; align-items: center; gap: 10px; padding: 5px 10px; background: var(--card-background-color); border: 1px solid var(--divider-color); border-radius: 12px; cursor: pointer; text-align: left; min-width: 0; }
+.chip:hover { background: color-mix(in srgb, var(--primary-text-color) 4%, var(--card-background-color)); }
+.chip .ic { --c: var(--state-inactive-color); width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; flex: none; background: color-mix(in srgb, var(--c) 20%, transparent); color: var(--c); transition: background .3s, color .3s; }
+.chip[aria-pressed="true"] .ic { --c: var(--on); }
+.chip .tx { display: flex; flex-direction: column; min-width: 0; }
+.chip .n { font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.chip .s { font-size: 12px; color: var(--secondary-text-color); }
+.foot { grid-column: 1 / -1; text-align: center; color: var(--secondary-text-color); font-size: 12px; padding: 0 8px 12px; }
+.foot a { color: var(--primary-color); }
+@media (max-width: 960px) {
+  .view { grid-template-columns: minmax(0, 1fr); max-width: 900px; margin: 0 auto; padding: 8px 8px 8px; gap: 8px; }
+  .chips { grid-template-columns: 1fr 1fr; }
+  .panel { padding: 12px; }
+}
+@media (max-width: 400px) { .chips { grid-template-columns: 1fr; } .appbar h1 { font-size: 18px; } .langs a { padding: 5px 8px; } }
 </style>
 </head>
 <body>
-<div class="wrap">
-  <header>
-    <h1>FNS Floorplan live demo</h1>
-    <nav class="seg" id="langs" aria-label="Language"><a href="?lang=en">EN</a><a href="?lang=cs">CS</a><a href="?lang=de">DE</a></nav>
-    <button id="theme" type="button" aria-pressed="false">Night</button>
-  </header>
-  <div class="bar" id="actions"></div>
-  <div class="card" id="card"></div>
-  <p class="hint">The real card with an invented flat and fake states. Use the buttons to change states and watch the animations. <a href="https://github.com/matata86/fns-floorplan">GitHub</a></p>
-</div>
+<header class="appbar">
+  <span class="ibtn" aria-hidden="true"><ha-icon icon="mdi:menu"></ha-icon></span>
+  <h1 id="title">Home</h1>
+  <nav class="langs" id="langs" aria-label="Language"><a href="?lang=en">EN</a><a href="?lang=cs">CS</a><a href="?lang=de">DE</a></nav>
+  <button class="ibtn" id="theme" type="button" aria-label="Theme"><ha-icon icon="mdi:weather-night"></ha-icon></button>
+  <span class="ibtn" aria-hidden="true"><ha-icon icon="mdi:magnify"></ha-icon></span>
+  <span class="ibtn" aria-hidden="true"><ha-icon icon="mdi:dots-vertical"></ha-icon></span>
+</header>
+<main class="view">
+  <div class="hacard" id="card"></div>
+  <section class="hacard panel" aria-labelledby="ptitle">
+    <h2 id="ptitle"></h2>
+    <p id="phint"></p>
+    <div class="chips" id="actions"></div>
+  </section>
+  <div class="foot" id="foot"></div>
+</main>
 
 <script>window.FP_ICONS = __ICONS__;</script>
 <script type="module">
-// icons the card asks Home Assistant for: mdi:thermometer mdi:water-percent mdi:history mdi:close mdi:floor-plan mdi:door-closed mdi:door-open mdi:window-closed-variant mdi:window-open-variant
+// icons asked for through <ha-icon>/the plan: mdi:thermometer mdi:water-percent mdi:history mdi:close mdi:floor-plan mdi:door-closed mdi:door-open mdi:window-closed-variant mdi:window-open-variant
 const LANGS = ["en", "cs", "de"];
-const q = new URLSearchParams(location.search).get("lang");
-const lang = LANGS.includes(q) ? q : (LANGS.find((l) => (navigator.language || "").startsWith(l)) || "en");
+const params = new URLSearchParams(location.search);
+const lang = LANGS.includes(params.get("lang")) ? params.get("lang") : (LANGS.find((l) => (navigator.language || "").startsWith(l)) || "en");
 document.documentElement.lang = lang; // before the card module is imported
-for (const a of document.querySelectorAll("#langs a")) {
-  if (a.getAttribute("href") === "?lang=" + lang) a.setAttribute("aria-current", "true");
-}
 
-// fake ha-icon / ha-state-icon: the card reads the icon path from their shadow root
+const TEXT = {
+  en: {
+    home: "Home", controls: "Demo controls", hint: "Tap a chip, or a room and a light in the plan.",
+    foot: "This is a demo with fake data. Install: HACS → Custom repositories → matata86/fns-floorplan", docs: "Documentation",
+    c: { lights: "Lights", door: "Front door", window: "Window", blind: "Blind", vacuum: "Vacuum", washer: "Washing machine", dishwasher: "Dishwasher", motion: "Motion", alarm: "Alarm", daynight: "Day / Night" },
+    w: { on: "On", off: "Off", open: "Open", closed: "Closed", detected: "Detected", clear: "Clear", running: "Running", heating: "Heating", cleaning: "Cleaning", docked: "Docked", returning: "Returning", paused: "Paused", armed_home: "Armed home", triggered: "Triggered", playing: "Playing", idle: "Idle", locked: "Locked", unlocked: "Unlocked", min: "min", day: "Day", night: "Night" },
+    out: "°C outside",
+    n: { "Flat": "Flat", "Living room": "Living room", "Kitchen": "Kitchen", "Hall": "Hall", "Bathroom": "Bathroom", "Bedroom": "Bedroom", "Radiator": "Radiator", "Dishwasher": "Dishwasher", "Washing machine": "Washing machine", "Alarm": "Alarm", "Camera": "Camera", "Fireplace": "Fireplace" },
+    e: ["Ceiling light", "LED strip", "Spotlight", "Kitchen light", "Hall light", "Bathroom light", "Bedside lamp", "Front door", "Bathroom door", "Living room window", "Bedroom window", "Blind", "Front door lock", "Motion", "Washing machine", "Dishwasher", "Thermostat", "Alarm", "Hall camera", "Fireplace", "TV", "Robot vacuum"],
+  },
+  cs: {
+    home: "Domov", controls: "Ovládání dema", hint: "Klepněte na dlaždici, nebo na místnost či světlo v plánu.",
+    foot: "Toto je demo s vymyšlenými daty. Instalace: HACS → Vlastní repozitáře → matata86/fns-floorplan", docs: "Dokumentace",
+    c: { lights: "Světla", door: "Vchodové dveře", window: "Okno", blind: "Roleta", vacuum: "Vysavač", washer: "Pračka", dishwasher: "Myčka", motion: "Pohyb", alarm: "Alarm", daynight: "Den / Noc" },
+    w: { on: "Zapnuto", off: "Vypnuto", open: "Otevřeno", closed: "Zavřeno", detected: "Zaznamenán", clear: "Klid", running: "Běží", heating: "Topí", cleaning: "Uklízí", docked: "V doku", returning: "Vrací se", paused: "Pozastaveno", armed_home: "Zabezpečeno doma", triggered: "Spuštěn", playing: "Hraje", idle: "Nečinný", locked: "Zamčeno", unlocked: "Odemčeno", min: "min", day: "Den", night: "Noc" },
+    out: "°C venku",
+    n: { "Flat": "Byt", "Living room": "Obývák", "Kitchen": "Kuchyň", "Hall": "Chodba", "Bathroom": "Koupelna", "Bedroom": "Ložnice", "Radiator": "Radiátor", "Dishwasher": "Myčka", "Washing machine": "Pračka", "Alarm": "Alarm", "Camera": "Kamera", "Fireplace": "Krb" },
+    e: ["Stropní světlo", "LED pásek", "Bodovka", "Světlo v kuchyni", "Světlo v chodbě", "Světlo v koupelně", "Noční lampička", "Vchodové dveře", "Dveře do koupelny", "Okno v obýváku", "Okno v ložnici", "Roleta", "Zámek dveří", "Pohyb", "Pračka", "Myčka", "Termostat", "Alarm", "Kamera v chodbě", "Krb", "Televize", "Robotický vysavač"],
+  },
+  de: {
+    home: "Zuhause", controls: "Demo-Steuerung", hint: "Tippe auf eine Kachel, oder auf Raum und Licht im Plan.",
+    foot: "Dies ist eine Demo mit erfundenen Daten. Installation: HACS → Benutzerdefinierte Repositories → matata86/fns-floorplan", docs: "Dokumentation",
+    c: { lights: "Lichter", door: "Haustür", window: "Fenster", blind: "Rollo", vacuum: "Saugroboter", washer: "Waschmaschine", dishwasher: "Geschirrspüler", motion: "Bewegung", alarm: "Alarm", daynight: "Tag / Nacht" },
+    w: { on: "An", off: "Aus", open: "Offen", closed: "Geschlossen", detected: "Erkannt", clear: "Ruhig", running: "Läuft", heating: "Heizt", cleaning: "Saugt", docked: "In Station", returning: "Kehrt zurück", paused: "Pausiert", armed_home: "Scharf (zu Hause)", triggered: "Ausgelöst", playing: "Spielt", idle: "Leerlauf", locked: "Verriegelt", unlocked: "Entriegelt", min: "Min.", day: "Tag", night: "Nacht" },
+    out: "°C draußen",
+    n: { "Flat": "Wohnung", "Living room": "Wohnzimmer", "Kitchen": "Küche", "Hall": "Flur", "Bathroom": "Bad", "Bedroom": "Schlafzimmer", "Radiator": "Heizkörper", "Dishwasher": "Geschirrspüler", "Washing machine": "Waschmaschine", "Alarm": "Alarm", "Camera": "Kamera", "Fireplace": "Kamin" },
+    e: ["Deckenlicht", "LED-Streifen", "Spot", "Küchenlicht", "Flurlicht", "Badlicht", "Nachttischlampe", "Haustür", "Badezimmertür", "Wohnzimmerfenster", "Schlafzimmerfenster", "Rollo", "Türschloss", "Bewegung", "Waschmaschine", "Geschirrspüler", "Thermostat", "Alarm", "Flurkamera", "Kamin", "Fernseher", "Saugroboter"],
+  },
+}[lang];
+const W = TEXT.w;
+
+// ---- fake <ha-card> and <ha-icon>: what Home Assistant provides and the card relies on ----
+customElements.define("ha-card", class extends HTMLElement {
+  constructor() { super(); this.attachShadow({ mode: "open" }).innerHTML = "<style>:host{display:block}</style><slot></slot>"; }
+});
+// The card writes <ha-icon icon="mdi:…"> as an ATTRIBUTE (the room panel uses the property), so both must work
 class FakeIcon extends HTMLElement {
-  set icon(v) { this._icon = v; this.draw(); } get icon() { return this._icon; }
-  set stateObj(v) { this._so = v; this.draw(); } get stateObj() { return this._so; }
+  static get observedAttributes() { return ["icon"]; }
+  constructor() { super(); this.attachShadow({ mode: "open" }).innerHTML = '<style>:host{display:inline-flex;width:var(--mdc-icon-size,24px);height:var(--mdc-icon-size,24px);vertical-align:middle;flex:none}svg{width:100%;height:100%;fill:currentColor}</style><svg viewBox="0 0 24 24"><path/></svg>'; }
+  set icon(v) { this._icon = v; this.draw(); }
+  get icon() { return this._icon ?? this.getAttribute("icon"); }
+  set stateObj(v) { this._so = v; this.draw(); }
+  attributeChangedCallback() { this.draw(); }
   connectedCallback() { this.draw(); }
   draw() {
-    const d = window.FP_ICONS[this._icon || this._so?.attributes?.icon];
-    if (d) (this.shadowRoot || this.attachShadow({ mode: "open" })).innerHTML = `<svg viewBox="0 0 24 24" width="24" height="24"><path d="${d}"/></svg>`;
+    const d = window.FP_ICONS[this.icon || this._so?.attributes?.icon];
+    this.shadowRoot.querySelector("path").setAttribute("d", d || "");
   }
 }
 customElements.define("ha-icon", FakeIcon);
 customElements.define("ha-state-icon", class extends FakeIcon {});
 
-await import("./fns-floorplan-card.js");
+// ---- the invented flat: one plan.json with English names, translated here ----
 const plan = await (await fetch("./plan.json")).json();
+const tn = (s) => TEXT.n[s] || s;
+for (const l of plan.levels) l.name = tn(l.name);
+for (const r of plan.rooms) r.name = tn(r.name);
+for (const d of plan.devices) d.name = tn(d.name);
+for (const t of plan.texts) t.text = t.text.replace("°C outside", TEXT.out);
 
 const root = document.documentElement;
 const now = Date.now(), ago = (min) => new Date(now - min * 60e3).toISOString();
-const T = {
-  en: { lights: "Lights", door: "Front door", vacuum: "Vacuum cleaning", washer: "Washing machine", motion: "Motion", alarm: "Alarm", night: "Night", day: "Day" },
-  cs: { lights: "Světla", door: "Vchodové dveře", vacuum: "Vysavač uklízí", washer: "Pračka", motion: "Pohyb", alarm: "Alarm", night: "Noc", day: "Den" },
-  de: { lights: "Lichter", door: "Haustür", vacuum: "Saugroboter saugt", washer: "Waschmaschine", motion: "Bewegung", alarm: "Alarm", night: "Nacht", day: "Tag" },
-}[lang];
-
-const S = (state, attributes = {}, icon, minutes = 30) => ({ state, attributes: icon ? { icon, ...attributes } : attributes, last_changed: ago(minutes) });
+const ENT = ["light.living_room", "light.living_strip", "light.living_spot", "light.kitchen", "light.hall", "light.bathroom", "light.bedroom",
+  "binary_sensor.front_door", "binary_sensor.bathroom_door", "binary_sensor.living_room_window", "binary_sensor.bedroom_window", "cover.living_room_blind", "lock.front_door",
+  "binary_sensor.living_room_motion", "binary_sensor.washing_machine", "sensor.dishwasher_state", "climate.living_room", "alarm_control_panel.home", "camera.hall", "switch.fireplace", "media_player.tv", "vacuum.robot"];
+const NAME = Object.fromEntries(ENT.map((id, i) => [id, TEXT.e[i]]));
+const S = (state, attributes = {}, minutes = 30) => ({ state, attributes, last_changed: ago(minutes) });
+const LT = (state, brightness, extra, modes) => S(state, { ...(state === "on" ? { brightness } : {}), color_mode: "color_temp", color_temp_kelvin: 2700, supported_color_modes: modes || ["color_temp"], ...extra });
 const states = {
-  "light.living_room": S("on", { brightness: 220, color_mode: "color_temp", color_temp_kelvin: 2700 }, "mdi:lightbulb"),
-  "light.living_strip": S("on", { brightness: 255, color_mode: "rgb", rgb_color: [255, 120, 60] }, "mdi:led-strip-variant"),
-  "light.living_spot": S("on", { brightness: 200, color_mode: "color_temp", color_temp_kelvin: 3000 }, "mdi:lightbulb"),
-  "light.kitchen": S("off", {}, "mdi:lightbulb-off"),
-  "light.hall": S("off", {}, "mdi:lightbulb-off"),
-  "light.bathroom": S("off", {}, "mdi:lightbulb-off"),
-  "light.bedroom": S("on", { brightness: 90, color_mode: "hs", rgb_color: [255, 170, 90] }, "mdi:lamp"),
-  "binary_sensor.front_door": S("off", { device_class: "door" }, "mdi:door-closed"),
-  "binary_sensor.bathroom_door": S("off", { device_class: "door" }, "mdi:door-closed"),
-  "binary_sensor.living_room_window": S("off", { device_class: "window" }, "mdi:window-closed"),
-  "binary_sensor.bedroom_window": S("on", { device_class: "window" }, "mdi:window-open", 3),
-  "cover.living_room_blind": S("open", { current_position: 35 }, "mdi:window-shutter"),
-  "lock.front_door": S("locked", {}, "mdi:lock"),
-  "binary_sensor.living_room_motion": S("off", { device_class: "motion" }, "mdi:motion-sensor-off"),
-  "binary_sensor.washing_machine": S("off", {}, "mdi:washing-machine-off"),
-  "sensor.dishwasher_state": S("run", {}, "mdi:dishwasher"),
+  "light.living_room": LT("on", 220),
+  "light.living_strip": LT("on", 255, { color_mode: "rgb", rgb_color: [255, 120, 60] }, ["rgb"]),
+  "light.living_spot": LT("on", 200, { color_temp_kelvin: 3000 }),
+  "light.kitchen": LT("off"),
+  "light.hall": LT("off"),
+  "light.bathroom": LT("off", 0, {}, ["brightness"]),
+  "light.bedroom": LT("on", 90, { color_mode: "hs", rgb_color: [255, 170, 90] }, ["hs"]),
+  "binary_sensor.front_door": S("off", { device_class: "door" }),
+  "binary_sensor.bathroom_door": S("off", { device_class: "door" }),
+  "binary_sensor.living_room_window": S("off", { device_class: "window" }),
+  "binary_sensor.bedroom_window": S("on", { device_class: "window" }, 3),
+  "cover.living_room_blind": S("open", { current_position: 35, device_class: "blind" }),
+  "lock.front_door": S("locked"),
+  "binary_sensor.living_room_motion": S("off", { device_class: "motion" }),
+  "binary_sensor.washing_machine": S("off"),
+  "sensor.dishwasher_state": S("run"),
   "sensor.dishwasher_remaining": S("47", { unit_of_measurement: "min" }),
-  "timer.dishwasher": S("active", { duration: "2:00:00", finishes_at: new Date(now + 47 * 60e3).toISOString() }, "mdi:timer-outline"),
-  "climate.living_room": S("heat", { hvac_action: "heating", current_temperature: 21.4, temperature: 22.5 }, "mdi:thermostat"),
-  "alarm_control_panel.home": S("armed_home", {}, "mdi:shield-home"),
-  "camera.hall": S("idle", {}, "mdi:cctv"),
-  "switch.fireplace": S("on", {}, "mdi:fireplace"),
-  "media_player.tv": S("playing", { media_title: "Evening news", device_class: "tv" }, "mdi:television"),
-  "vacuum.robot": S("docked", {}, "mdi:robot-vacuum"),
+  "timer.dishwasher": S("active", { duration: "2:00:00", finishes_at: new Date(now + 47 * 60e3).toISOString() }),
+  "climate.living_room": S("heat", { hvac_action: "heating", current_temperature: 21.4, temperature: 22.5 }),
+  "alarm_control_panel.home": S("armed_home"),
+  "camera.hall": S("idle"),
+  "switch.fireplace": S("on"),
+  "media_player.tv": S("playing", { media_title: "Evening news", device_class: "tv" }),
+  "vacuum.robot": S("docked"),
   "sensor.robot_current_room": S("Living room", { options: ["Living room", "Kitchen"] }),
   "sensor.robot_battery": S("100", { device_class: "battery", unit_of_measurement: "%" }),
   "sensor.living_room_temperature": S("21.4", { device_class: "temperature", unit_of_measurement: "°C" }),
@@ -107,66 +177,244 @@ const states = {
   "sensor.kitchen_temperature": S("22.6", { device_class: "temperature", unit_of_measurement: "°C" }),
   "sensor.bedroom_temperature": S("19.8", { device_class: "temperature", unit_of_measurement: "°C" }),
   "sensor.bathroom_humidity": S("58", { device_class: "humidity", unit_of_measurement: "%" }),
-  "sensor.outdoor_temperature": S("12", { device_class: "temperature", unit_of_measurement: "°C" }),
+  "sensor.outdoor_temperature": S("12.4", { device_class: "temperature", unit_of_measurement: "°C" }),
   "sun.sun": S("above_horizon"),
 };
-for (const [id, s] of Object.entries(states)) s.entity_id = id;
-const set = (id, state, extra = {}, icon) => {
+for (const [id, s] of Object.entries(states)) { s.entity_id = id; s.attributes.friendly_name = NAME[id] || id; }
+const set = (id, state, extra = {}) => {
   const o = states[id];
-  states[id] = { ...o, state, last_changed: new Date().toISOString(), attributes: { ...o.attributes, ...extra, ...(icon ? { icon } : {}) } };
+  states[id] = { ...o, state, last_changed: new Date().toISOString(), attributes: { ...o.attributes, ...extra } };
+};
+const LIGHTS = ENT.filter((e) => e.startsWith("light."));
+const lastBr = {};
+const lightOn = (id, br) => set(id, "on", { brightness: br ?? lastBr[id] ?? 220 });
+const lightOff = (id) => {
+  const o = states[id], a = { ...o.attributes };
+  if (a.brightness) lastBr[id] = a.brightness;
+  delete a.brightness;
+  states[id] = { ...o, state: "off", last_changed: new Date().toISOString(), attributes: a };
 };
 
-const card = document.createElement("fns-floorplan-card");
-const mode = () => (root.dataset.theme === "dark" ? "night" : "day");
-let hass;
-function push() {
-  hass = { ...hass, states: { ...states }, themes: { darkMode: mode() === "night" }, language: lang, locale: { language: lang } };
-  card.hass = hass;
+// ---- fake behaviour: dishwasher countdown, vacuum run ----
+const dishLeft = () => Math.max(0, Math.ceil((Date.parse(states["timer.dishwasher"].attributes.finishes_at || 0) - Date.now()) / 60e3));
+function dish(on) {
+  if (on) { set("sensor.dishwasher_state", "run"); set("timer.dishwasher", "active", { finishes_at: new Date(Date.now() + 47 * 60e3).toISOString() }); set("sensor.dishwasher_remaining", "47"); }
+  else { set("sensor.dishwasher_state", "off"); set("timer.dishwasher", "idle", { finishes_at: null }); set("sensor.dishwasher_remaining", "0"); }
 }
+let vacT = 0;
+function vac(go) {
+  clearTimeout(vacT);
+  if (go) set("vacuum.robot", "cleaning");
+  else if (states["vacuum.robot"].state === "cleaning") {
+    set("vacuum.robot", "returning");
+    vacT = setTimeout(() => { set("vacuum.robot", "docked"); set("sensor.robot_current_room", "Living room"); push(); }, 9000);
+  }
+}
+setInterval(() => { // the robot moves between rooms; the dishwasher counts down
+  if (states["vacuum.robot"].state === "cleaning") set("sensor.robot_current_room", states["sensor.robot_current_room"].state === "Kitchen" ? "Living room" : "Kitchen");
+  if (states["sensor.dishwasher_state"].state === "run") { const m = dishLeft(); m ? set("sensor.dishwasher_remaining", String(m)) : dish(false); }
+  push();
+}, 6000);
+
+// ---- fake hass ----
+let hass, card;
+const subs = [];
+const renderTpl = (t) => t.replace(/\{\{\s*states\('([^']+)'\)\s*\}\}/g, (_, id) => states[id]?.state ?? "unknown");
+// a day of history for the replay tool (hours ago → state)
+const H = (h) => Date.now() / 1000 - h * 3600;
+const HIST = {
+  "light.living_room": [[24, "off"], [20.5, "on"], [17, "off"], [5, "on"]], "light.kitchen": [[24, "off"], [22, "on"], [21.2, "off"], [9, "on"], [8.4, "off"]],
+  "light.bedroom": [[24, "off"], [3.5, "on"]], "light.hall": [[24, "off"], [19.2, "on"], [19.1, "off"], [8.7, "on"], [8.6, "off"]], "light.bathroom": [[24, "off"], [8.8, "on"], [8.5, "off"]],
+  "light.living_strip": [[24, "off"], [20.5, "on"], [17, "off"], [5, "on"]], "light.living_spot": [[24, "off"], [5, "on"]],
+  "binary_sensor.front_door": [[24, "off"], [19.2, "on"], [19.1, "off"], [8.7, "on"], [8.6, "off"]], "binary_sensor.bedroom_window": [[24, "off"], [6, "on"], [4, "off"], [0.05, "on"]],
+  "binary_sensor.living_room_motion": [[24, "off"], [20.4, "on"], [20.3, "off"], [5, "on"], [4.9, "off"]], "binary_sensor.washing_machine": [[24, "off"], [15, "on"], [13.8, "off"]],
+  "sensor.living_room_temperature": [[24, "20.2"], [16, "20.6"], [10, "21.1"], [4, "21.7"], [1, "21.4"]], "sensor.kitchen_temperature": [[24, "21.5"], [12, "22.0"], [9, "23.1"], [1, "22.6"]],
+  "sensor.bedroom_temperature": [[24, "19.4"], [12, "19.1"], [1, "19.8"]], "sensor.outdoor_temperature": [[24, "8.1"], [14, "13.6"], [6, "10.2"], [1, "12.4"]],
+};
 hass = {
   entities: { "vacuum.robot": { entity_id: "vacuum.robot", device_id: "robot" }, "sensor.robot_battery": { entity_id: "sensor.robot_battery", device_id: "robot" } },
-  connection: { subscribeMessage: (cb, msg) => { if (msg.type === "fns_floorplan/plan/subscribe") setTimeout(() => cb(plan)); return Promise.resolve(() => {}); }, addEventListener() {} },
-  callWS: () => Promise.reject(new Error("demo")), hassUrl: (p) => p,
+  connection: {
+    subscribeMessage(cb, msg) {
+      if (msg.type === "fns_floorplan/plan/subscribe") setTimeout(() => cb(plan));
+      else if (msg.type === "render_template") { const s = { cb, t: msg.template }; subs.push(s); setTimeout(() => cb({ result: renderTpl(s.t) })); return Promise.resolve(() => subs.splice(subs.indexOf(s), 1)); }
+      return Promise.resolve(() => {});
+    },
+    addEventListener() {},
+  },
+  async callWS(msg) {
+    if (msg.type !== "history/history_during_period") throw new Error("demo");
+    return Object.fromEntries(Object.entries(HIST).map(([id, list]) => [id, list.map(([h, s], i) => ({ s, lu: H(h), ...(i === 0 ? { a: { ...states[id].attributes, ...(s === "on" && id.startsWith("light.") ? { brightness: 220 } : {}) } } : {}) }))]));
+  },
+  hassUrl: (p) => p,
   callService(domain, service, data = {}, target) {
-    // a tap on a light or switch toggles it, everything else is ignored in the demo
-    const id = data.entity_id || target?.entity_id;
-    if (service === "toggle" && states[id]) { states[id].state === "on" ? off(id) : on(id); push(); }
+    const id = data.entity_id || target?.entity_id, d = id?.split(".")[0];
+    if (!states[id]) return;
+    if (["toggle", "turn_on", "turn_off"].includes(service)) {
+      const want = service === "toggle" ? states[id].state !== "on" : service === "turn_on";
+      if (d === "light") {
+        if (data.brightness_pct != null) data.brightness_pct ? lightOn(id, Math.round(data.brightness_pct * 2.55)) : lightOff(id);
+        else want ? lightOn(id) : lightOff(id);
+      } else if (d === "switch") set(id, want ? "on" : "off");
+    } else if (d === "climate" && service === "set_temperature") set(id, states[id].state, { temperature: data.temperature });
+    else if (d === "vacuum") vac(service === "start");
+    push(); refresh();
   },
 };
-const lightsOn = { "light.living_room": 1, "light.living_strip": 1, "light.living_spot": 1, "light.bedroom": 1, "light.kitchen": 1, "light.hall": 1, "light.bathroom": 1 };
-const on = (id) => set(id, "on", { brightness: 220, color_mode: "color_temp", color_temp_kelvin: 2700 }, "mdi:lightbulb");
-const off = (id) => set(id, "off", {}, "mdi:lightbulb-off");
+const push = () => {
+  hass = { ...hass, states: { ...states }, themes: { darkMode: root.dataset.theme === "dark" }, language: lang, locale: { language: lang } };
+  card.hass = hass;
+  for (const s of subs) s.cb({ result: renderTpl(s.t) });
+};
 
-const actions = [
-  [T.lights, () => { const anyOn = Object.keys(lightsOn).some((l) => states[l].state === "on"); for (const l of Object.keys(lightsOn)) anyOn ? off(l) : on(l); }, () => Object.keys(lightsOn).some((l) => states[l].state === "on")],
-  [T.door, () => { const o = states["binary_sensor.front_door"].state === "on"; set("binary_sensor.front_door", o ? "off" : "on"); set("lock.front_door", o ? "locked" : "unlocked"); }, () => states["binary_sensor.front_door"].state === "on"],
-  [T.vacuum, () => { const c = states["vacuum.robot"].state === "cleaning"; set("vacuum.robot", c ? "returning" : "cleaning"); if (c) setTimeout(() => { set("vacuum.robot", "docked"); push(); refresh(); }, 9000); }, () => ["cleaning", "returning"].includes(states["vacuum.robot"].state)],
-  [T.washer, () => set("binary_sensor.washing_machine", states["binary_sensor.washing_machine"].state === "on" ? "off" : "on"), () => states["binary_sensor.washing_machine"].state === "on"],
-  [T.motion, () => set("binary_sensor.living_room_motion", states["binary_sensor.living_room_motion"].state === "on" ? "off" : "on", {}, "mdi:motion-sensor"), () => states["binary_sensor.living_room_motion"].state === "on"],
-  [T.alarm, () => set("alarm_control_panel.home", states["alarm_control_panel.home"].state === "triggered" ? "armed_home" : "triggered"), () => states["alarm_control_panel.home"].state === "triggered"],
-];
-const bar = document.getElementById("actions");
-const buttons = actions.map(([label, fn, active]) => {
-  const b = document.createElement("button");
-  b.type = "button"; b.textContent = label; bar.append(b);
-  b.addEventListener("click", () => { fn(); push(); refresh(); });
-  return [b, active];
+// ---- fake card helpers: HA-tile-looking rows for the room panel ----
+const INACTIVE = new Set(["off", "closed", "unavailable", "idle", "standby", "clear"]);
+function colorOf(id, s) {
+  const d = id.split(".")[0], v = s.state;
+  if (INACTIVE.has(v) || (d === "binary_sensor" && v === "off")) return "var(--state-inactive-color)";
+  if (d === "light") { const c = s.attributes.rgb_color; return c ? `rgb(${c})` : "var(--state-light-active-color)"; }
+  return `var(--state-${d}-${v}-color, var(--state-${d}-active-color, var(--state-active-color)))`;
+}
+function iconOf(id, s) {
+  const d = id.split(".")[0], v = s.state, c = s.attributes.device_class, on = v === "on";
+  if (d === "light") return on ? "mdi:lightbulb" : "mdi:lightbulb-off";
+  if (c === "door") return on ? "mdi:door-open" : "mdi:door-closed";
+  if (c === "window") return on ? "mdi:window-open" : "mdi:window-closed";
+  if (c === "motion") return on ? "mdi:motion-sensor" : "mdi:motion-sensor-off";
+  if (id === "binary_sensor.washing_machine") return on ? "mdi:washing-machine" : "mdi:washing-machine-off";
+  const M = { cover: "mdi:window-shutter", lock: v === "locked" ? "mdi:lock" : "mdi:lock-open-variant", climate: "mdi:thermostat", camera: "mdi:cctv", switch: "mdi:fireplace",
+    media_player: "mdi:television", vacuum: "mdi:robot-vacuum", sensor: "mdi:dishwasher", alarm_control_panel: v === "triggered" ? "mdi:bell-ring" : "mdi:shield-home" };
+  return M[d] || "mdi:thermostat";
+}
+function stateText(id, s) {
+  const d = id.split(".")[0], a = s.attributes, v = s.state, c = a.device_class;
+  if (d === "light") return v === "on" ? Math.round((a.brightness ?? 255) / 2.55) + "%" : W.off;
+  if (d === "cover") return v === "open" ? W.open : W.closed;
+  if (d === "binary_sensor") return c === "door" || c === "window" ? (v === "on" ? W.open : W.closed) : c === "motion" ? (v === "on" ? W.detected : W.clear) : v === "on" ? W.running : W.off;
+  if (d === "climate") return `${W.heating} · ${a.temperature} °C`;
+  if (d === "sensor") return v === "run" ? `${W.running} · ${states["sensor.dishwasher_remaining"].state} ${W.min}` : v === "off" ? W.off : `${v} ${a.unit_of_measurement || ""}`;
+  if (d === "switch") return v === "on" ? W.on : W.off;
+  return W[v] || v;
+}
+const TILE_CSS = `
+:host { display: block; }
+*, *::before, *::after { box-sizing: border-box; }
+.t { height: 100%; display: flex; flex-direction: column; gap: 8px; padding: 10px; background: var(--card-background-color); border: 1px solid var(--divider-color); border-radius: 12px; cursor: pointer; }
+.hd { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.ic { --c: var(--state-inactive-color); width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; flex: none; background: color-mix(in srgb, var(--c) 20%, transparent); color: var(--c); transition: background .3s, color .3s; --mdc-icon-size: 22px; }
+.tx { min-width: 0; flex: 1; }
+.n { font-size: 14px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.s { font-size: 12px; color: var(--secondary-text-color); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bar { flex: 0 0 148px; max-width: 55%; height: 36px; border-radius: 10px; background: color-mix(in srgb, var(--c) 28%, transparent); position: relative; overflow: hidden; touch-action: none; cursor: pointer; }
+.bar i { position: absolute; inset: 0 auto 0 0; background: var(--c); border-radius: 0 4px 4px 0; transition: width .25s; }
+.f { display: flex; gap: 8px; }
+.f button { flex: 1; height: 36px; border: 0; border-radius: 10px; background: color-mix(in srgb, var(--primary-text-color) 8%, transparent); color: var(--primary-text-color); display: grid; place-items: center; cursor: pointer; --mdc-icon-size: 20px; }
+.f button:hover { background: color-mix(in srgb, var(--primary-text-color) 14%, transparent); }
+.f .v { flex: 2; text-align: center; align-self: center; font-weight: 500; }
+.cam { height: 150px; border-radius: 12px; position: relative; overflow: hidden; background: linear-gradient(135deg, #3a4a5c, #1d2733); color: rgba(255,255,255,.35); display: grid; place-items: center; --mdc-icon-size: 56px; }
+.cam b { position: absolute; left: 12px; bottom: 10px; color: #fff; font-weight: 500; font-size: 13px; text-shadow: 0 1px 3px rgba(0,0,0,.6); }
+`;
+const set$ = (el, c, tpl) => { el.shadowRoot.innerHTML = `<style>${TILE_CSS}</style>${tpl}`; return (q) => el.shadowRoot.querySelector(q); };
+customElements.define("demo-tile", class extends HTMLElement {
+  constructor() { super(); this.attachShadow({ mode: "open" }); }
+  setConfig(c) {
+    this._c = c;
+    const f = (c.features || [])[0]?.type;
+    const $ = set$(this, c, `<div class="t"><div class="hd"><div class="ic"><ha-icon></ha-icon></div><div class="tx"><div class="n"></div><div class="s"></div></div>${f === "light-brightness" ? '<div class="bar"><i></i></div>' : ""}</div>${f === "target-temperature" ? '<div class="f"><button data-d="-.5"><ha-icon icon="mdi:minus"></ha-icon></button><span class="v"></span><button data-d=".5"><ha-icon icon="mdi:plus"></ha-icon></button></div>'
+      : f === "vacuum-commands" ? '<div class="f"><button data-s="pp"><ha-icon></ha-icon></button><button data-s="stop"><ha-icon icon="mdi:stop"></ha-icon></button><button data-s="home"><ha-icon icon="mdi:home-import-outline"></ha-icon></button></div>' : ""}</div>`);
+    const call = (...a) => this._h.callService(...a), id = c.entity;
+    $(".ic").addEventListener("click", (e) => { if (c.icon_tap_action?.action === "toggle") { e.stopPropagation(); call("homeassistant", "toggle", { entity_id: id }); } });
+    const bar = $(".bar");
+    if (bar) {
+      const at = (e) => { const r = bar.getBoundingClientRect(); call("light", "turn_on", { entity_id: id, brightness_pct: Math.max(0, Math.min(100, Math.round(((e.clientX - r.left) / r.width) * 100))) }); };
+      bar.addEventListener("pointerdown", (e) => { e.stopPropagation(); bar.setPointerCapture(e.pointerId); bar.dragging = true; at(e); });
+      bar.addEventListener("pointermove", (e) => bar.dragging && at(e));
+      bar.addEventListener("pointerup", () => (bar.dragging = false));
+    }
+    this.shadowRoot.querySelectorAll("[data-d]").forEach((b) => b.addEventListener("click", () => call("climate", "set_temperature", { entity_id: id, temperature: Number(this._h.states[id].attributes.temperature) + Number(b.dataset.d) })));
+    this.shadowRoot.querySelectorAll("[data-s]").forEach((b) => b.addEventListener("click", () => call("vacuum", { pp: this._h.states[id].state === "cleaning" ? "pause" : "start", stop: "stop", home: "return_to_base" }[b.dataset.s], { entity_id: id })));
+  }
+  set hass(h) {
+    this._h = h;
+    const c = this._c, s = h.states[c.entity], r = (q) => this.shadowRoot.querySelector(q);
+    if (!s) return;
+    const col = colorOf(c.entity, s);
+    r(".ic").style.setProperty("--c", col);
+    r(".ic ha-icon").icon = c.icon || iconOf(c.entity, s);
+    r(".n").textContent = c.name || s.attributes.friendly_name;
+    r(".s").textContent = stateText(c.entity, s);
+    const bar = r(".bar");
+    if (bar) { bar.style.setProperty("--c", col); r(".bar i").style.width = s.state === "on" ? Math.round((s.attributes.brightness ?? 255) / 2.55) + "%" : "0"; }
+    const v = r(".v");
+    if (v) v.textContent = `${Number(s.attributes.temperature).toFixed(1)} °C`;
+    const pp = r('[data-s="pp"] ha-icon');
+    if (pp) pp.icon = s.state === "cleaning" ? "mdi:pause" : "mdi:play";
+  }
 });
-const refresh = () => buttons.forEach(([b, active]) => b.setAttribute("aria-pressed", String(active())));
+customElements.define("demo-camera", class extends HTMLElement {
+  constructor() { super(); this.attachShadow({ mode: "open" }); }
+  setConfig(c) { this._c = c; set$(this, c, '<div class="cam"><ha-icon icon="mdi:cctv"></ha-icon><b></b></div>')("b").textContent = NAME[c.entity] || c.entity; }
+  set hass(h) { this._h = h; }
+});
+window.loadCardHelpers = async () => ({ createCardElement(config) { const el = document.createElement(config.type === "picture-entity" ? "demo-camera" : "demo-tile"); el.setConfig(config); return el; } });
 
+await import("./fns-floorplan-card.js");
+card = document.createElement("fns-floorplan-card");
+
+// ---- demo controls ----
+const st = (id) => states[id].state;
+const actions = [
+  ["lights", "mdi:lightbulb", "var(--state-light-active-color)", () => { const any = LIGHTS.some((l) => st(l) === "on"); LIGHTS.forEach((l) => (any ? lightOff(l) : lightOn(l))); }, () => LIGHTS.some((l) => st(l) === "on"), (a) => (a ? W.on : W.off)],
+  ["door", "mdi:door-open", "var(--orange-color)", () => { const o = st("binary_sensor.front_door") === "on"; set("binary_sensor.front_door", o ? "off" : "on"); set("lock.front_door", o ? "locked" : "unlocked"); }, () => st("binary_sensor.front_door") === "on", (a) => (a ? W.open : W.closed)],
+  ["window", "mdi:window-open-variant", "var(--orange-color)", () => set("binary_sensor.bedroom_window", st("binary_sensor.bedroom_window") === "on" ? "off" : "on"), () => st("binary_sensor.bedroom_window") === "on", (a) => (a ? W.open : W.closed)],
+  ["blind", "mdi:window-shutter", "var(--purple-color)", () => (st("cover.living_room_blind") === "closed" ? set("cover.living_room_blind", "open", { current_position: 100 }) : set("cover.living_room_blind", "closed", { current_position: 0 })), () => st("cover.living_room_blind") === "closed", (a) => (a ? W.closed : W.open)],
+  ["vacuum", "mdi:robot-vacuum", "var(--teal-color)", () => vac(st("vacuum.robot") !== "cleaning" && st("vacuum.robot") !== "returning" ? true : false), () => ["cleaning", "returning"].includes(st("vacuum.robot")), () => W[st("vacuum.robot")]],
+  ["washer", "mdi:washing-machine", "var(--blue-color)", () => set("binary_sensor.washing_machine", st("binary_sensor.washing_machine") === "on" ? "off" : "on"), () => st("binary_sensor.washing_machine") === "on", (a) => (a ? W.running : W.off)],
+  ["dishwasher", "mdi:dishwasher", "var(--blue-color)", () => dish(st("sensor.dishwasher_state") !== "run"), () => st("sensor.dishwasher_state") === "run", (a) => (a ? `${st("sensor.dishwasher_remaining")} ${W.min}` : W.off)],
+  ["motion", "mdi:motion-sensor", "var(--amber-color)", () => set("binary_sensor.living_room_motion", st("binary_sensor.living_room_motion") === "on" ? "off" : "on"), () => st("binary_sensor.living_room_motion") === "on", (a) => (a ? W.detected : W.clear)],
+  ["alarm", "mdi:bell-ring", "var(--red-color)", () => set("alarm_control_panel.home", st("alarm_control_panel.home") === "triggered" ? "armed_home" : "triggered"), () => st("alarm_control_panel.home") === "triggered", (a) => (a ? W.triggered : W.armed_home)],
+  ["daynight", "mdi:weather-night", "var(--indigo-color)", () => applyTheme(root.dataset.theme !== "dark"), () => root.dataset.theme === "dark", (a) => (a ? W.night : W.day)],
+];
+const box = document.getElementById("actions");
+const chips = actions.map(([key, icon, color, fn, active, text]) => {
+  const b = document.createElement("button");
+  b.type = "button"; b.className = "chip"; b.style.setProperty("--on", color);
+  b.innerHTML = `<span class="ic"><ha-icon icon="${icon}"></ha-icon></span><span class="tx"><span class="n">${TEXT.c[key]}</span><span class="s"></span></span>`;
+  box.append(b);
+  b.addEventListener("click", () => { fn(); push(); refresh(); });
+  return [b, active, text, key];
+});
+function refresh() {
+  for (const [b, active, text, key] of chips) {
+    const a = active();
+    b.setAttribute("aria-pressed", String(a));
+    b.querySelector(".s").textContent = text(a);
+    if (key === "daynight") b.querySelector("ha-icon").icon = a ? "mdi:weather-night" : "mdi:white-balance-sunny";
+  }
+}
+
+// ---- page chrome ----
+document.getElementById("title").textContent = TEXT.home;
+document.getElementById("ptitle").textContent = TEXT.controls;
+document.getElementById("phint").textContent = TEXT.hint;
+const docsUrl = "https://matata86.github.io/fns-floorplan/" + (lang === "en" ? "" : lang + "/");
+document.getElementById("foot").innerHTML = `${TEXT.foot} · <a href="${docsUrl}">${TEXT.docs}</a>`;
+for (const a of document.querySelectorAll("#langs a")) {
+  const l = a.getAttribute("href").slice(6), p = new URLSearchParams(location.search);
+  p.set("lang", l);
+  a.setAttribute("href", "?" + p);
+  if (l === lang) a.setAttribute("aria-current", "true");
+}
 const themeBtn = document.getElementById("theme");
-const dark = matchMedia("(prefers-color-scheme: dark)").matches;
 function applyTheme(isDark) {
   root.dataset.theme = isDark ? "dark" : "light";
-  themeBtn.textContent = isDark ? T.day : T.night;
-  card.setConfig({ type: "custom:fns-floorplan-card", mode: isDark ? "night" : "day" });
-  push();
+  themeBtn.querySelector("ha-icon").icon = isDark ? "mdi:white-balance-sunny" : "mdi:weather-night";
+  push(); refresh();
 }
 themeBtn.addEventListener("click", () => applyTheme(root.dataset.theme !== "dark"));
 
+card.setConfig({ type: "custom:fns-floorplan-card", mode: "ha" });
 document.getElementById("card").append(card);
-applyTheme(dark);
-refresh();
+applyTheme(params.get("theme") ? params.get("theme") === "dark" : matchMedia("(prefers-color-scheme: dark)").matches);
 </script>
 </body>
 </html>

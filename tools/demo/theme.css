@@ -1,7 +1,8 @@
 :root {
   /* Home Assistant default theme colours the card reads */
   --primary-color: #03a9f4; --accent-color: #ff9800; --primary-text-color: #212121; --secondary-text-color: #727272; --text-primary-color: #fff;
-  --card-background-color: #fff; --divider-color: rgba(0,0,0,.12); --disabled-text-color: #bdbdbd;
+  --card-background-color: #fff; --primary-background-color: #fafafa; --app-header-background-color: #fff; --app-header-border-bottom: 1px solid var(--divider-color);
+  --ha-card-border-radius: 12px; --ha-card-border-width: 1px; --ha-card-border-color: var(--divider-color); --ha-card-box-shadow: none; --ha-font-family-body: Roboto, Noto, system-ui, sans-serif; --divider-color: rgba(0,0,0,.12); --disabled-text-color: #bdbdbd;
   --red-color: #f44336; --pink-color: #e91e63; --purple-color: #926bc7; --deep-purple-color: #6e41ab; --indigo-color: #3f51b5; --blue-color: #2196f3;
   --light-blue-color: #03a9f4; --cyan-color: #00bcd4; --teal-color: #009688; --green-color: #4caf50; --light-green-color: #8bc34a; --lime-color: #cddc39;
   --yellow-color: #ffeb3b; --amber-color: #ffc107; --orange-color: #ff9800; --deep-orange-color: #ff6f22; --brown-color: #795548; --light-grey-color: #bdbdbd;
@@ -21,5 +22,5 @@
   --state-input_boolean-active-color: var(--amber-color); --state-script-active-color: var(--amber-color); --state-automation-active-color: var(--amber-color);
 }
 :root[data-theme="dark"] {
-  --primary-text-color: #e1e1e1; --secondary-text-color: #9b9b9b; --card-background-color: #1c1c1c; --divider-color: rgba(225,225,225,.12); color-scheme: dark;
+  --primary-text-color: #e1e1e1; --secondary-text-color: #9b9b9b; --card-background-color: #1c1c1c; --primary-background-color: #111111; --app-header-background-color: #1c1c1c; --divider-color: rgba(225,225,225,.12); color-scheme: dark;
 }
