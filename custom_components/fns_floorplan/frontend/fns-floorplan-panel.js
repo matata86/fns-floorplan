@@ -3,7 +3,7 @@
 // In the "Místnosti" mode rooms (corner points, whole rooms), windows and doors are edited.
 
 // icons, furniture types and the rules engine come from the card module (same URL, so loaded once)
-const { vacRoom, MDI, COLORS, UI_COLORS, color, FURNITURE, lightIcon, SIZES, evalRules, resolveIcon, iconHtml, FX_SVG, DOMAIN_DEV, STYLE: CARD_STYLE } =
+const { furnShape, vacRoom, MDI, COLORS, UI_COLORS, color, FURNITURE, lightIcon, SIZES, evalRules, resolveIcon, iconHtml, FX_SVG, DOMAIN_DEV, STYLE: CARD_STYLE } =
   await import(new URL("./fns-floorplan-card.js", import.meta.url).href + new URL(import.meta.url).search);
 
 // what a generic item does by default, by its entity's domain (the behaviour itself is DOMAIN_DEV in the card)
@@ -226,6 +226,7 @@ svg { width: 100%; height: 100%; display: block; touch-action: none; user-select
 .icon-row { display: flex; align-items: flex-start; gap: 8px; margin-top: 12px; }
 /* the picker field is 56 px tall (its helper hangs below it): centre the button on the field, not on field + helper */
 .icon-row > ha-button, .icon-row > button { margin-top: 8px; height: 40px; }
+.icon-row > ha-icon-button { flex: none; margin-top: 4px; color: var(--secondary-text-color, #727272); }
 .icon-row ha-icon { flex: none; color: var(--primary-color, #03a9f4); }
 .icon-row input, .icon-row ha-icon-picker { flex: 1; }
 .place { display: grid; grid-template-columns: repeat(3, 40px); gap: 0; margin-top: 4px; }
@@ -812,11 +813,23 @@ class FnsFloorplanPanel extends HTMLElement {
         el("g", { class: "ico" }, g).innerHTML = iconHtml(null, 12, "mdiLock");
       }
       if (selected) el("line", { x1: A[0], y1: A[1], x2: B[0], y2: B[1], class: "open-sel" }, svg);
-      // dragging slides the opening along its wall
+      // dragging slides the opening along its wall, or onto the nearest wall of any room on this floor
       el("line", { x1: A[0], y1: A[1], x2: B[0], y2: B[1], class: "open-hit" }, svg).addEventListener("pointerdown", (e) => {
-        const base = o.offset;
-        this._press(e, { cat: "openings", i: oi }, (dx, dz) => {
-          o.offset = r3(clamp(snap(base + dx * u[0] + dz * u[1]), o.width / 2, L - o.width / 2));
+        const p0 = this._toPlan(e), grab = (p0[0] - a[0]) * u[0] + (p0[1] - a[1]) * u[1] - o.offset;
+        const walls = this._roomsHere().flatMap((rr) => rr.points.map((_, k) => ({ rr, k, ...edgeOf(rr, k) }))).filter((w) => w.L >= o.width);
+        this._press(e, { cat: "openings", i: oi }, (dx, dz, p) => {
+          let best = null;
+          for (const w of walls) {
+            const t = clamp((p[0] - w.a[0]) * w.u[0] + (p[1] - w.a[1]) * w.u[1], 0, w.L);
+            const d = Math.hypot(w.a[0] + w.u[0] * t - p[0], w.a[1] + w.u[1] * t - p[1]);
+            // its own room wins on a shared wall, so the opening does not flip rooms there
+            if (!best || d < best.d - 1e-6 || (Math.abs(d - best.d) < 1e-6 && w.rr.id === o.room_id)) best = { w, t, d };
+          }
+          if (!best) return;
+          const { w, t } = best, own = w.rr.id === o.room_id && w.k === o.edge;
+          o.room_id = w.rr.id;
+          o.edge = w.k;
+          o.offset = r3(clamp(snap(own ? t - grab : t), o.width / 2, w.L - o.width / 2));
         });
       });
     });
@@ -859,9 +872,10 @@ class FnsFloorplanPanel extends HTMLElement {
         el("circle", { r: 12, class: "dev" }, g);
         icon(g, f, 16, "mdiRobotVacuum");
       } else {
-        paint(el("rect", { x: -w / 2, y: -d / 2, width: Math.max(w, 2), height: Math.max(d, 2), rx: 3, class: "furn" }, g), { ...res, color: res.color || f.color }, true);
-        const size = Math.min(w, d) * 0.6;
-        if (size >= 9 && f.icon !== "none") el("g", {}, g).innerHTML = `<g class="ico furn-ico">${iconHtml(f.icon, Math.min(size, 26), FURNITURE[f.type]?.[1] || "mdiShapeOutline")}</g>`;
+        const sh = furnShape(f.type, Math.max(w, 2), Math.max(d, 2));
+        paint(el(sh.tag, { ...sh.attrs, rx: 3, class: "furn" }, g), { ...res, color: res.color || f.color }, true);
+        const size = sh.fit * 0.6;
+        if (size >= 9 && f.icon !== "none") el("g", { transform: `translate(${sh.ix} ${sh.iz})` }, g).innerHTML = `<g class="ico furn-ico">${iconHtml(f.icon, Math.min(size, 26), FURNITURE[f.type]?.[1] || "mdiShapeOutline")}</g>`;
       }
     }
     for (const members of groups.values()) {
@@ -1528,7 +1542,7 @@ class FnsFloorplanPanel extends HTMLElement {
     const side = this.shadowRoot.querySelector(".side");
     const sel = this._sel, o = this._get();
     if (!o && this._mode === "rooms") {
-      side.innerHTML = `<h2>Místnosti, okna a dveře</h2><p class="hint">Klepni na místnost: táhnutím ji posuneš celou, za modré body táhneš rohy (přichytí se k rohům sousedních místností; s Ctrl jdou stěny po 15°, zelená = zcela rovně; u stěn je jejich délka), za stěnu ji celou posuneš ven nebo dovnitř (stěny a rohy se přichytí k sousedním místnostem, Alt to vypne), poloprůhledné body mezi rohy přidají nový roh.<br><br>Okno nebo dveře vybereš klepnutím a táhnutím posuneš po stěně. U vybraných dveří přehodí ⇄ panty a ⇅ směr otevírání. Nové přidáš v panelu vybrané místnosti.<br><br>Společný roh sousedních místností se posouvá s oběma místnostmi naráz; s Alt jen ten jeden.</p>`;
+      side.innerHTML = `<h2>Místnosti, okna a dveře</h2><p class="hint">Klepni na místnost: táhnutím ji posuneš celou, za modré body táhneš rohy (přichytí se k rohům sousedních místností; s Ctrl jdou stěny po 15°, zelená = zcela rovně; u stěn je jejich délka), za stěnu ji celou posuneš ven nebo dovnitř (stěny a rohy se přichytí k sousedním místnostem, Alt to vypne), poloprůhledné body mezi rohy přidají nový roh.<br><br>Okno nebo dveře vybereš klepnutím a táhnutím posuneš po stěně, i na stěnu jiné místnosti. Ctrl+C / Ctrl+X / Ctrl+V kopíruje a vyjímá místnost i s jejími okny a dveřmi. U vybraných dveří přehodí ⇄ panty a ⇅ směr otevírání. Nové přidáš v panelu vybrané místnosti.<br><br>Společný roh sousedních místností se posouvá s oběma místnostmi naráz; s Alt jen ten jeden.</p>`;
       this._bgUI(side);
       return;
     }
@@ -1536,7 +1550,7 @@ class FnsFloorplanPanel extends HTMLElement {
     if (sel?.cat === "rooms") return this._roomForm(side, o);
     if (sel?.cat === "openings") return this._openingForm(side, o);
     if (!o) {
-      side.innerHTML = `<h2>Úpravy půdorysu</h2><p class="hint">Klepni na světlo, spotřebič, senzor, text, nábytek nebo badge místnosti a uprav ho. Táhnutím ji přesuneš (mřížka 5 cm, s Ctrl nebo Shift jen v jedné ose), šipky posouvají vybraný prvek, Delete ho smaže. Ctrl+klik vybere víc prvků najednou (pak je jde táhnout spolu a seskupit), Ctrl+C / Ctrl+V kopíruje. Vybraný nábytek má úchyty na změnu velikosti a kolečko na otáčení (s Ctrl po 15°). Při tažení se prvek přichytí k ose jiného prvku, ke středu místnosti nebo ke stěně (růžová čára); Alt přichycení vypne.<br><br>Prvky bez entity mají červený přerušovaný okraj, prvky skryté pravidlem jsou bledé.<br><br>Změny se na dashboardu projeví hned po uložení.</p>`;
+      side.innerHTML = `<h2>Úpravy půdorysu</h2><p class="hint">Klepni na světlo, spotřebič, senzor, text, nábytek nebo badge místnosti a uprav ho. Táhnutím ji přesuneš (mřížka 5 cm, s Ctrl nebo Shift jen v jedné ose), šipky posouvají vybraný prvek, Delete ho smaže. Ctrl+klik vybere víc prvků najednou (pak je jde táhnout spolu a seskupit), Ctrl+C / Ctrl+V kopíruje, Ctrl+X vyjme. Vybraný nábytek má úchyty na změnu velikosti a kolečko na otáčení (s Ctrl po 15°). Při tažení se prvek přichytí k ose jiného prvku, ke středu místnosti nebo ke stěně (růžová čára); Alt přichycení vypne.<br><br>Prvky bez entity mají červený přerušovaný okraj, prvky skryté pravidlem jsou bledé.<br><br>Změny se na dashboardu projeví hned po uložení.</p>`;
       return;
     }
     const field = (label, key, value, type = "text", extra = "") =>
@@ -1771,11 +1785,11 @@ class FnsFloorplanPanel extends HTMLElement {
       inp.replaceWith(pick);
     });
     // the rules YAML gets HA's own code editor (syntax colours, entity completion); commits on blur
-    const ta = side.querySelector('textarea[data-k="rules_yaml"]');
+    const ta = side.querySelector('textarea[data-k="rules_yaml"], textarea[data-k^="rule_yaml:"]');
     if (ta && customElements.get("ha-code-editor")) {
       const ed = document.createElement("ha-code-editor");
       Object.assign(ed, { hass: this._hass, mode: "yaml", linewrap: true, autocompleteEntities: true, autocompleteIcons: true });
-      ed.dataset.k = "rules_yaml";
+      ed.dataset.k = ta.dataset.k;
       ed.addEventListener("focusout", () => ed.dispatchEvent(new Event("change")));
       ta.replaceWith(ed);
     }
@@ -1808,6 +1822,8 @@ class FnsFloorplanPanel extends HTMLElement {
       row?.querySelector('[data-a="icon-reset"]')?.remove();
       inp.replaceWith(pick);
     }
+    const one = side.querySelector('[data-k^="rule_yaml:"]'), rule = one && this._targets()[0]?.rules?.[Number(one.dataset.k.split(":")[1])];
+    if (one) this._hass.callWS({ type: "fns_floorplan/yaml/dump", data: rule || {} }).then((r) => (one.value = r.text), () => (one.value = JSON.stringify(rule || {}, null, 1)));
     const ta = side.querySelector('[data-k="rules_yaml"]');
     if (ta && this._aiDraft != null && this._aiFor === this._targets()[0]) ta.value = this._aiDraft;
     else if (ta) {
@@ -1853,8 +1869,8 @@ class FnsFloorplanPanel extends HTMLElement {
     const def = fallback ? "mdi:" + fallback.slice(3).replace(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase() : "";
     if (o.icon === "none") return `<label>Ikona</label><div class="icon-row"><span class="hint" style="flex:1">bez ikony</span><button class="mini" data-a="icon-reset">Vrátit výchozí</button></div>`;
     return `<label>Ikona (prázdná = výchozí)</label><div class="icon-row"><ha-icon icon="${esc(o.icon || def)}"></ha-icon>
-      <input data-k="icon" value="${esc(o.icon || "")}" placeholder="${esc(def || "mdi:…")}">${o.icon ? `<button class="mini" data-a="icon-reset" title="Výchozí ikona">✕</button>` : ""}
-      <button class="mini" data-a="icon-none" title="Nezobrazovat žádnou ikonu">Bez ikony</button></div>`;
+      <input data-k="icon" value="${esc(o.icon || "")}" placeholder="${esc(def || "mdi:…")}">${o.icon ? `<button class="mini" data-a="icon-reset" data-icon="mdi:restore" title="Výchozí ikona">✕</button>` : ""}
+      <button class="mini" data-a="icon-none" data-icon="mdi:eye-off-outline" title="Bez ikony">Bez ikony</button></div>`;
   }
 
   // quick placement inside the item's room: corners, sides, middle
@@ -1926,6 +1942,8 @@ class FnsFloorplanPanel extends HTMLElement {
     const own = this._ownEntity(o);
     // AI suggestions need an ai_task entity that can generate data; remember the fields for the prompt
     const ai = this._aiTask(), draft = this._aiDraft != null && this._aiFor === o;
+    // one rule can be open as YAML (its header button)
+    const yr = this._yamlRule?.o === o ? this._yamlRule.i : null;
     this._ruleFields = fields;
     const opOf = (c) => (c.template != null ? "template" : ["state_not", "above", "below"].find((k) => c[k] != null) || "state");
     const valOf = (c, op) => (op === "template" ? c.template : [].concat(c[op] ?? "").join(", "));
@@ -1951,8 +1969,8 @@ class FnsFloorplanPanel extends HTMLElement {
       // "+ podmínka" sits in the footer of the last condition, next to its delete icon
       const addCond = `<button data-a="ra:cadd:${i}" class="mini">+ podmínka</button>`;
       return `<div class="rule"><div class="rule-h"><span>Pravidlo ${i + 1}</span>
-          <button data-a="ra:up:${i}" data-icon="mdi:arrow-up" title="Posunout výš" ${i ? "" : "disabled"}>↑</button><button data-a="ra:down:${i}" data-icon="mdi:arrow-down" title="Posunout níž" ${i < rules.length - 1 ? "" : "disabled"}>↓</button><button data-a="ra:del:${i}" data-icon="mdi:delete" title="Smazat pravidlo">✕</button></div>
-        ${simple ? conds.map((c, j) => {
+          <button data-a="ra:up:${i}" data-icon="mdi:arrow-up" title="Posunout výš" ${i ? "" : "disabled"}>↑</button><button data-a="ra:down:${i}" data-icon="mdi:arrow-down" title="Posunout níž" ${i < rules.length - 1 ? "" : "disabled"}>↓</button><button data-a="ra:ryaml:${i}" data-icon="${yr === i ? "mdi:form-select" : "mdi:code-braces"}" title="${yr === i ? "Zpět na formulář" : "Upravit v YAML"}">YAML</button><button data-a="ra:del:${i}" data-icon="mdi:delete" title="Smazat pravidlo">✕</button></div>
+        ${yr === i ? `<textarea data-k="rule_yaml:${i}" spellcheck="false">Načítám…</textarea>` : `${simple ? conds.map((c, j) => {
           const op = opOf(c);
           return `<div class="cond">${op === "template" ? "" : `<input data-k="rc:${i}:${j}:entity" value="${esc(c.entity || "")}" placeholder="entita" data-label="Entita" list="ents">
               ${own && c.entity !== own ? `<button class="mini wide" data-a="ra:self:${i}:${j}" title="${esc(own)}">↳ tato entita</button>` : ""}
@@ -1961,17 +1979,17 @@ class FnsFloorplanPanel extends HTMLElement {
             <input data-k="rc:${i}:${j}:value" value="${esc(valOf(c, op))}" placeholder="${op === "template" ? "{{ is_state('timer.x', 'active') }}" : op === "state" || op === "state_not" ? "on, open" : "20"}" data-label="Hodnota" ${op === "template" ? 'class="wide"' : ""}>
             <div class="cond-foot">${j === conds.length - 1 ? addCond : ""}<span class="sp"></span><button data-a="ra:cdel:${i}:${j}" data-icon="mdi:delete-outline" title="Smazat podmínku">✕</button></div></div>`;
         }).join("") + (conds.length ? "" : `<div class="cond-foot">${addCond}<span class="hint">bez podmínky platí vždy</span></div>`)
-          : `<p class="hint">Pravidlo s podmínkou „nebo“ (any) uprav v YAML.</p>`}
-        ${out(i, r)}</div>`;
+          : `<p class="hint">Pravidlo s podmínkou „nebo“ (any) uprav v YAML (tlačítko { } nahoře).</p>`}
+        ${out(i, r)}`}</div>`;
     }).join("");
     return this._sec(`Pravidla: barvy, skrytí${fields.includes("icon") ? ", ikona" : ""}${rules.length ? ` (${rules.length})` : ""}`, `
       <p class="hint">Pro každou vlastnost platí první pravidlo, jehož podmínky platí.</p>${list}
-      <div class="actions"><button data-a="ra:add">+ pravidlo</button><button data-a="ra:yaml">${this._yaml ? "Skrýt YAML" : "Upravit v YAML"}</button>${ai ? `<button data-a="ra:ai">${this._ai ? "Skrýt AI" : "Navrhnout s AI"}</button>` : ""}</div>
+      <div class="actions"><button data-a="ra:add">+ pravidlo</button>${ai ? `<button data-a="ra:ai">${this._ai ? "Skrýt AI" : "Navrhnout s AI"}</button>` : ""}</div>
       ${ai && this._ai ? `<div class="ai-ask"><input data-k="rules_ai" value="${esc(this._aiText || "")}" data-label="Co má pravidlo dělat" placeholder="např. červeně, když je otevřené okno a topí se">
         <div class="actions"><button data-a="ra:aigo" ${this._aiBusy ? "disabled" : ""}>${this._aiBusy ? "AI přemýšlí…" : "Navrhnout"}</button></div></div>
         ${this._aiErr ? `<p class="hint err">${esc(this._aiErr)}</p>` : ""}` : ""}
       ${draft ? `<p class="hint">Návrh od AI (${esc(ai)}). Zkontroluj ho a potvrď, zatím se nic nezměnilo.</p>` : ""}
-      ${this._yaml || draft ? `<textarea data-k="rules_yaml" spellcheck="false" placeholder="- if:\n    - entity: binary_sensor.x\n      state: \"on\"\n  color: red">Načítám…</textarea>` : ""}
+      ${draft ? `<textarea data-k="rules_yaml" spellcheck="false" placeholder="- if:\n    - entity: binary_sensor.x\n      state: \"on\"\n  color: red">Načítám…</textarea>` : ""}
       ${draft ? `<div class="actions"><button data-a="ra:aiok">Použít návrh</button><button data-a="ra:aino">Zahodit</button></div>` : ""}`, rules.length > 0 || draft, "Pravidla");
   }
 
@@ -1987,6 +2005,16 @@ class FnsFloorplanPanel extends HTMLElement {
     if (key === "rules_ai") { this._aiText = value; return true; }
     // while an AI draft is open, the editor edits the draft, not the rules
     if (key === "rules_yaml" && this._aiDraft != null && this._aiFor === first) { this._aiDraft = value; return true; }
+    if (key.startsWith("rule_yaml:")) {
+      // one rule as YAML: a mapping (a one-item list is taken too)
+      let data = await parseYaml(value).catch(() => undefined);
+      if (Array.isArray(data) && data.length === 1) data = data[0];
+      if (!data || typeof data !== "object" || Array.isArray(data)) { inp?.classList.add("bad"); return true; }
+      const n = Number(key.split(":")[1]);
+      for (const t of targets) if (t.rules?.[n]) t.rules[n] = JSON.parse(JSON.stringify(data));
+      this._changed();
+      return true;
+    }
     if (key === "rules_yaml") {
       const data = value.trim() ? await parseYaml(value).catch(() => undefined) : [];
       if (data === undefined) return true;
@@ -2044,7 +2072,7 @@ class FnsFloorplanPanel extends HTMLElement {
   // rule list buttons: add, remove, move a rule, add or remove a condition, YAML view
   _ruleAction(targets, a) {
     const [, op, i, j] = a.split(":");
-    if (op === "yaml") { this._yaml = !this._yaml; return this._form(); }
+    if (op === "ryaml") { const n = Number(i); this._yamlRule = this._yamlRule?.o === targets[0] && this._yamlRule.i === n ? null : { o: targets[0], i: n }; return this._form(); }
     if (op === "ai") { this._ai = !this._ai; this._aiErr = ""; return this._form(); }
     if (op === "aigo") return this._aiSuggest(targets);
     if (op === "aino") { this._aiDraft = null; return this._form(); }
@@ -2317,13 +2345,33 @@ Request (may be in Czech): ${ask}`;
     this._changed();
   }
 
-  // Ctrl+C / Ctrl+V: an in-editor clipboard for items and rooms (not doors, windows or labels)
+  // Ctrl+C / Ctrl+X / Ctrl+V: an in-editor clipboard for items and rooms (a room with its doors and windows; not labels)
   _copy() {
     const sel = this._sel;
     if (!sel || sel.cat === "openings") return false;
     const items = sel.cat === "rooms" ? [["rooms", this._plan.rooms[sel.i]]] : this._picked().map(([cat, o]) => [cat, o]);
     if (!items.length) return false;
-    this._clip = { items: JSON.parse(JSON.stringify(items)), level: this._level, n: 0 };
+    const open = sel.cat === "rooms" ? this._plan.openings.filter((o) => o.room_id === items[0][1].id) : [];
+    this._clip = { items: JSON.parse(JSON.stringify(items)), openings: JSON.parse(JSON.stringify(open)), level: this._level, n: 0 };
+    return true;
+  }
+
+  // cut = copy, then delete (Ctrl+Z brings it back)
+  _cut() {
+    if (!this._copy()) return false;
+    if (this._sel.cat !== "rooms") {
+      const gone = new Set(this._picked().map(([, o]) => o));
+      for (const k of GROUPABLE) this._plan[k] = this._plan[k].filter((o) => !gone.has(o));
+      this._sel = this._multi = null;
+      this._changed();
+      return true;
+    }
+    const r = this._plan.rooms[this._sel.i];
+    this._plan.openings = this._plan.openings.filter((o) => o.room_id !== r.id);
+    delete this._plan.labels[r.id];
+    this._plan.rooms.splice(this._sel.i, 1);
+    this._sel = null;
+    this._changed();
     return true;
   }
 
@@ -2339,6 +2387,7 @@ Request (may be in Czech): ${ask}`;
       if (cat === "rooms") {
         copy.id = uid("room");
         copy.points = copy.points.map(([x, z]) => [r3(x + d), r3(z + d)]);
+        for (const o of c.openings || []) this._plan.openings.push({ ...JSON.parse(JSON.stringify(o)), id: uid(o.type === "window" ? "w" : "d"), room_id: copy.id });
       } else Object.assign(copy, { x: r3(copy.x + d), z: r3(copy.z + d) });
       if (cat === "furniture") copy.id = `f_${Date.now().toString(36)}${this._plan.furniture.length}${k}`;
       if (copy.group) copy.group = groups[copy.group] ||= uid("grp");
@@ -2358,8 +2407,9 @@ Request (may be in Czech): ${ask}`;
       const redo = e.key.toLowerCase() === "y" || e.shiftKey;
       return redo ? this._history(this._redo, this._undo) : this._history(this._undo, this._redo);
     }
-    if ((e.ctrlKey || e.metaKey) && !typing && /^[cv]$/i.test(e.key)) {
+    if ((e.ctrlKey || e.metaKey) && !typing && /^[cxv]$/i.test(e.key)) {
       if (e.key.toLowerCase() === "c") return this._copy() && e.preventDefault();
+      if (e.key.toLowerCase() === "x") return this._cut() && e.preventDefault();
       if (this._clip) { e.preventDefault(); this._paste(); }
       return;
     }
