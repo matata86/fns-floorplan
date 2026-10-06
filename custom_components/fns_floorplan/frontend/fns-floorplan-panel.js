@@ -1023,17 +1023,21 @@ class FnsFloorplanPanel extends HTMLElement {
       const hit = el("line", { x1: A[0], y1: A[1], x2: B[0], y2: B[1], class: "edge-hit" }, svg);
       hit.style.cursor = Math.abs(n[1]) > Math.abs(n[0]) ? "ns-resize" : "ew-resize";
       hit.addEventListener("pointerdown", (e) => {
-        const b0 = [...p], b1 = [...q];
-        const tw = [this._twins(r, b0), this._twins(r, b1)];
+        const b0 = [...p], b1 = [...q], u = [(q[0] - p[0]) / L, (q[1] - p[1]) / L];
+        // corners of other rooms on this wall (its ends or anywhere along it) share it and move along
+        const on = this._plan.rooms.filter((x) => x !== r && this._on(x)).flatMap((x) => x.points.map((o, j) => ({ room: x, k: j, b: [...o] })))
+          .filter(({ b }) => {
+            const w = [b[0] - b0[0], b[1] - b0[1]], t = w[0] * u[0] + w[1] * u[1];
+            return Math.abs(w[0] * n[0] + w[1] * n[1]) < 0.02 && t > -0.02 && t < L + 0.02;
+          });
         // how far each other corner is from the wall, measured square to it
-        const dist = this._otherCorners(r, [...tw[0], ...tw[1]]).map((o) => (o[0] - b0[0]) * n[0] + (o[1] - b0[1]) * n[1]);
+        const dist = this._otherCorners(r, on).map((o) => (o[0] - b0[0]) * n[0] + (o[1] - b0[1]) * n[1]);
         this._press(e, { cat: "rooms", i: ri }, (dx, dz, pt, ev) => {
           const raw = dx * n[0] + dz * n[1], hit = !ev?.altKey && nearest([raw], dist);
-          const d = hit ? hit.t : snap(raw);
-          [[k, b0], [k2, b1]].forEach(([j, b], t) => {
-            r.points[j] = [r3(Math.max(0, b[0] + n[0] * d)), r3(Math.max(0, b[1] + n[1] * d))];
-            if (!ev?.altKey) for (const x of tw[t]) x.room.points[x.k] = [...r.points[j]];
-          });
+          const d = hit ? hit.t : snap(raw), mv = (b) => [r3(Math.max(0, b[0] + n[0] * d)), r3(Math.max(0, b[1] + n[1] * d))];
+          r.points[k] = mv(b0);
+          r.points[k2] = mv(b1);
+          for (const x of on) x.room.points[x.k] = ev?.altKey ? [...x.b] : mv(x.b);
         });
       });
     });
@@ -1594,8 +1598,7 @@ class FnsFloorplanPanel extends HTMLElement {
         ${field("Text, když běží", "text_on", o.text_on || "")}
         <label>Barva, když běží</label>${this._colorPick("color_on", o.color_on)}
         <p class="hint">Výchozí = stejná jako Barva; obě výchozí = barva stavu z motivu.</p>
-        ${this._fxPicker("fx", o.fx, o.kind === "alarm" ? "výchozí (střeženo radar, zabezpečování načítání, poplach blikání)" : domFx ? `výchozí (${DEVICE_FX[domFx].split(" ")[0]})` : "výchozí (rozbíhající kruh)", o.kind === "alarm" ? "radar" : domFx || "ring", DEVICE_ICON[o.kind] || "mdiShapeOutline", "progress", o.progress)}
-        ${o.fx === "countdown" && o.progress ? `<input data-k="progress_total" type="number" min="1" step="1" value="${o.progress_total ?? ""}" data-label="Celková doba (min, nepovinné)">` : ""}`, true)}
+        ${this._fxPicker("fx", o.fx, o.kind === "alarm" ? "výchozí (střeženo radar, zabezpečování načítání, poplach blikání)" : domFx ? `výchozí (${DEVICE_FX[domFx].split(" ")[0]})` : "výchozí (rozbíhající kruh)", o.kind === "alarm" ? "radar" : domFx || "ring", DEVICE_ICON[o.kind] || "mdiShapeOutline", "progress", o.progress, undefined, undefined, o.progress_total)}`, true)}
         ${this._sec("Vzhled", `${field("Text pod ikonou", "text", o.text || "")}
         <p class="hint">Může být šablona, např. {{ states('sensor.x') }} °C.</p>
         <label>Barva</label>${this._colorPick("color", o.color)}
@@ -1653,12 +1656,13 @@ class FnsFloorplanPanel extends HTMLElement {
   // swaps plain inputs and selects for HA's ha-selector (same data-k, same set callback)
   // tile picker of the circle animations, each tile plays its animation with the card's own CSS
   // a countdown tile adds an entity field (progKey) that drives the arc; defText names the default tile, title the label above
-  _fxPicker(key, value, defLabel, defFx, iconName, progKey, progValue, defText = "výchozí", title = "Animace kruhu, když běží") {
+  _fxPicker(key, value, defLabel, defFx, iconName, progKey, progValue, defText = "výchozí", title = "Animace kruhu, když běží", total) {
     const tile = (v, anim, text, title) => `<button class="fxt${(value || "") === v ? " on" : ""}" data-fx="${v}" title="${esc(title)}">
       <svg viewBox="-34 -34 68 68" width="56" height="56"><g class="dev on dev-generic" data-fx="${anim}"><circle r="17" class="badge"/><circle r="17" class="ring"/><g class="fx">${FX_SVG[anim] || ""}</g><g class="icon">${iconHtml(null, 20, iconName, "glyph")}</g></g></svg>
       <span>${text}</span></button>`;
     const prog = value === "countdown" && progKey ? `<input data-k="${progKey}" value="${esc(progValue || "")}" placeholder="timer, % průběhu, zbývající čas nebo čas konce" data-label="Průběh odpočtu (entita)" list="ents">
-      <p class="hint">Bez entity se odpočet jen dekorativně opakuje.</p>` : "";
+      <input data-k="${progKey}_total" type="number" min="0" step="0.5" value="${total ?? ""}" data-label="Doba (min)">
+      <p class="hint">Entita, nebo jen doba: odpočet pak běží od chvíle, kdy stav nastal. U entity se zbývajícím časem je doba celková délka. Bez obojího se kruh jen dekorativně opakuje.</p>` : "";
     return `<label>${title}</label><div class="app fxapp" data-mode="day"><div class="fxpick" data-fx-key="${key}">${tile("", defFx, defText, defLabel)}${Object.entries(DEVICE_FX).map(([k, t]) => tile(k, k, t.split(" ")[0], t)).join("")}</div></div>${prog}`;
   }
 
@@ -1933,9 +1937,9 @@ class FnsFloorplanPanel extends HTMLElement {
       if (fields.includes("wave") && o.kind === "radiator") parts.push(`<span>Vlny</span>${this._colorPick(`ro:${i}:wave`, r.wave)}`);
       if (fields.includes("glow")) parts.push(`<label class="chk"><input type="checkbox" data-k="ro:${i}:glow" ${r.glow ? "checked" : ""}> záře</label>`);
       if (fields.includes("animate")) parts.push(`<select data-k="ro:${i}:animate" data-label="Animace"><option value="">animace podle stavu</option><option value="true" ${r.animate === true ? "selected" : ""}>animovat</option><option value="false" ${r.animate === false ? "selected" : ""}>neanimovat</option></select>`);
-      if (fields.includes("fx")) parts.push(`<div style="flex:1 1 100%">${(o.kind ? this._fxPicker(`ro:${i}:fx`, r.fx, "podle prvku", o.kind === "alarm" ? "radar" : "ring", DEVICE_ICON[o.kind] || "mdiShapeOutline", `ro:${i}:progress`, r.progress, "podle prvku", "Animace kruhu")
+      if (fields.includes("fx")) parts.push(`<div style="flex:1 1 100%">${(o.kind ? this._fxPicker(`ro:${i}:fx`, r.fx, "podle prvku", o.kind === "alarm" ? "radar" : "ring", DEVICE_ICON[o.kind] || "mdiShapeOutline", `ro:${i}:progress`, r.progress, "podle prvku", "Animace kruhu", r.progress_total)
         // lights, strips, the dock and furniture have no animation of their own: empty = none
-        : this._fxPicker(`ro:${i}:fx`, r.fx === "none" ? "" : r.fx, "bez animace", "none", FURNITURE[o.type]?.[1] || "mdiShapeOutline", `ro:${i}:progress`, r.progress, "žádná", "Animace kruhu").replace(/<button class="fxt[^"]*" data-fx="none"[\s\S]*?<\/button>/, ""))}</div>`);
+        : this._fxPicker(`ro:${i}:fx`, r.fx === "none" ? "" : r.fx, "bez animace", "none", FURNITURE[o.type]?.[1] || "mdiShapeOutline", `ro:${i}:progress`, r.progress, "žádná", "Animace kruhu", r.progress_total).replace(/<button class="fxt[^"]*" data-fx="none"[\s\S]*?<\/button>/, ""))}</div>`);
       if (fields.includes("hide")) parts.push(`<label class="chk"><input type="checkbox" data-k="ro:${i}:hide" ${r.hide ? "checked" : ""}> skrýt</label>`);
       if (o.points) parts.push(`<span>Průhlednost</span><input type="number" step="0.05" min="0" max="1" data-k="ro:${i}:opacity" value="${r.opacity ?? ""}" placeholder="0,14" style="width:70px">`);
       if (fields.includes("icon")) parts.push(`<input type="text" data-k="ro:${i}:icon" value="${esc(r.icon || "")}" placeholder="ikona, např. mdi:timer-sand (none = bez ikony)">`);
@@ -2025,7 +2029,7 @@ class FnsFloorplanPanel extends HTMLElement {
       r.if = conds;
     } else {
       const v = b === "glow" || b === "hide" ? value === true : b === "animate" ? (value === "" ? undefined : value === "true")
-        : b === "opacity" ? (value === "" ? undefined : Number(value)) : b === "color" || b === "background" || b === "wave" ? color(value) : value;
+        : b === "opacity" || b === "progress_total" ? (value === "" ? undefined : Number(String(value).replace(",", ".")) || undefined) : b === "color" || b === "background" || b === "wave" ? color(value) : value;
       if (v === undefined || v === "" || v === false) delete r[b]; else r[b] = v;
     }
     for (const t of targets) t.rules = JSON.parse(JSON.stringify(rules));
