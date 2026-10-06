@@ -21,9 +21,21 @@ Switch the editor to **Rooms** to edit the shape of the flat. Everything else is
 - Drag the room itself to **move the whole room**.
 - Arrow keys nudge the selected room, corner or wall by 5 cm.
 
+![Dragging a whole wall: the lengths of the neighbouring walls update.](../../assets/screenshots/gif/drag-wall.gif){ loading=lazy }
+
+*Dragging a whole wall: the lengths of the neighbouring walls update.*
+
+![Moving a whole room by dragging its floor.](../../assets/screenshots/gif/move-room.gif){ loading=lazy }
+
+*Moving a whole room by dragging its floor.*
+
 ## Snapping to neighbours
 
 Corners, walls and whole rooms snap to corners and walls of other rooms on the same floor within 15 cm, shown by a pink guide line. Hold ++alt++ to turn snapping off. Otherwise the grid of 5 cm applies.
+
+![A corner snaps to the corner of the neighbouring room.](../../assets/screenshots/gif/corner-snap-neighbour.gif){ loading=lazy }
+
+*A corner snaps to the corner of the neighbouring room.*
 
 ## Shared walls
 
@@ -34,6 +46,10 @@ Each room has its own polygon, so a wall between two rooms is two walls on top o
 - The selected room shows the **length of every wall** (outside the room), live while dragging.
 - Hold ++ctrl++ while dragging a corner: the wall to the neighbouring corner snaps to **15 degree steps**, the length to 5 cm. Near the intersection of the two walls the corner jumps to it, which gives a right angle.
 - The walls of the selected corner are marked: a green **straight** marker when a wall is exactly horizontal or vertical, otherwise an orange marker with the angle.
+
+![Dragging a corner with Ctrl held: 15 degree steps and the green "straight" marker.](../../assets/screenshots/gif/drag-corner-snap.gif){ loading=lazy }
+
+*Dragging a corner with Ctrl held: 15 degree steps and the green "straight" marker.*
 
 ## Name, icon and climate
 

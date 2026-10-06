@@ -54,6 +54,10 @@ Ein älterer Plan mit einem `vacuum`-Schlüssel auf oberster Ebene (`entity`, `r
 | `docked`, `charging` | Er sitzt in der Station. Ein **Ring um ihn zeigt den Akku** (bei 100 % voll), er atmet nur, wenn der Akkustand unbekannt ist. Der Roboter hat die Designfarbe des Staubsaugerzustands |
 | `idle`, `paused`, `error` | Er steht **in seinem Raum** auf einer freien Stelle und blinkt (der Badge-Rand hat die Zustandsfarbe, Fehler sind rot) |
 
+![Der Roboter verlässt die Station, fährt durch den Durchgang in die Küche und kehrt zur Station zurück.](../assets/screenshots/gif/vacuum-driving.gif){ loading=lazy }
+
+*Der Roboter verlässt die Station, fährt durch den Durchgang in die Küche und kehrt zur Station zurück.*
+
 - Zwischen Räumen und zurück zur Station fährt er **durch Türen und Durchgänge** (eine Wegsuche über andere Öffnungen als Fenster; die andere Seite einer Öffnung ist der Raum 35 cm hinter der Wand). Gibt es keinen Weg, fährt er geradeaus.
 - Wenn die Seite lädt und der Roboter nicht in der Station ist, erscheint er direkt in seinem Raum, statt aus der Station auszufahren.
 - Der Roboter behält beim Fahren die Ausrichtung, die er in der Station hat.

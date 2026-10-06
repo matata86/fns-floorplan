@@ -13,6 +13,14 @@ Dveře a okna („otvory“) patří ke stěně místnosti. Upravuješ je v rež
 
 Přidání nebo odebrání rohu místnosti otvor nikdy neposune z místa, kde byl.
 
+![Posunutí dveří po stěně a přetažení na stěnu jiné místnosti.](../../assets/screenshots/gif/drag-opening.gif){ loading=lazy }
+
+*Posunutí dveří po stěně a přetažení na stěnu jiné místnosti.*
+
+![Dvě úchytky vybraných dveří přehodí stranu pantů a směr otevírání.](../../assets/screenshots/gif/flip-door.gif){ loading=lazy }
+
+*Dvě úchytky vybraných dveří přehodí stranu pantů a směr otevírání.*
+
 ## Nastavení
 
 | Nastavení | Klíč | Význam |

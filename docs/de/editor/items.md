@@ -4,6 +4,10 @@ Elemente sind alles auf dem Plan, was keine Wand ist: Lichter, Geräte, Sensoren
 
 ![Das Menü „Hinzufügen“ und das Formular einer ausgewählten Deckenleuchte](../../assets/screenshots/de/items-add-menu.png){ loading=lazy }
 
+![Ein Licht über das Menü „Hinzufügen“ einfügen und auf dem Plan platzieren.](../../assets/screenshots/gif/add-item.gif){ loading=lazy }
+
+*Ein Licht über das Menü „Hinzufügen“ einfügen und auf dem Plan platzieren.*
+
 ## Gemeinsame Einstellungen
 
 | Einstellung | Schlüssel | Bedeutung |
@@ -136,6 +140,12 @@ texts:
 
 ![Möbel in einem Wohnzimmer mit Griffen um ein ausgewähltes Sofa](../../assets/screenshots/de/items-furniture.png){ loading=lazy }
 
+![Ein Sofa mit den Griffen skalieren und drehen (Strg = 15-Grad-Schritte).](../../assets/screenshots/gif/resize-furniture.gif){ loading=lazy }
+
+*Ein Sofa mit den Griffen skalieren und drehen (Strg = 15-Grad-Schritte).*
+
+![Das Formular der Saugroboter-Station mit dem Abschnitt für die Zeit, in der er saugt](../../assets/screenshots/de/vacuum-form.png){ loading=lazy }
+
 ## Reihenfolge
 
 Die Stapelreihenfolge wird nur unter Elementen derselben Art verglichen. Nutze **In den Vordergrund / Nach vorn / Nach hinten / In den Hintergrund** im Formular. Der Saugroboter hat eigene Regeln, siehe [Saugroboter](../robot-vacuum.md#layer-and-stacking).
@@ -158,6 +168,8 @@ Jedes Element (auch Türen und Fenster) akzeptiert `tap_action`, `double_tap_act
 | `none` | Tut nichts |
 
 Standards: Ein Licht schaltet beim Tippen um und zeigt beim Halten die Details; ein Gerät, ein Staubsauger, eine Tür und ein Fenster zeigen die Details. Ein Doppeltippen verzögert das einfache Tippen um 250 ms, aber nur, wenn eine Doppeltipp-Aktion gesetzt ist. Fährst du mit der Maus über ein Element, erscheint ein Tooltip: der Name und was Tippen, Doppeltippen und Halten bewirken.
+
+![Die Aktionen für Tippen, Doppeltippen und Halten im Formular eines Elements](../../assets/screenshots/de/item-actions.png){ loading=lazy }
 
 ```yaml
 tap_action:

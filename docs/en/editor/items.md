@@ -4,6 +4,10 @@ Items are everything on the plan that is not a wall: lights, appliances, sensors
 
 ![The Add menu and the form of a selected ceiling light](../../assets/screenshots/en/items-add-menu.png){ loading=lazy }
 
+![Adding a light from the Add menu and placing it on the plan.](../../assets/screenshots/gif/add-item.gif){ loading=lazy }
+
+*Adding a light from the Add menu and placing it on the plan.*
+
 ## Common settings
 
 | Setting | Key | Meaning |
@@ -136,6 +140,12 @@ texts:
 
 ![Furniture in a living room with handles around a selected sofa](../../assets/screenshots/en/items-furniture.png){ loading=lazy }
 
+![Resizing a sofa with the handles and rotating it (Ctrl = 15 degree steps).](../../assets/screenshots/gif/resize-furniture.gif){ loading=lazy }
+
+*Resizing a sofa with the handles and rotating it (Ctrl = 15 degree steps).*
+
+![The form of the robot vacuum dock with the section for the time while it cleans](../../assets/screenshots/en/vacuum-form.png){ loading=lazy }
+
 ## Layers
 
 The stacking order is only compared among items of the same kind. Use **To front / Forward / Backward / To back** in the form. The robot vacuum has its own rules, see [Robot vacuum](../robot-vacuum.md#layer-and-stacking).
@@ -158,6 +168,8 @@ Every item (also doors and windows) accepts `tap_action`, `double_tap_action` an
 | `none` | Do nothing |
 
 Defaults: a light toggles on tap and shows details on hold; an appliance, a vacuum, a door and a window show details. A double tap delays a single tap by 250 ms, but only when a double tap action is set. Hovering an item with the mouse shows a tooltip: the name and what tap, double tap and hold do.
+
+![The tap, double tap and hold actions in the form of an item](../../assets/screenshots/en/item-actions.png){ loading=lazy }
 
 ```yaml
 tap_action:

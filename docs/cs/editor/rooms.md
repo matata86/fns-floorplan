@@ -21,9 +21,21 @@ Přepni editor na **Místnosti** a upravuj tvar bytu. Vše ostatní je v tomto r
 - Tažením za samotnou místnost **přesuneš celou místnost**.
 - Šipky posunou vybranou místnost, roh nebo stěnu o 5 cm.
 
+![Tažení celé stěny: délky sousedních stěn se přepočítají.](../../assets/screenshots/gif/drag-wall.gif){ loading=lazy }
+
+*Tažení celé stěny: délky sousedních stěn se přepočítají.*
+
+![Přesun celé místnosti tažením za podlahu.](../../assets/screenshots/gif/move-room.gif){ loading=lazy }
+
+*Přesun celé místnosti tažením za podlahu.*
+
 ## Přichytávání k sousedům
 
 Rohy, stěny i celé místnosti se přichytávají k rohům a stěnám ostatních místností na stejném patře do vzdálenosti 15 cm, což ukazuje růžová vodicí čára. S ++alt++ přichytávání vypneš. Jinak platí mřížka 5 cm.
+
+![Roh se přichytí k rohu sousední místnosti.](../../assets/screenshots/gif/corner-snap-neighbour.gif){ loading=lazy }
+
+*Roh se přichytí k rohu sousední místnosti.*
 
 ## Sdílené stěny
 
@@ -34,6 +46,10 @@ Každá místnost má vlastní mnohoúhelník, takže stěna mezi dvěma místno
 - Vybraná místnost ukazuje **délku každé stěny** (vně místnosti), živě při tažení.
 - Drž ++ctrl++ při tažení rohu: stěna k sousednímu rohu se přichytí po **15 stupních** a délka po 5 cm. V blízkosti průsečíku obou stěn roh do průsečíku skočí, čímž vznikne pravý úhel.
 - Stěny vybraného rohu jsou označené: zelená značka **rovně**, když je stěna přesně vodorovná nebo svislá, jinak oranžová značka s úhlem.
+
+![Tažení rohu s podrženým Ctrl: kroky po 15 stupních a zelená značka „rovně“.](../../assets/screenshots/gif/drag-corner-snap.gif){ loading=lazy }
+
+*Tažení rohu s podrženým Ctrl: kroky po 15 stupních a zelená značka „rovně“.*
 
 ## Název, ikona a klima
 

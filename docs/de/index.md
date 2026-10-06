@@ -7,6 +7,10 @@ FNS Floorplan verwandelt dein Home-Assistant-Dashboard in einen lebendigen Grund
 
 ![Eine animierte Grundriss-Karte mit einer Wohnung, eingeschalteten Lichtern, einer offenen Tür und einem Saugroboter](../assets/screenshots/de/card-overview.png){ loading=lazy }
 
+| Dunkles Design | Helles Design |
+|---|---|
+| ![Die Karte im dunklen Design](../assets/screenshots/de/card-dark.png){ loading=lazy } | ![Die Karte im hellen Design](../assets/screenshots/de/card-light.png){ loading=lazy } |
+
 Er besteht aus zwei Teilen, die zusammen als eine HACS-Integration installiert werden:
 
 - **die Karte** `custom:fns-floorplan-card`, die du auf jedes Dashboard legst,

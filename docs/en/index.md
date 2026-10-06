@@ -7,6 +7,10 @@ FNS Floorplan turns your Home Assistant dashboard into a living floor plan. Ligh
 
 ![An animated floor plan card showing a flat with lights on, an open door and a robot vacuum](../assets/screenshots/en/card-overview.png){ loading=lazy }
 
+| Dark theme | Light theme |
+|---|---|
+| ![The card in the dark theme](../assets/screenshots/en/card-dark.png){ loading=lazy } | ![The card in the light theme](../assets/screenshots/en/card-light.png){ loading=lazy } |
+
 It consists of two parts that are installed together as one HACS integration:
 
 - **the card** `custom:fns-floorplan-card`, which you put on any dashboard,

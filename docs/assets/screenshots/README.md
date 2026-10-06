@@ -1,24 +1,64 @@
-# Screenshots
+# Screenshots and GIFs
 
-Every screenshot referenced by the README and the docs. Create one set per language in `en/`, `cs/` and `de/` with the same file names (the UI language of the editor and card differs, the demo data does not matter). PNG, about 1600 px wide for full views, a crop for details. Use the invented demo plan, never real data.
+Taken from a local test Home Assistant (demo integration, invented demo plan from `tools/demo/plan.json`), never from real data. Still images exist once per UI language in `en/`, `cs/` and `de/` with the same file name; GIFs are language-neutral (English UI) in `gif/`.
 
-| Name | What it should show | Used on |
-|------|---------------------|---------|
-| `card-overview.png` | The whole card on a dashboard: a flat with lights on, an open door, a robot vacuum, a running appliance | README, `index.md` |
-| `hacs-custom-repository.png` | HACS Custom repositories dialog with the repository URL and category Integration filled in | `installation.md` |
-| `add-integration.png` | The Add integration dialog with FNS Floorplan found | `installation.md` |
-| `editor-overview.png` | The editor with a three-room flat and the side panel open | `quick-start.md` |
-| `editor-layout.png` | Editor with the top bar, the plan and the side panel; annotate the parts if possible | `editor/index.md` |
-| `editor-tracing-image.png` | A scanned drawing under the rooms in the editor | `editor/index.md` |
-| `rooms-mode.png` | Rooms mode, one room selected with corner points and wall lengths | `editor/rooms.md` |
-| `openings-editor.png` | A door with its swing arc and a window with a blind, selected opening | `editor/openings.md` |
-| `items-add-menu.png` | The Add menu open next to the form of a selected ceiling light | `editor/items.md` |
-| `items-furniture.png` | A living room with furniture and handles around a selected sofa | `editor/items.md` |
-| `rules-editor.png` | The Rules section of an appliance with two rules (entity mode and Jinja mode) | `editor/rules.md` |
-| `vacuum-cleaning.png` | The robot vacuum driving through a room with its trail | `robot-vacuum.md` |
-| `card-editor.png` | The card editor in the dashboard with the options and the Edit floor plan button | `card.md` |
-| `card-temperature.png` | Rooms tinted by temperature with the colour legend under the plan | `card.md` |
-| `card-replay.png` | The day replay bar under the plan | `card.md` |
-| `room-panel.png` | The room panel with thermostat, lights and a camera | `room-panel.md` |
-| `history-list.png` | The History list with several revisions | `history.md` |
-| `check-list.png` | The Check list with a missing and an unavailable entity | `history.md` |
+| File | Used on |
+|------|---------|
+| `{en,cs,de}/add-integration.png` | `installation.md` |
+| `{en,cs,de}/card-dark.png` | `card.md`, `index.md` |
+| `{en,cs,de}/card-editor.png` | `card.md`, `installation.md` |
+| `{en,cs,de}/card-humidity.png` | `card.md` |
+| `{en,cs,de}/card-light.png` | `card.md`, `index.md` |
+| `{en,cs,de}/card-mode-day.png` | `card.md` |
+| `{en,cs,de}/card-mode-night.png` | `card.md` |
+| `{en,cs,de}/card-overview.png` | `index.md`, `README.md` |
+| `{en,cs,de}/card-picker.png` | `installation.md` |
+| `{en,cs,de}/card-replay.png` | `card.md` |
+| `{en,cs,de}/card-temperature.png` | `card.md` |
+| `{en,cs,de}/card-yaml.png` | `installation.md` |
+| `{en,cs,de}/editor-layout.png` | `editor/index.md` |
+| `{en,cs,de}/editor-overview.png` | `quick-start.md` |
+| `{en,cs,de}/editor-tracing-image.png` | `editor/index.md` |
+| `{en,cs,de}/history-list.png` | `history.md` |
+| `{en,cs,de}/check-list.png` | `history.md` |
+| `{en,cs,de}/integration-options.png` | `installation.md` |
+| `{en,cs,de}/integration-page.png` | `installation.md` |
+| `{en,cs,de}/item-actions.png` | `editor/items.md` |
+| `{en,cs,de}/items-add-menu.png` | `editor/items.md` |
+| `{en,cs,de}/items-furniture.png` | `editor/items.md` |
+| `{en,cs,de}/levels-menu.png` | `editor/index.md` |
+| `{en,cs,de}/openings-editor.png` | `editor/openings.md` |
+| `{en,cs,de}/room-panel-hall.png` | `room-panel.md` |
+| `{en,cs,de}/room-panel-light.png` | `room-panel.md` |
+| `{en,cs,de}/room-panel.png` | `room-panel.md` |
+| `{en,cs,de}/rooms-mode.png` | `editor/rooms.md` |
+| `{en,cs,de}/rules-editor.png` | `editor/rules.md` |
+| `{en,cs,de}/rule-yaml.png` | `editor/rules.md` |
+| `{en,cs,de}/sidebar-entry.png` | `installation.md` |
+| `{en,cs,de}/vacuum-cleaning.png` | `robot-vacuum.md` |
+| `{en,cs,de}/vacuum-form.png` | `editor/items.md` |
+| `gif/add-item.gif` | `editor/items.md` |
+| `gif/alarm-triggered.gif` | `card.md` |
+| `gif/blind-closing.gif` | `card.md` |
+| `gif/copy-paste.gif` | `editor/index.md` |
+| `gif/corner-snap-neighbour.gif` | `editor/rooms.md` |
+| `gif/day-night.gif` | `card.md` |
+| `gif/dishwasher-countdown.gif` | `card.md` |
+| `gif/door-opening.gif` | `card.md`, `README.md` |
+| `gif/drag-corner-snap.gif` | `editor/rooms.md` |
+| `gif/drag-opening.gif` | `editor/openings.md` |
+| `gif/drag-wall.gif` | `editor/rooms.md`, `README.md` |
+| `gif/fireplace.gif` | `card.md` |
+| `gif/flip-door.gif` | `editor/openings.md` |
+| `gif/light-colour.gif` | `card.md` |
+| `gif/lights-on.gif` | `card.md`, `README.md` |
+| `gif/motion-ripple.gif` | `card.md` |
+| `gif/move-room.gif` | `editor/rooms.md` |
+| `gif/multi-select.gif` | `editor/index.md` |
+| `gif/resize-furniture.gif` | `editor/items.md` |
+| `gif/room-panel-open.gif` | `room-panel.md` |
+| `gif/rotate-narrow.gif` | `installation.md` |
+| `gif/temperature-layer.gif` | `card.md` |
+| `gif/vacuum-driving.gif` | `robot-vacuum.md` |
+| `gif/washing-machine.gif` | `card.md` |
+| `gif/window-opening.gif` | `card.md` |

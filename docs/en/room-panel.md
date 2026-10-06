@@ -2,7 +2,15 @@
 
 Tap a room on the card and an **off-canvas panel** slides in from the right edge of the screen. It looks like an area dashboard of Home Assistant: the theme background, a header with the room icon, name, temperature and humidity, and tiles in two columns. Close it with the cross, ++esc++ or a click outside.
 
-![The room panel with a thermostat, lights and a camera](../assets/screenshots/en/room-panel.png){ loading=lazy }
+| Dark theme | Light theme |
+|---|---|
+| ![The panel of the living room: thermostat, lights, a window, a switch and the vacuum](../assets/screenshots/en/room-panel.png){ loading=lazy } | ![The same panel in the light theme](../assets/screenshots/en/room-panel-light.png){ loading=lazy } |
+
+![The panel of the hall: lights, a camera, doors, an alarm and a lock](../assets/screenshots/en/room-panel-hall.png){ loading=lazy }
+
+![Opening the panel, setting a light's brightness and closing it.](../assets/screenshots/gif/room-panel-open.gif){ loading=lazy }
+
+*Opening the panel, setting a light's brightness and closing it.*
 
 ## Sections
 

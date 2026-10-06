@@ -2,7 +2,15 @@
 
 Tippe auf der Karte auf einen Raum, und von der rechten Bildschirmkante fährt ein **seitliches Panel** ein. Es sieht aus wie ein Bereichs-Dashboard von Home Assistant: der Designhintergrund, eine Kopfzeile mit Raumsymbol, Name, Temperatur und Luftfeuchtigkeit und Kacheln in zwei Spalten. Schließe es mit dem Kreuz, ++esc++ oder einem Klick außerhalb.
 
-![Das Raum-Panel mit einem Thermostat, Lichtern und einer Kamera](../assets/screenshots/de/room-panel.png){ loading=lazy }
+| Dunkles Design | Helles Design |
+|---|---|
+| ![Das Panel des Wohnzimmers: Thermostat, Lichter, ein Fenster, ein Schalter und der Saugroboter](../assets/screenshots/de/room-panel.png){ loading=lazy } | ![Dasselbe Panel im hellen Design](../assets/screenshots/de/room-panel-light.png){ loading=lazy } |
+
+![Das Panel des Flurs: Lichter, eine Kamera, Türen, ein Alarm und ein Schloss](../assets/screenshots/de/room-panel-hall.png){ loading=lazy }
+
+![Das Panel öffnen, die Helligkeit eines Lichts einstellen und das Panel schließen.](../assets/screenshots/gif/room-panel-open.gif){ loading=lazy }
+
+*Das Panel öffnen, die Helligkeit eines Lichts einstellen und das Panel schließen.*
 
 ## Abschnitte
 

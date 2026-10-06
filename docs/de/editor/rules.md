@@ -89,6 +89,8 @@ Ohne eine dieser Angaben ist der Countdown ein dekorativer Zyklus von 4 Sekunden
 
 Jede Regel hat in ihrer Kopfzeile eine Schaltfläche **{ }**, die nur diese Regel als YAML im Code-Editor von Home Assistant öffnet (Syntaxfarben, Zeilennummern, Vorschläge für Entitäten und Symbole). Die Änderung wird übernommen, wenn du den Editor verlässt. Dasselbe YAML siehst du im [Planformat](../reference/plan-format.md#rules).
 
+![Eine Regel als YAML geöffnet über ihre Kopfzeile](../../assets/screenshots/de/rule-yaml.png){ loading=lazy }
+
 ## KI-Assistent (AI Task)
 
 Wenn dein Home Assistant eine `ai_task.*`-Entität hat, die Datengenerierung unterstützt, zeigt der Abschnitt Regeln **Mit KI vorschlagen**. Beschreibe in einem Satz, was du willst. Der Editor sendet die Beschreibung zusammen mit dem Regelformat, den für dieses Element erlaubten Ausgaben, seiner Entität (Zustand und Attribute), den aktuellen Regeln und einer Liste deiner Entitäten (bis zu 1500, ohne update-, event-, scene- und script-Entitäten) an `ai_task.generate_data`. Die Antwort kommt als YAML und öffnet sich als **Entwurf**; erst **Vorschlag übernehmen** ersetzt die Regeln. Lässt sich die Anfrage nicht erfüllen, antwortet der Assistent mit einem Satz, den du als Meldung siehst.

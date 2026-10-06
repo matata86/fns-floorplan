@@ -36,6 +36,10 @@ Siehe [Räume](rooms.md), [Türen und Fenster](openings.md) und [Elemente](items
 - **Esc** hebt die Auswahl auf.
 - Beim Ziehen zeigen rosafarbene **Fanglinien** die Ausrichtung an anderen Elementen, an der Raummitte und an Wänden.
 
+![Strg+Klick wählt zwei Elemente aus, danach werden sie gemeinsam gezogen.](../../assets/screenshots/gif/multi-select.gif){ loading=lazy }
+
+*Strg+Klick wählt zwei Elemente aus, danach werden sie gemeinsam gezogen.*
+
 ## Tastenkürzel { #keyboard-shortcuts }
 
 | Kürzel | Aktion |
@@ -53,6 +57,10 @@ Siehe [Räume](rooms.md), [Türen und Fenster](openings.md) und [Elemente](items
 
 Auf macOS verwendest du ++cmd++ statt ++ctrl++.
 
+![Strg+C und Strg+V duplizieren ein Element; die Kopie ist versetzt und ausgewählt.](../../assets/screenshots/gif/copy-paste.gif){ loading=lazy }
+
+*Strg+C und Strg+V duplizieren ein Element; die Kopie ist versetzt und ausgewählt.*
+
 ## Rückgängig, Wiederholen und Speichern
 
 Jede Änderung landet auf dem Rückgängig-Stapel (100 Schritte). Die Revision wird nie zurückgesetzt. Der Editor warnt dich, wenn du mit nicht gespeicherten Änderungen gehst.
@@ -66,6 +74,8 @@ Gespeicherte Pläne bleiben erhalten: siehe [Verlauf und Prüfung](../history.md
 Ein Plan ohne Etagen hat eine Etage. Im Dreipunktmenü **Weitere Aktionen** kannst du mit **Neue Etage…**, **Etage umbenennen…** und **Etage löschen…** eine Etage hinzufügen, umbenennen oder löschen (eine gelöschte Etage nimmt ihre Räume und Elemente mit; die erste Etage lässt sich nicht löschen). Eine neue Etage startet im Modus **Räume**.
 
 Räume und Elemente gehören über den Schlüssel `level` zu einer Etage; ohne ihn gehören sie zur ersten Etage. Türen und Fenster folgen ihrem Raum. Die Etagenauswahl oben schaltet die bearbeitete Etage um, und die Karte zeigt Etagen-Tabs. Siehe das [Planformat](../reference/plan-format.md#levels).
+
+![Das Drei-Punkte-Menü mit der Etagenverwaltung und die Etagenauswahl](../../assets/screenshots/de/levels-menu.png){ loading=lazy }
 
 ## Vorlagenbild zum Nachzeichnen { #tracing-image }
 

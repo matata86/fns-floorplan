@@ -54,6 +54,10 @@ Starší půdorys s klíčem `vacuum` na nejvyšší úrovni (`entity`, `room_se
 | `docked`, `charging` | Sedí v doku. **Kruh kolem něj ukazuje baterii** (při 100 % plný), jen dýchá, když baterie není známá. Robot má barvu motivu podle stavu vysavače |
 | `idle`, `paused`, `error` | Stojí **ve své místnosti** na volném místě a bliká (rámeček odznaku má barvu stavu, chyby jsou červené) |
 
+![Robot vyjede z doku, projede průchodem do kuchyně a vrátí se do doku.](../assets/screenshots/gif/vacuum-driving.gif){ loading=lazy }
+
+*Robot vyjede z doku, projede průchodem do kuchyně a vrátí se do doku.*
+
 - Mezi místnostmi i zpět do doku jezdí **dveřmi a průchody** (hledání cesty přes otvory jiné než okna; druhá strana otvoru je místnost 35 cm za zdí). Když cesta neexistuje, jede přímo.
 - Při načtení stránky se robot, který není v doku, objeví rovnou ve své místnosti a nevyjíždí z doku.
 - Robot při jízdě zachovává orientaci, kterou má v doku.

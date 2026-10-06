@@ -13,6 +13,14 @@ Doors and windows ("openings") belong to a wall of a room. Edit them in the **Ro
 
 Adding or removing a room corner never moves an opening away from where it was.
 
+![Sliding a door along its wall and dragging it onto the wall of another room.](../../assets/screenshots/gif/drag-opening.gif){ loading=lazy }
+
+*Sliding a door along its wall and dragging it onto the wall of another room.*
+
+![The two handles of a selected door swap the hinge side and the opening direction.](../../assets/screenshots/gif/flip-door.gif){ loading=lazy }
+
+*The two handles of a selected door swap the hinge side and the opening direction.*
+
 ## Settings
 
 | Setting | Key | Meaning |

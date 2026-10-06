@@ -16,8 +16,6 @@ FNS Floorplan není ve výchozím seznamu HACS, přidáš ho proto jako vlastní
 4. V HACS vyhledej **FNS Floorplan** a klikni na **Stáhnout**.
 5. **Restartuj Home Assistant** (Nastavení, Systém, Restartovat).
 
-![Dialog Vlastní repozitáře v HACS s vyplněným repozitářem FNS Floorplan](../assets/screenshots/cs/hacs-custom-repository.png){ loading=lazy }
-
 ## Ruční instalace
 
 1. Stáhni nejnovější verzi ze [stránky s vydáními](https://github.com/matata86/fns-floorplan/releases) nebo naklonuj repozitář.
@@ -31,6 +29,8 @@ FNS Floorplan není ve výchozím seznamu HACS, přidáš ho proto jako vlastní
 
 ![Integrace FNS Floorplan v dialogu Přidat integraci](../assets/screenshots/cs/add-integration.png){ loading=lazy }
 
+![Stránka integrace FNS Floorplan v Nastavení, Zařízení a služby](../assets/screenshots/cs/integration-page.png){ loading=lazy }
+
 Integrace kartu zaregistruje sama, takže nemusíš ručně přidávat zdroj do dashboardu.
 
 ## Možnosti
@@ -42,6 +42,24 @@ Klikni na **Konfigurovat** u integrace.
 | Zobrazit editor v postranním menu | zapnuto | Přidá do postranního menu položku **Půdorys** (jen pro administrátory). |
 
 Editor je vždy dostupný na adrese `/fns-floorplan` (například `http://homeassistant.local:8123/fns-floorplan`), i když je položka v menu skrytá. Editor karty na dashboardu má tlačítko **Upravit půdorys**, které otevře stejnou adresu.
+
+![Možnosti integrace s přepínačem postranního menu](../assets/screenshots/cs/integration-options.png){ loading=lazy }
+
+![Položka Půdorys v postranním menu](../assets/screenshots/cs/sidebar-entry.png){ loading=lazy }
+
+## Přidání karty
+
+V režimu úprav dashboardu zvol **Přidat kartu**, vyhledej „floor“ a vyber **FNS Floorplan**. Vizuální editor nabízí níže popsané možnosti a tlačítko **Upravit půdorys**; **Zobrazit editor kódu** přepne na YAML.
+
+![FNS Floorplan ve výběru karet](../assets/screenshots/cs/card-picker.png){ loading=lazy }
+
+![Vizuální editor karty](../assets/screenshots/cs/card-editor.png){ loading=lazy }
+
+![YAML editor karty](../assets/screenshots/cs/card-yaml.png){ loading=lazy }
+
+![Možnost rotate na úzké kartě, přepínání mezi true a false](../assets/screenshots/gif/rotate-narrow.gif){ loading=lazy }
+
+Volba `rotate` otočí plán na úzké kartě o 90 stupňů, zde přepínání `rotate` mezi `true` a `false`.
 
 ## Aktualizace
 

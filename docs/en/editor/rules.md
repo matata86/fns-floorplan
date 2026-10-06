@@ -89,6 +89,8 @@ Without any of these the countdown is a decorative 4 second cycle.
 
 Every rule has a **{ }** button in its header that opens just that rule as YAML in the Home Assistant code editor (syntax colours, line numbers, suggestions for entities and icons). The change is committed when you leave the editor. The same YAML is what you see in the [plan format](../reference/plan-format.md#rules).
 
+![One rule opened as YAML in the rule's header](../../assets/screenshots/en/rule-yaml.png){ loading=lazy }
+
 ## AI Task assistant
 
 If your Home Assistant has an `ai_task.*` entity that supports data generation, the Rules section shows **Suggest with AI**. Describe in a sentence what you want. The editor sends the description to `ai_task.generate_data` together with the rules format, the outputs allowed for this item, its entity (state and attributes), the current rules and a list of your entities (up to 1500, without update, event, scene and script entities). The answer arrives as YAML and opens as a **draft**; only **Use draft** replaces the rules. If the request cannot be fulfilled, the assistant answers with one sentence that you see as a message.

@@ -54,6 +54,10 @@ An older plan with a top-level `vacuum` key (`entity`, `room_sensor`) still work
 | `docked`, `charging` | It sits in the dock. A **ring around it shows the battery** (full at 100 %), it only breathes when the battery is unknown. The robot has the theme colour of the vacuum state |
 | `idle`, `paused`, `error` | It stands **in its room** on a free spot and blinks (the badge border has the state colour, errors are red) |
 
+![The robot leaves the dock, drives through the passage into the kitchen and returns to the dock.](../assets/screenshots/gif/vacuum-driving.gif){ loading=lazy }
+
+*The robot leaves the dock, drives through the passage into the kitchen and returns to the dock.*
+
 - Between rooms and back to the dock it drives **through doors and passages** (a path search over openings other than windows; the other side of an opening is the room 35 cm behind the wall). With no path it drives straight.
 - When the page loads and the robot is not in the dock, it appears directly in its room instead of driving out of the dock.
 - The robot keeps the orientation it has in the dock while driving.

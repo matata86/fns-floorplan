@@ -7,6 +7,10 @@ FNS Floorplan promění dashboard v Home Assistantu v živý půdorys domova. Sv
 
 ![Animovaná karta s půdorysem bytu se zapnutými světly, otevřenými dveřmi a robotickým vysavačem](../assets/screenshots/cs/card-overview.png){ loading=lazy }
 
+| Tmavý motiv | Světlý motiv |
+|---|---|
+| ![Karta v tmavém motivu](../assets/screenshots/cs/card-dark.png){ loading=lazy } | ![Karta ve světlém motivu](../assets/screenshots/cs/card-light.png){ loading=lazy } |
+
 Skládá se ze dvou částí, které se přes HACS instalují jako jedna integrace:
 
 - **karta** `custom:fns-floorplan-card`, kterou vložíš na libovolný dashboard,

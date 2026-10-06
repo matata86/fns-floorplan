@@ -36,6 +36,10 @@ Viz [Místnosti](rooms.md), [Dveře a okna](openings.md) a [Položky](items.md).
 - **Esc** zruší výběr.
 - Při tažení ukazují růžové **vodicí čáry** zarovnání s ostatními prvky, středem místnosti a stěnami.
 
+![Ctrl+klepnutí vybere dvě položky, poté se táhnou společně.](../../assets/screenshots/gif/multi-select.gif){ loading=lazy }
+
+*Ctrl+klepnutí vybere dvě položky, poté se táhnou společně.*
+
 ## Klávesové zkratky { #keyboard-shortcuts }
 
 | Zkratka | Akce |
@@ -53,6 +57,10 @@ Viz [Místnosti](rooms.md), [Dveře a okna](openings.md) a [Položky](items.md).
 
 Na macOS používej ++cmd++ místo ++ctrl++.
 
+![Ctrl+C a Ctrl+V zduplikují položku; kopie je odsazená a vybraná.](../../assets/screenshots/gif/copy-paste.gif){ loading=lazy }
+
+*Ctrl+C a Ctrl+V zduplikují položku; kopie je odsazená a vybraná.*
+
 ## Zpět, vpřed a ukládání
 
 Každá změna jde na zásobník zpět (100 kroků). Revize se nikdy nevrací. Editor tě upozorní, když odcházíš s neuloženými změnami.
@@ -66,6 +74,8 @@ Uložené plány se uchovávají: viz [Historie a kontrola](../history.md).
 Půdorys bez pater má jedno patro. V nabídce **Další akce** (tři tečky) pomocí **Nové patro…**, **Přejmenovat patro…** a **Smazat patro…** patro přidáš, přejmenuješ nebo smažeš (smazané patro odnese své místnosti a prvky s sebou; první patro smazat nejde). Nové patro začíná v režimu **Místnosti**.
 
 Místnosti a prvky patří k patru přes klíč `level`; ty bez něj patří k prvnímu patru. Dveře a okna následují svou místnost. Výběr patra nahoře přepíná patro, které upravuješ, a karta zobrazuje záložky pater. Viz [Formát plánu](../reference/plan-format.md#levels).
+
+![Nabídka se třemi tečkami se správou pater a výběr patra](../../assets/screenshots/cs/levels-menu.png){ loading=lazy }
 
 ## Podklad pro obkreslení { #tracing-image }
 

@@ -17,6 +17,12 @@ An animated 2D floor plan for Home Assistant that shows the live state of your h
 
 **Documentation:** [English](https://matata86.github.io/fns-floorplan/) | [Česky](https://matata86.github.io/fns-floorplan/cs/) | [Deutsch](https://matata86.github.io/fns-floorplan/de/)
 
+## See it move
+
+![A door opening on the plan](docs/assets/screenshots/gif/door-opening.gif)
+![Lights switching on in their colour](docs/assets/screenshots/gif/lights-on.gif)
+![Dragging a wall in the editor](docs/assets/screenshots/gif/drag-wall.gif)
+
 ## Features
 
 **Card**

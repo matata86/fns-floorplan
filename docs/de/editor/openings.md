@@ -13,6 +13,14 @@ Türen und Fenster („Öffnungen“) gehören zu einer Wand eines Raums. Du bea
 
 Das Hinzufügen oder Entfernen einer Raumecke verschiebt eine Öffnung nie von ihrer Stelle.
 
+![Eine Tür entlang der Wand schieben und auf die Wand eines anderen Raums ziehen.](../../assets/screenshots/gif/drag-opening.gif){ loading=lazy }
+
+*Eine Tür entlang der Wand schieben und auf die Wand eines anderen Raums ziehen.*
+
+![Die zwei Griffe einer ausgewählten Tür vertauschen die Scharnierseite und die Öffnungsrichtung.](../../assets/screenshots/gif/flip-door.gif){ loading=lazy }
+
+*Die zwei Griffe einer ausgewählten Tür vertauschen die Scharnierseite und die Öffnungsrichtung.*
+
 ## Einstellungen
 
 | Einstellung | Schlüssel | Bedeutung |

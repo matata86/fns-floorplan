@@ -89,6 +89,8 @@ Bez ničeho z toho je odpočet jen dekorativní cyklus o délce 4 sekundy.
 
 Každé pravidlo má v hlavičce tlačítko **{ }**, které otevře jen toto pravidlo jako YAML v editoru kódu Home Assistantu (barvy syntaxe, čísla řádků, nápovědy entit a ikon). Změna se potvrdí, když editor opustíš. Stejné YAML vidíš ve [formátu plánu](../reference/plan-format.md#rules).
 
+![Jedno pravidlo otevřené jako YAML z hlavičky pravidla](../../assets/screenshots/cs/rule-yaml.png){ loading=lazy }
+
 ## Asistent AI Task
 
 Pokud má tvůj Home Assistant entitu `ai_task.*`, která podporuje generování dat, zobrazí sekce Pravidla tlačítko **Navrhnout s AI**. Jednou větou popiš, co chceš. Editor pošle popis službě `ai_task.generate_data` spolu s formátem pravidel, výstupy povolenými pro tuto položku, její entitou (stav a atributy), stávajícími pravidly a seznamem tvých entit (až 1500, bez entit update, event, scene a script). Odpověď dorazí jako YAML a otevře se jako **návrh**; pravidla nahradí teprve **Použít návrh**. Pokud požadavek nejde splnit, asistent odpoví jednou větou, kterou uvidíš jako zprávu.

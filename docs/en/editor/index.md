@@ -36,6 +36,10 @@ See [Rooms](rooms.md), [Doors and windows](openings.md) and [Items](items.md).
 - **Esc** clears the selection.
 - While dragging, pink **snap guides** show alignment with other items, the centre of a room and walls.
 
+![Ctrl+click selects two items, then they are dragged together.](../../assets/screenshots/gif/multi-select.gif){ loading=lazy }
+
+*Ctrl+click selects two items, then they are dragged together.*
+
 ## Keyboard shortcuts
 
 | Shortcut | Action |
@@ -53,6 +57,10 @@ See [Rooms](rooms.md), [Doors and windows](openings.md) and [Items](items.md).
 
 On macOS use ++cmd++ instead of ++ctrl++.
 
+![Ctrl+C and Ctrl+V duplicate an item; the copy is offset and selected.](../../assets/screenshots/gif/copy-paste.gif){ loading=lazy }
+
+*Ctrl+C and Ctrl+V duplicate an item; the copy is offset and selected.*
+
 ## Undo, redo and saving
 
 Every change goes on the undo stack (100 steps). The revision is never undone. The editor warns when you leave with unsaved changes.
@@ -66,6 +74,8 @@ Saved plans are kept: see [History and check](../history.md).
 A plan without levels has one floor. In the three-dot menu choose **Floors** to add a floor, rename it or delete it (a deleted floor takes its rooms and items with it; the first floor cannot be deleted). A new floor starts in the **Rooms** mode.
 
 Rooms and items belong to a floor with the `level` key; ones without it belong to the first floor. Doors and windows follow their room. The floor selector at the top switches the floor being edited, and the card shows floor tabs. See the [Plan format](../reference/plan-format.md#levels).
+
+![The three-dot menu with the floor management and the floor selector](../../assets/screenshots/en/levels-menu.png){ loading=lazy }
 
 ## Tracing image
 

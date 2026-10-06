@@ -4,6 +4,10 @@ Položky jsou vše na půdorysu, co není zeď: světla, spotřebiče, senzory, 
 
 ![Nabídka Přidat a formulář vybraného stropního světla](../../assets/screenshots/cs/items-add-menu.png){ loading=lazy }
 
+![Přidání světla z nabídky Přidat a umístění na plán.](../../assets/screenshots/gif/add-item.gif){ loading=lazy }
+
+*Přidání světla z nabídky Přidat a umístění na plán.*
+
 ## Společná nastavení
 
 | Nastavení | Klíč | Význam |
@@ -136,6 +140,12 @@ texts:
 
 ![Nábytek v obývacím pokoji s úchyty kolem vybrané pohovky](../../assets/screenshots/cs/items-furniture.png){ loading=lazy }
 
+![Změna velikosti pohovky úchyty a otáčení (Ctrl = kroky po 15 stupních).](../../assets/screenshots/gif/resize-furniture.gif){ loading=lazy }
+
+*Změna velikosti pohovky úchyty a otáčení (Ctrl = kroky po 15 stupních).*
+
+![Formulář základny robotického vysavače s oddílem pro dobu, kdy uklízí](../../assets/screenshots/cs/vacuum-form.png){ loading=lazy }
+
 ## Vrstvy
 
 Pořadí překrytí se porovnává jen mezi položkami stejného druhu. Použij **Do popředí / Výše / Níže / Do pozadí** ve formuláři. Robotický vysavač má vlastní pravidla, viz [Robotický vysavač](../robot-vacuum.md#layer-and-stacking).
@@ -158,6 +168,8 @@ Každá položka (i dveře a okna) přijímá `tap_action`, `double_tap_action` 
 | `none` | Nedělá nic |
 
 Výchozí chování: světlo se při klepnutí přepne a při podržení ukáže detail; spotřebič, vysavač, dveře a okno ukážou detail. Dvojklik zpozdí jednoduché klepnutí o 250 ms, ale jen když je nastavena akce dvojkliku. Při najetí myší na položku se zobrazí tooltip: název a co dělá klepnutí, dvojklik a podržení.
+
+![Akce klepnutí, dvojitého klepnutí a podržení ve formuláři položky](../../assets/screenshots/cs/item-actions.png){ loading=lazy }
 
 ```yaml
 tap_action:

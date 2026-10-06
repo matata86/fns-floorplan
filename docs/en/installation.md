@@ -16,8 +16,6 @@ FNS Floorplan is not in the default HACS list, so you add it as a custom reposit
 4. Search for **FNS Floorplan** in HACS and click **Download**.
 5. **Restart Home Assistant** (Settings, System, Restart).
 
-![HACS custom repositories dialog with the FNS Floorplan repository filled in](../assets/screenshots/en/hacs-custom-repository.png){ loading=lazy }
-
 ## Install manually
 
 1. Download the latest release from the [releases page](https://github.com/matata86/fns-floorplan/releases) or clone the repository.
@@ -31,6 +29,8 @@ FNS Floorplan is not in the default HACS list, so you add it as a custom reposit
 
 ![The FNS Floorplan integration in the Add integration dialog](../assets/screenshots/en/add-integration.png){ loading=lazy }
 
+![The FNS Floorplan integration page in Settings, Devices & services](../assets/screenshots/en/integration-page.png){ loading=lazy }
+
 The integration registers the card, so you do not have to add a dashboard resource by hand.
 
 ## Options
@@ -42,6 +42,24 @@ Click **Configure** on the integration card.
 | Show the editor in the sidebar | on | Adds the **Floor plan** entry to the sidebar (admins only). |
 
 The editor is always reachable at `/fns-floorplan` (for example `http://homeassistant.local:8123/fns-floorplan`), even with the sidebar entry hidden. The card editor in the dashboard has an **Edit floor plan** button that opens the same address.
+
+![The integration options with the sidebar toggle](../assets/screenshots/en/integration-options.png){ loading=lazy }
+
+![The Floor plan entry in the sidebar](../assets/screenshots/en/sidebar-entry.png){ loading=lazy }
+
+## Add the card
+
+In dashboard edit mode choose **Add card**, search for "floor" and pick **FNS Floorplan**. The visual editor offers the options below and the **Edit floor plan** button; **Show code editor** switches to YAML.
+
+![FNS Floorplan in the card picker](../assets/screenshots/en/card-picker.png){ loading=lazy }
+
+![The card's visual editor](../assets/screenshots/en/card-editor.png){ loading=lazy }
+
+![The card's YAML editor](../assets/screenshots/en/card-yaml.png){ loading=lazy }
+
+![Option rotate on a narrow card, switching between true and false](../assets/screenshots/gif/rotate-narrow.gif){ loading=lazy }
+
+With `rotate` the plan turns by 90 degrees on a narrow card, shown here switching `rotate` between `true` and `false`.
 
 ## Update
 

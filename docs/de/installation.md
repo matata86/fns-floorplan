@@ -16,8 +16,6 @@ FNS Floorplan steht nicht in der Standardliste von HACS, du fügst es deshalb al
 4. Suche in HACS nach **FNS Floorplan** und klicke auf **Herunterladen**.
 5. **Starte Home Assistant neu** (Einstellungen, System, Neu starten).
 
-![Der HACS-Dialog für benutzerdefinierte Repositories mit eingetragenem FNS-Floorplan-Repository](../assets/screenshots/de/hacs-custom-repository.png){ loading=lazy }
-
 ## Manuelle Installation
 
 1. Lade die neueste Version von der [Release-Seite](https://github.com/matata86/fns-floorplan/releases) herunter oder klone das Repository.
@@ -31,6 +29,8 @@ FNS Floorplan steht nicht in der Standardliste von HACS, du fügst es deshalb al
 
 ![Die Integration FNS Floorplan im Dialog „Integration hinzufügen“](../assets/screenshots/de/add-integration.png){ loading=lazy }
 
+![Die Seite der Integration FNS Floorplan unter Einstellungen, Geräte & Dienste](../assets/screenshots/de/integration-page.png){ loading=lazy }
+
 Die Integration registriert die Karte selbst, du musst also keine Dashboard-Ressource von Hand hinzufügen.
 
 ## Optionen
@@ -42,6 +42,24 @@ Klicke bei der Integration auf **Konfigurieren**.
 | Editor in der Seitenleiste anzeigen | an | Fügt den Eintrag **Grundriss** zur Seitenleiste hinzu (nur für Administratoren). |
 
 Der Editor ist immer unter `/fns-floorplan` erreichbar (zum Beispiel `http://homeassistant.local:8123/fns-floorplan`), auch wenn der Seitenleisten-Eintrag ausgeblendet ist. Der Karteneditor im Dashboard hat die Schaltfläche **Grundriss bearbeiten**, die dieselbe Adresse öffnet.
+
+![Die Optionen der Integration mit dem Schalter für die Seitenleiste](../assets/screenshots/de/integration-options.png){ loading=lazy }
+
+![Der Eintrag Grundriss in der Seitenleiste](../assets/screenshots/de/sidebar-entry.png){ loading=lazy }
+
+## Karte hinzufügen
+
+Wähle im Bearbeitungsmodus des Dashboards **Karte hinzufügen**, suche nach „floor“ und wähle **FNS Floorplan**. Der visuelle Editor bietet die folgenden Optionen und die Schaltfläche **Grundriss bearbeiten**; **Code-Editor anzeigen** wechselt zu YAML.
+
+![FNS Floorplan in der Kartenauswahl](../assets/screenshots/de/card-picker.png){ loading=lazy }
+
+![Der visuelle Editor der Karte](../assets/screenshots/de/card-editor.png){ loading=lazy }
+
+![Der YAML-Editor der Karte](../assets/screenshots/de/card-yaml.png){ loading=lazy }
+
+![Option rotate auf einer schmalen Karte, Umschalten zwischen true und false](../assets/screenshots/gif/rotate-narrow.gif){ loading=lazy }
+
+Mit `rotate` dreht sich der Grundriss auf einer schmalen Karte um 90 Grad, hier beim Umschalten von `rotate` zwischen `true` und `false`.
 
 ## Aktualisieren
 

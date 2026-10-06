@@ -21,9 +21,21 @@ Wechsle den Editor zu **Räume**, um die Form der Wohnung zu bearbeiten. Alles a
 - Zieh den Raum selbst, um den **ganzen Raum zu verschieben**.
 - Mit den Pfeiltasten verschiebst du den ausgewählten Raum, die Ecke oder die Wand um 5 cm.
 
+![Eine ganze Wand ziehen: die Längen der benachbarten Wände werden angepasst.](../../assets/screenshots/gif/drag-wall.gif){ loading=lazy }
+
+*Eine ganze Wand ziehen: die Längen der benachbarten Wände werden angepasst.*
+
+![Einen ganzen Raum verschieben, indem man den Boden zieht.](../../assets/screenshots/gif/move-room.gif){ loading=lazy }
+
+*Einen ganzen Raum verschieben, indem man den Boden zieht.*
+
 ## Einrasten an Nachbarn
 
 Ecken, Wände und ganze Räume rasten bis 15 cm Abstand an Ecken und Wänden anderer Räume derselben Etage ein, angezeigt durch eine rosafarbene Fanglinie. Halte ++alt++, um das Einrasten auszuschalten. Sonst gilt das Raster von 5 cm.
+
+![Eine Ecke rastet an der Ecke des Nachbarraums ein.](../../assets/screenshots/gif/corner-snap-neighbour.gif){ loading=lazy }
+
+*Eine Ecke rastet an der Ecke des Nachbarraums ein.*
 
 ## Gemeinsame Wände
 
@@ -34,6 +46,10 @@ Jeder Raum hat sein eigenes Polygon, eine Wand zwischen zwei Räumen sind also z
 - Der ausgewählte Raum zeigt die **Länge jeder Wand** (außerhalb des Raums), live beim Ziehen.
 - Halte ++ctrl++ beim Ziehen einer Ecke: Die Wand zur benachbarten Ecke rastet in **15-Grad-Schritten** ein, die Länge auf 5 cm. Nahe am Schnittpunkt der beiden Wände springt die Ecke dorthin, was einen rechten Winkel ergibt.
 - Die Wände der ausgewählten Ecke sind markiert: eine grüne Markierung **gerade**, wenn eine Wand genau waagerecht oder senkrecht ist, sonst eine orange Markierung mit dem Winkel.
+
+![Eine Ecke mit gedrückter Strg-Taste ziehen: 15-Grad-Schritte und die grüne Markierung „gerade“.](../../assets/screenshots/gif/drag-corner-snap.gif){ loading=lazy }
+
+*Eine Ecke mit gedrückter Strg-Taste ziehen: 15-Grad-Schritte und die grüne Markierung „gerade“.*
 
 ## Name, Symbol und Klima
 

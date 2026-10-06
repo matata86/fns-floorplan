@@ -2,7 +2,15 @@
 
 Klepni na místnost na kartě a od pravého okraje obrazovky se vysune **boční panel**. Vypadá jako dashboard oblasti v Home Assistantu: pozadí z motivu, hlavička s ikonou místnosti, názvem, teplotou a vlhkostí a dlaždice ve dvou sloupcích. Zavřeš ho křížkem, ++esc++ nebo klepnutím mimo něj.
 
-![Panel místnosti s termostatem, světly a kamerou](../assets/screenshots/cs/room-panel.png){ loading=lazy }
+| Tmavý motiv | Světlý motiv |
+|---|---|
+| ![Panel obýváku: termostat, světla, okno, spínač a vysavač](../assets/screenshots/cs/room-panel.png){ loading=lazy } | ![Stejný panel ve světlém motivu](../assets/screenshots/cs/room-panel-light.png){ loading=lazy } |
+
+![Panel chodby: světla, kamera, dveře, alarm a zámek](../assets/screenshots/cs/room-panel-hall.png){ loading=lazy }
+
+![Otevření panelu, nastavení jasu světla a zavření.](../assets/screenshots/gif/room-panel-open.gif){ loading=lazy }
+
+*Otevření panelu, nastavení jasu světla a zavření.*
 
 ## Sekce
 

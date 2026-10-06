@@ -42,6 +42,24 @@ Vizuální editor karty má stejná pole (Vzhled, Otočení plánu, Výchozí pa
 - `auto`: karta užší než 600 px otočí široký půdorys o 90 stupňů, ale jen když je půdorys víc než 1,25krát širší než vysoký,
 - `true`: otáčí vždy, `false`: nikdy.
 
+## Světlý a tmavý vzhled
+
+Karta vypadá dobře v obou motivech. S `mode: ha` následuje světlý nebo tmavý motiv Home Assistantu, s `auto` rozhoduje slunce a `day` nebo `night` zafixuje jeden vzhled (viz [mode](#mode)).
+
+| Tmavý motiv | Světlý motiv |
+|---|---|
+| ![Karta v tmavém motivu](../assets/screenshots/cs/card-dark.png){ loading=lazy } | ![Karta ve světlém motivu](../assets/screenshots/cs/card-light.png){ loading=lazy } |
+
+Vzhled samotné karty lze nastavit i nezávisle na motivu:
+
+| Režim `day` | Režim `night` |
+|---|---|
+| ![Karta s režimem day](../assets/screenshots/cs/card-mode-day.png){ loading=lazy } | ![Karta s režimem night](../assets/screenshots/cs/card-mode-night.png){ loading=lazy } |
+
+![Karta přepínající z tmavého vzhledu na světlý a zpět.](../assets/screenshots/gif/day-night.gif){ loading=lazy }
+
+*Karta přepínající z tmavého vzhledu na světlý a zpět.*
+
 ## Vzhled
 
 - Zdi a záře přebírají `--primary-color` tvého motivu; pozadí karty má stejnou barvu s 5% neprůhledností. Barvy zařízení pocházejí z barev stavů motivu.
@@ -61,6 +79,12 @@ Při zapnuté teplotě nebo vlhkosti se pod půdorysem objeví barevná legenda.
 
 ![Místnosti obarvené podle teploty s legendou pod nimi](../assets/screenshots/cs/card-temperature.png){ loading=lazy }
 
+![Místnosti obarvené podle vlhkosti s legendou pod nimi](../assets/screenshots/cs/card-humidity.png){ loading=lazy }
+
+![Zapnutí a vypnutí vrstvy teploty.](../assets/screenshots/gif/temperature-layer.gif){ loading=lazy }
+
+*Zapnutí a vypnutí vrstvy teploty.*
+
 ## Přehrání dne
 
 Tlačítko s hodinami otevře lištu **pod půdorysem**, která ho nezakrývá. Přehraje **posledních 24 hodin** z historie Home Assistantu: světla, dveře a zařízení se vrací v čase. Šablony v pravidlech zůstávají během přehrávání živé.
@@ -77,6 +101,50 @@ Tlačítko s hodinami otevře lištu **pod půdorysem**, která ho nezakrývá. 
 | Místnost | otevře [panel místnosti](room-panel.md) | |
 
 Vše lze měnit u jednotlivých položek pomocí [akcí](editor/items.md#actions). Tooltipy uvádějí, co dělá klepnutí, dvojklik a podržení.
+
+## Animace
+
+Co karta ukazuje, když se mění entity:
+
+![Vchodové dveře se otevřou a zavřou, křídlo se otáčí.](../assets/screenshots/gif/door-opening.gif){ loading=lazy }
+
+*Vchodové dveře se otevřou a zavřou, křídlo se otáčí.*
+
+![Okno se otevře a zavře.](../assets/screenshots/gif/window-opening.gif){ loading=lazy }
+
+*Okno se otevře a zavře.*
+
+![Roleta se zatahuje podél okna.](../assets/screenshots/gif/blind-closing.gif){ loading=lazy }
+
+*Roleta se zatahuje podél okna.*
+
+![Světla se zapínají jedno po druhém, každá místnost září barvou svého světla.](../assets/screenshots/gif/lights-on.gif){ loading=lazy }
+
+*Světla se zapínají jedno po druhém, každá místnost září barvou svého světla.*
+
+![Světlo mění barvu.](../assets/screenshots/gif/light-colour.gif){ loading=lazy }
+
+*Světlo mění barvu.*
+
+![Pohybový senzor vyšle vlnku a pak se uklidní.](../assets/screenshots/gif/motion-ripple.gif){ loading=lazy }
+
+*Pohybový senzor vyšle vlnku a pak se uklidní.*
+
+![Běžící pračka má kolem ikony kroužek.](../assets/screenshots/gif/washing-machine.gif){ loading=lazy }
+
+*Běžící pračka má kolem ikony kroužek.*
+
+![Odpočítávací kroužek kolem myčky, dokud běží její časovač.](../assets/screenshots/gif/dishwasher-countdown.gif){ loading=lazy }
+
+*Odpočítávací kroužek kolem myčky, dokud běží její časovač.*
+
+![Spuštěný alarm obarví celý byt, dokud ho nevypneš.](../assets/screenshots/gif/alarm-triggered.gif){ loading=lazy }
+
+*Spuštěný alarm obarví celý byt, dokud ho nevypneš.*
+
+![Plamen krbu plápolá, dokud je jeho spínač zapnutý.](../assets/screenshots/gif/fireplace.gif){ loading=lazy }
+
+*Plamen krbu plápolá, dokud je jeho spínač zapnutý.*
 
 ## Výkon
 

@@ -42,6 +42,24 @@ Der visuelle Karteneditor hat dieselben Felder (Darstellung, Drehung des Plans, 
 - `auto`: Eine Karte, die schmaler als 600 px ist, dreht einen breiten Plan um 90 Grad, aber nur, wenn der Plan mehr als 1,25-mal so breit wie hoch ist,
 - `true`: immer drehen, `false`: nie.
 
+## Hell und dunkel
+
+Die Karte sieht in beiden Designs gut aus. Mit `mode: ha` folgt sie dem hellen oder dunklen Design von Home Assistant, mit `auto` entscheidet die Sonne, und `day` oder `night` legt ein Aussehen fest (siehe [mode](#mode)).
+
+| Dunkles Design | Helles Design |
+|---|---|
+| ![Die Karte im dunklen Design](../assets/screenshots/de/card-dark.png){ loading=lazy } | ![Die Karte im hellen Design](../assets/screenshots/de/card-light.png){ loading=lazy } |
+
+Das Aussehen der Karte selbst lässt sich auch unabhängig vom Design einstellen:
+
+| Modus `day` | Modus `night` |
+|---|---|
+| ![Die Karte mit Modus day](../assets/screenshots/de/card-mode-day.png){ loading=lazy } | ![Die Karte mit Modus night](../assets/screenshots/de/card-mode-night.png){ loading=lazy } |
+
+![Die Karte wechselt vom dunklen zum hellen Aussehen und zurück.](../assets/screenshots/gif/day-night.gif){ loading=lazy }
+
+*Die Karte wechselt vom dunklen zum hellen Aussehen und zurück.*
+
 ## Aussehen
 
 - Wände und Leuchten übernehmen die `--primary-color` deines Designs; der Kartenhintergrund hat dieselbe Farbe mit 5 % Deckkraft. Gerätefarben stammen aus den Zustandsfarben des Designs.
@@ -61,6 +79,12 @@ Bei eingeschalteter Temperatur oder Luftfeuchtigkeit erscheint unter dem Plan ei
 
 ![Nach Temperatur eingefärbte Räume mit der Legende darunter](../assets/screenshots/de/card-temperature.png){ loading=lazy }
 
+![Nach Luftfeuchtigkeit eingefärbte Räume mit der Legende darunter](../assets/screenshots/de/card-humidity.png){ loading=lazy }
+
+![Die Temperaturebene ein- und ausschalten.](../assets/screenshots/gif/temperature-layer.gif){ loading=lazy }
+
+*Die Temperaturebene ein- und ausschalten.*
+
 ## Tageswiedergabe
 
 Die Uhr-Schaltfläche öffnet eine Leiste **unter dem Plan**, die ihn nicht verdeckt. Sie spielt die **letzten 24 Stunden** aus dem Verlauf von Home Assistant ab: Lichter, Türen und Geräte gehen in der Zeit zurück. Regelvorlagen bleiben während der Wiedergabe live.
@@ -77,6 +101,50 @@ Die Uhr-Schaltfläche öffnet eine Leiste **unter dem Plan**, die ihn nicht verd
 | Raum | öffnet das [Raum-Panel](room-panel.md) | |
 
 Alles lässt sich pro Element mit [Aktionen](editor/items.md#actions) ändern. Tooltips listen auf, was Tippen, Doppeltippen und Halten bewirken.
+
+## Animationen
+
+Was die Karte zeigt, wenn sich Entitäten ändern:
+
+![Die Haustür öffnet und schließt sich, das Türblatt schwingt.](../assets/screenshots/gif/door-opening.gif){ loading=lazy }
+
+*Die Haustür öffnet und schließt sich, das Türblatt schwingt.*
+
+![Ein Fenster öffnet und schließt sich.](../assets/screenshots/gif/window-opening.gif){ loading=lazy }
+
+*Ein Fenster öffnet und schließt sich.*
+
+![Ein Rollo wird entlang seines Fensters zugezogen.](../assets/screenshots/gif/blind-closing.gif){ loading=lazy }
+
+*Ein Rollo wird entlang seines Fensters zugezogen.*
+
+![Lichter gehen nacheinander an, jeder Raum leuchtet in der Farbe seines Lichts.](../assets/screenshots/gif/lights-on.gif){ loading=lazy }
+
+*Lichter gehen nacheinander an, jeder Raum leuchtet in der Farbe seines Lichts.*
+
+![Ein Licht wechselt die Farbe.](../assets/screenshots/gif/light-colour.gif){ loading=lazy }
+
+*Ein Licht wechselt die Farbe.*
+
+![Ein Bewegungsmelder sendet eine Welle aus und beruhigt sich wieder.](../assets/screenshots/gif/motion-ripple.gif){ loading=lazy }
+
+*Ein Bewegungsmelder sendet eine Welle aus und beruhigt sich wieder.*
+
+![Eine laufende Waschmaschine zeigt einen Ring um ihr Symbol.](../assets/screenshots/gif/washing-machine.gif){ loading=lazy }
+
+*Eine laufende Waschmaschine zeigt einen Ring um ihr Symbol.*
+
+![Ein Countdown-Ring um die Spülmaschine, solange ihr Timer läuft.](../assets/screenshots/gif/dishwasher-countdown.gif){ loading=lazy }
+
+*Ein Countdown-Ring um die Spülmaschine, solange ihr Timer läuft.*
+
+![Ein ausgelöster Alarm färbt die ganze Wohnung ein, bis er ausgeschaltet wird.](../assets/screenshots/gif/alarm-triggered.gif){ loading=lazy }
+
+*Ein ausgelöster Alarm färbt die ganze Wohnung ein, bis er ausgeschaltet wird.*
+
+![Die Flamme eines Kamins flackert, solange sein Schalter an ist.](../assets/screenshots/gif/fireplace.gif){ loading=lazy }
+
+*Die Flamme eines Kamins flackert, solange sein Schalter an ist.*
 
 ## Leistung
 
