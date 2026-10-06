@@ -43,7 +43,9 @@ const PAD = 40;
 const SNAP = 0.05; // metres
 const NS = "http://www.w3.org/2000/svg";
 
-const FURNITURE_TYPES = Object.keys(FURNITURE);
+// pickers list types by name (Czech order), the catch-all one last
+const byName = (keys, label, last) => keys.filter((k) => k !== last).sort((a, b) => label(a).localeCompare(label(b), "cs")).concat(keys.includes(last) ? [last] : []);
+const FURNITURE_TYPES = byName(Object.keys(FURNITURE), (k) => FURNITURE[k][0], "other");
 const LIGHT_TYPES = { lamp_spot: "Bodové světlo (směrové)", lamp_ceiling: "Stropní světlo", lamp_pendant: "Závěsné světlo", lamp_panel: "Panel", lamp_table: "Lampička", lamp_wall: "Nástěnné světlo", led_strip: "LED pásek" };
 const DEVICE_KINDS = {
   fan: "Větrák", purifier: "Čistička", dishwasher: "Myčka", dryer: "Sušička", boiler: "Kotel", radiator: "Radiátor",
@@ -1586,7 +1588,7 @@ class FnsFloorplanPanel extends HTMLElement {
         <div class="actions"><button data-a="auto">Vrátit doprostřed místnosti</button></div>`;
     } else if (sel.cat === "furniture") {
       const light = isLight(o), point = isPoint(o), dock = o.type === "robot_vacuum";
-      const types = light ? Object.keys(LIGHT_TYPES) : FURNITURE_TYPES;
+      const types = light ? byName(Object.keys(LIGHT_TYPES), (k) => LIGHT_TYPES[k]) : FURNITURE_TYPES;
       const label = (t) => (light ? LIGHT_TYPES[t] : FURNITURE[t]?.[0] || t);
       const look = `${o.type === "led_strip" ? `<label>Směr světla</label><select data-k="glow_side">
           <option value="" ${!o.glow_side ? "selected" : ""}>Všemi směry</option>
@@ -1598,7 +1600,7 @@ class FnsFloorplanPanel extends HTMLElement {
         ${point ? this._sizeField(o) : ""}`;
       html = `<h2>${esc(label(o.type))}${sel.g ? ` <span class="hint">(${sel.g.length} svítidla jednoho světla)</span>` : ""}</h2>
         ${sel.g ? `<p class="hint">Svítidla jednoho světla v jedné místnosti jsou na kartě jeden prvek. Táhnutím posuneš všechna, změny platí pro všechna.</p>` : ""}
-        ${this._sec("Základ", `<label>Typ</label><select data-k="type">${types.map((t) => `<option value="${t}" ${t === o.type ? "selected" : ""}>${esc(label(t))}</option>`).join("")}</select>
+        ${this._sec("Základ", `<label>Typ</label><select data-k="type" data-search>${types.map((t) => `<option value="${t}" ${t === o.type ? "selected" : ""}>${esc(label(t))}</option>`).join("")}</select>
         ${field(light ? "Entita (světlo nebo spínač)" : o.type === "tv_wall" ? "Entita (media_player)" : dock ? "Entita (vacuum)" : "Entita (nepovinná, klepnutí otevře její detail)", "entity", o.entity || "", "text", 'list="ents"')}
         ${dock ? `<label>Baterie (entita; prázdné = senzor baterie zařízení vysavače)</label><input data-k="battery" value="${esc(o.battery || "")}" placeholder="sensor.*_battery" list="ents">` : ""}
         ${dock ? this._vacPairing(o) : ""}
@@ -1620,7 +1622,7 @@ class FnsFloorplanPanel extends HTMLElement {
       const dom = o.kind === "generic" ? String(o.entity || "").split(".")[0] : "", dd = DOMAIN_DEV[dom];
       const domFx = typeof dd?.fx === "string" ? dd.fx : "", domTap = dd?.tap?.("")?.perform_action || "";
       html = `<h2>${DEVICE_KINDS[o.kind] || "Spotřebič"}</h2>
-        ${this._sec("Základ", `<label>Druh</label><select data-k="kind">${Object.entries(DEVICE_KINDS).map(([k, v]) => `<option value="${k}" ${k === o.kind ? "selected" : ""}>${v}</option>`).join("")}</select>
+        ${this._sec("Základ", `<label>Druh</label><select data-k="kind" data-search>${byName(Object.keys(DEVICE_KINDS), (k) => DEVICE_KINDS[k], "generic").map((k) => [k, DEVICE_KINDS[k]]).map(([k, v]) => `<option value="${k}" ${k === o.kind ? "selected" : ""}>${v}</option>`).join("")}</select>
         ${field("Název", "name", o.name || "")}
         ${field("Entita", "entity", o.entity || "", "text", 'list="ents"')}
         ${o.kind === "generic" && DOMAIN_HINT[dom] ? `<p class="hint">${DOMAIN_HINT[dom]}</p>` : ""}
@@ -1737,7 +1739,8 @@ class FnsFloorplanPanel extends HTMLElement {
       const m = label.length > 30 && label.match(/^(.+?)\s*\((.+)\)$/s);
       if (m) [, label, helper] = m;
       if (tag === "SELECT") {
-        selector = { select: { mode: "dropdown", options: [...el.options].map((o) => ({ value: o.value === "" ? DEF : o.value, label: o.textContent.trim() })) } };
+        // data-search: a long list gets HA's picker with a search box
+        selector = { select: { mode: "dropdown", custom_value: el.hasAttribute("data-search"), options: [...el.options].map((o) => ({ value: o.value === "" ? DEF : o.value, label: o.textContent.trim() })) } };
         value = el.value === "" ? DEF : el.value;
       } else if (el.getAttribute("list") === "ents") { selector = { entity: {} }; value = el.value || undefined; }
       else if (type === "number") {
@@ -2323,6 +2326,8 @@ Request (may be in Czech): ${ask}`;
     if (key.startsWith("rm:")) { const name = key.slice(3), t = targets[0]; const m = { ...(t.room_map || {}) }; if (value) m[name] = value; else delete m[name]; if (Object.keys(m).length) t.room_map = m; else delete t.room_map; return this._changed(); }
     if (key === "rm_add") { if (value.trim()) (this._vacExtra ||= new Set()).add(value.trim()); return this._form(); }
     if (await this._setShared(targets, key, value, inp)) return;
+    // the searchable pickers also take typed text: only a known type or kind counts
+    if ((key === "type" && sel.cat === "furniture" && !FURNITURE[value] && !LIGHT_TYPES[value]) || (key === "kind" && sel.cat === "devices" && !DEVICE_KINDS[value])) return this._form();
     if (sel.g && (key === "x" || key === "z")) {
       this._move(sel, key === "x" ? Number(value) : o.x, key === "z" ? Number(value) : o.z);
       return this._changed();
