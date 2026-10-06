@@ -1,0 +1,24 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "FNS Floorplan",
+        "description": "Dodaje animowaną kartę planu piętra (custom:fns-floorplan-card)."
+      }
+    },
+    "abort": {
+      "single_instance_allowed": "FNS Floorplan jest już skonfigurowany."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "FNS Floorplan",
+        "description": "Edytor planu piętra zawsze otworzysz pod adresem [{url}]({url}) lub z edytora karty, nawet gdy nie jest wyświetlany na pasku bocznym.",
+        "data": {
+          "sidebar": "Pokaż edytor planu piętra na pasku bocznym"
+        }
+      }
+    }
+  }
+}

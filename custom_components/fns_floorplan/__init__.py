@@ -79,7 +79,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     frontend.async_register_built_in_panel(
         hass,
         component_name="custom",
-        sidebar_title={"cs": "Půdorys", "de": "Grundriss"}.get((hass.config.language or "")[:2], "Floor plan"),
+        sidebar_title={"cs": "Půdorys", "de": "Grundriss", "pl": "Plan piętra"}.get((hass.config.language or "")[:2], "Floor plan"),
         sidebar_icon="mdi:floor-plan",
         frontend_url_path=PANEL_PATH,
         config={"_panel_custom": {"name": "fns-floorplan-panel", "module_url": f"{PANEL_URL}?v={version}",

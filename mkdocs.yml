@@ -129,6 +129,47 @@ plugins:
             "Still not working": "Es klappt immer noch nicht"
             "When something doesn't work": "Wenn etwas nicht geht"
             "All topics": "Alle Themen"
+        - locale: pl
+          name: Polski
+          build: true
+          site_description: Animowana karta z planem piętra 2D i edytor dla Home Assistanta
+          nav_translations:
+            Home: "Strona główna"
+            Getting started: "Pierwsze kroki"
+            Installation: Instalacja
+            Quick start: "Szybki start"
+            Editor: Edytor
+            Overview: "Przegląd"
+            Rooms: Pomieszczenia
+            Doors and windows: "Drzwi i okna"
+            Items: Elementy
+            Rules: "Reguły"
+            Features: Funkcje
+            Card: Karta
+            Room panel: "Panel pomieszczenia"
+            Robot vacuum: Odkurzacz
+            History and check: "Historia i kontrola"
+            Reference: "Dokumentacja techniczna"
+            Plan format: "Format planu"
+            "Websocket API": "Websocket API"
+            FAQ: FAQ
+            Changelog: "Lista zmian"
+            Live demo: "Demo na żywo"
+            "Card not found": "Karta nie jest znaleziona po instalacji"
+            "Custom element doesn't exist": "„Custom element doesn't exist”"
+            "Old version after update": "Stara wersja po aktualizacji"
+            "Card waits for the integration": "Karta czeka na integrację"
+            "Plan is empty": "Plan jest pusty"
+            "Sidebar entry is missing": "Brakuje pozycji w pasku bocznym"
+            "Icons are missing": "Brakuje ikon"
+            "Plan changed meanwhile": "Plan zmienił się w międzyczasie"
+            "Slow or choppy card": "Karta działa wolno"
+            "Wrong light colour": "Światło świeci innym kolorem"
+            "Rule does not apply": "Reguła nie działa"
+            "Texts not translated": "Teksty nie są przetłumaczone"
+            "Still not working": "Nadal nie działa"
+            "When something doesn't work": "Gdy coś nie działa"
+            All topics: "Wszystkie tematy"
 
 markdown_extensions:
   - admonition

@@ -15,7 +15,7 @@ An animated 2D floor plan for Home Assistant that shows the live state of your h
 
 **[Live demo](https://matata86.github.io/fns-floorplan/demo/)** (the real card with fake states, no Home Assistant needed)
 
-**Documentation:** [English](https://matata86.github.io/fns-floorplan/) | [Česky](https://matata86.github.io/fns-floorplan/cs/) | [Deutsch](https://matata86.github.io/fns-floorplan/de/)
+**Documentation:** [English](https://matata86.github.io/fns-floorplan/) | [Česky](https://matata86.github.io/fns-floorplan/cs/) | [Deutsch](https://matata86.github.io/fns-floorplan/de/) | [Polski](https://matata86.github.io/fns-floorplan/pl/)
 
 ## See it move
 

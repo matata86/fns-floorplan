@@ -54,7 +54,7 @@ span.ibtn:hover { background: none; }
 <header class="appbar">
   <span class="ibtn" aria-hidden="true"><ha-icon icon="mdi:menu"></ha-icon></span>
   <h1 id="title">Home</h1>
-  <nav class="langs" id="langs" aria-label="Language"><a href="?lang=en">EN</a><a href="?lang=cs">CS</a><a href="?lang=de">DE</a></nav>
+  <nav class="langs" id="langs" aria-label="Language"><a href="?lang=en">EN</a><a href="?lang=cs">CS</a><a href="?lang=de">DE</a><a href="?lang=pl">PL</a></nav>
   <button class="ibtn" id="theme" type="button" aria-label="Theme"><ha-icon icon="mdi:weather-night"></ha-icon></button>
   <span class="ibtn" aria-hidden="true"><ha-icon icon="mdi:magnify"></ha-icon></span>
   <span class="ibtn" aria-hidden="true"><ha-icon icon="mdi:dots-vertical"></ha-icon></span>
@@ -72,7 +72,7 @@ span.ibtn:hover { background: none; }
 <script>window.FP_ICONS = __ICONS__;</script>
 <script type="module">
 // icons asked for through <ha-icon>/the plan: mdi:thermometer mdi:water-percent mdi:history mdi:close mdi:floor-plan mdi:door-closed mdi:door-open mdi:window-closed-variant mdi:window-open-variant
-const LANGS = ["en", "cs", "de"];
+const LANGS = ["en", "cs", "de", "pl"];
 const params = new URLSearchParams(location.search);
 const lang = LANGS.includes(params.get("lang")) ? params.get("lang") : (LANGS.find((l) => (navigator.language || "").startsWith(l)) || "en");
 document.documentElement.lang = lang; // before the card module is imported
@@ -104,6 +104,15 @@ const TEXT = {
     out: "°C draußen",
     n: { "Flat": "Wohnung", "Living room": "Wohnzimmer", "Kitchen": "Küche", "Hall": "Flur", "Bathroom": "Bad", "Bedroom": "Schlafzimmer", "Radiator": "Heizkörper", "Dishwasher": "Geschirrspüler", "Washing machine": "Waschmaschine", "Alarm": "Alarm", "Camera": "Kamera", "Fireplace": "Kamin" },
     e: ["Deckenlicht", "LED-Streifen", "Spot", "Küchenlicht", "Flurlicht", "Badlicht", "Nachttischlampe", "Haustür", "Badezimmertür", "Wohnzimmerfenster", "Schlafzimmerfenster", "Rollo", "Türschloss", "Bewegung", "Waschmaschine", "Geschirrspüler", "Thermostat", "Alarm", "Flurkamera", "Kamin", "Fernseher", "Saugroboter"],
+  },
+  pl: {
+    home: "Dom", controls: "Sterowanie demonstracją", hint: "Dotknij kafelka albo pomieszczenia i światła na planie.",
+    foot: "To demo ze zmyślonymi danymi. Instalacja: HACS → Repozytoria niestandardowe → matata86/fns-floorplan", docs: "Dokumentacja",
+    c: { lights: "Światła", door: "Drzwi wejściowe", window: "Okno", blind: "Roleta", vacuum: "Odkurzacz", washer: "Pralka", dishwasher: "Zmywarka", motion: "Ruch", alarm: "Alarm", daynight: "Dzień / Noc" },
+    w: { on: "Włączone", off: "Wyłączone", open: "Otwarte", closed: "Zamknięte", detected: "Wykryto", clear: "Brak", running: "Działa", heating: "Grzeje", cleaning: "Sprząta", docked: "W stacji", returning: "Wraca", paused: "Wstrzymane", armed_home: "Uzbrojony (w domu)", triggered: "Wyzwolony", playing: "Odtwarzanie", idle: "Bezczynny", locked: "Zamknięty", unlocked: "Otwarty", min: "min", day: "Dzień", night: "Noc" },
+    out: "°C na zewnątrz",
+    n: { "Flat": "Mieszkanie", "Living room": "Salon", "Kitchen": "Kuchnia", "Hall": "Przedpokój", "Bathroom": "Łazienka", "Bedroom": "Sypialnia", "Radiator": "Grzejnik", "Dishwasher": "Zmywarka", "Washing machine": "Pralka", "Alarm": "Alarm", "Camera": "Kamera", "Fireplace": "Kominek" },
+    e: ["Lampa sufitowa", "Taśma LED", "Reflektor", "Światło w kuchni", "Światło w przedpokoju", "Światło w łazience", "Lampka nocna", "Drzwi wejściowe", "Drzwi do łazienki", "Okno w salonie", "Okno w sypialni", "Roleta", "Zamek drzwi", "Ruch", "Pralka", "Zmywarka", "Termostat", "Alarm", "Kamera w przedpokoju", "Kominek", "Telewizor", "Odkurzacz automatyczny"],
   },
 }[lang];
 const W = TEXT.w;
