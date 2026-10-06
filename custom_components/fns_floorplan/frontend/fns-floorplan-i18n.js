@@ -181,7 +181,7 @@ const STRINGS = {
     "panel.side.right": "right",
     "panel.side.left": "left",
     "panel.title": "Floor plan",
-    "panel.mode_items": "Equipment",
+    "panel.mode_items": "Items",
     "panel.mode_rooms": "Rooms",
     "panel.level": "Floor",
     "panel.add": "Add",
