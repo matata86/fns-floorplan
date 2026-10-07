@@ -162,7 +162,7 @@ Každá položka (i dveře a okna) přijímá `tap_action`, `double_tap_action` 
 |----------|--------|
 | `toggle` | Přepne entitu |
 | `more-info` | Otevře detail entity |
-| `perform-action` | Zavolá akci: `perform_action` a `data` |
+| `perform-action` | Zavolá akci: `perform_action` (výběr z akcí, které Home Assistant zná, s vyhledáváním) a `data` jako jeden řádek YAML, např. `entity_id: input_button.x` |
 | `navigate` | Přejde na `navigation_path` |
 | `url` | Otevře `url_path` |
 | `none` | Nedělá nic |

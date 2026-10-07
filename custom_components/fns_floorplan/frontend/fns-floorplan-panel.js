@@ -1973,9 +1973,14 @@ class FnsFloorplanPanel extends HTMLElement {
       const cur = a.action || "";
       const def = defaults[k] ? t("panel.f.def_x", { x: defaults[k] }) : t("panel.f.def_nothing");
       let more = "";
-      if (cur === "perform-action") more = `<input data-k="act:${k}:perform_action" value="${esc(a.perform_action || a.service || "")}" placeholder="light.turn_on">
+      if (cur === "perform-action") {
+        // every action HA knows, searchable; an unknown one (integration not loaded) stays selectable, and one can still be typed
+        const now = a.perform_action || a.service || "";
+        const svc = Object.entries(this._hass.services || {}).flatMap(([d, list]) => Object.keys(list).map((x) => `${d}.${x}`)).sort();
+        if (now && !svc.includes(now)) svc.unshift(now);
+        more = `<select data-k="act:${k}:perform_action" data-search data-label="${t("panel.f.act_service")}"><option value="">—</option>${svc.map((x) => `<option value="${esc(x)}" ${x === now ? "selected" : ""}>${esc(x)}</option>`).join("")}</select>
         <input data-k="act:${k}:data" value="${esc(a.data ? JSON.stringify(a.data) : "")}" placeholder="${t("panel.f.act_data_ph")}">`;
-      else if (cur === "navigate") more = `<input data-k="act:${k}:navigation_path" value="${esc(a.navigation_path || "")}" placeholder="/lovelace/0">`;
+      } else if (cur === "navigate") more = `<input data-k="act:${k}:navigation_path" value="${esc(a.navigation_path || "")}" placeholder="/lovelace/0">`;
       else if (cur === "url") more = `<input data-k="act:${k}:url_path" value="${esc(a.url_path || "")}" placeholder="https://…">`;
       else if (cur === "more-info" || cur === "toggle") more = `<input data-k="act:${k}:entity" value="${esc(a.entity || "")}" placeholder="${t("panel.f.act_entity_ph")}" list="ents">`;
       return `<label>${label}</label><select data-k="act:${k}:action">${Object.entries(ACTIONS).map(([v, txt]) => `<option value="${v}" ${v === cur ? "selected" : ""}>${v ? txt : def}</option>`).join("")}</select>${more}`;

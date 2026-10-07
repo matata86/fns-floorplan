@@ -162,7 +162,7 @@ Every item (also doors and windows) accepts `tap_action`, `double_tap_action` an
 |----------|---------|
 | `toggle` | Toggle the entity |
 | `more-info` | Open the entity details |
-| `perform-action` | Call an action: `perform_action` and `data` |
+| `perform-action` | Call an action: `perform_action` (picked from the actions Home Assistant knows, with search) and `data` as one line of YAML, e.g. `entity_id: input_button.x` |
 | `navigate` | Go to `navigation_path` |
 | `url` | Open `url_path` |
 | `none` | Do nothing |

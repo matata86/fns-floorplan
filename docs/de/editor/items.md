@@ -162,7 +162,7 @@ Jedes Element (auch Türen und Fenster) akzeptiert `tap_action`, `double_tap_act
 |----------|-----------|
 | `toggle` | Schaltet die Entität um |
 | `more-info` | Öffnet die Entitätsdetails |
-| `perform-action` | Ruft eine Aktion auf: `perform_action` und `data` |
+| `perform-action` | Ruft eine Aktion auf: `perform_action` (Auswahl aus den Aktionen, die Home Assistant kennt, mit Suche) und `data` als eine Zeile YAML, z. B. `entity_id: input_button.x` |
 | `navigate` | Wechselt zu `navigation_path` |
 | `url` | Öffnet `url_path` |
 | `none` | Tut nichts |

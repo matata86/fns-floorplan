@@ -162,7 +162,7 @@ Każdy element (także drzwi i okna) przyjmuje `tap_action`, `double_tap_action`
 |----------|---------|
 | `toggle` | Przełącz encję |
 | `more-info` | Otwórz szczegóły encji |
-| `perform-action` | Wywołaj akcję: `perform_action` i `data` |
+| `perform-action` | Wywołaj akcję: `perform_action` (wybór spośród akcji znanych Home Assistantowi, z wyszukiwaniem) i `data` jako jedna linia YAML, np. `entity_id: input_button.x` |
 | `navigate` | Przejdź do `navigation_path` |
 | `url` | Otwórz `url_path` |
 | `none` | Nic nie rób |
