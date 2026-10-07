@@ -26,7 +26,7 @@ Das Panel ist aus den eigenen Karten von Home Assistant gebaut, jede wie auf ein
 | **Medien** | Mediaplayer und Fernbedienungen (Fernseher, Lautsprecher, Player); ein Player mit einstellbarer Lautstärke erhält einen Lautstärkeregler neben dem Namen; die Kachel nimmt die volle Breite ein |
 | **Roboter** | Saugroboter mit Start / Stopp / zur Station, Mähroboter; die Kachel nimmt die volle Breite ein, die Schaltflächen stehen neben dem Namen |
 | **Geräte** | Haushaltsgeräte (ein Schloss erhält Schlossbefehle) |
-| **Sensoren** | Sensoren des Raums, auch die darin platzierten PIR- und Wasserleck-Sensoren |
+| **Sensoren** | Sensoren des Raums, auch die darin platzierten PIR- und Wasserleck-Sensoren (mit Zustand und Zeit der letzten Änderung) |
 | **Sonstige** | Alles andere |
 
 Angezeigt werden nur Elemente, die **im Raum platziert** sind, und die Entitäten in `sheet_extra`. Bereiche von Home Assistant werden nicht automatisch hinzugefügt. Der Saugroboter erscheint in dem Raum, in dem seine Station steht.

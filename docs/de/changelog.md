@@ -2,12 +2,12 @@
 
 Jede Version ist mit Hinweisen in den [GitHub-Releases](https://github.com/matata86/fns-floorplan/releases) aufgeführt. Diese Seite fasst die Reihe 0.6.x nach Themen zusammen.
 
-## 1.0.11 – 1.0.14
+## 1.0.11 – 1.0.15
 
 - Raumpanel: Mediaplayer und Fernbedienungen haben einen eigenen Abschnitt **Medien** (mit Lautstärkeregler), Saug- und Mähroboter den Abschnitt **Roboter**.
 - Editor: Ein nach der Suche im Symbolwähler einer Regel gewähltes Symbol bleibt erhalten, und das Formular behält seine Scrollposition, auch wenn sich die Seitenhöhe nach einer Änderung in die eine oder andere Richtung ändert.
 - Regeln: Eine Regel, die einen Ringeffekt setzt (z. B. einen von einem Timer gesteuerten Countdown), startet ihn jetzt auch bei ausgeschaltetem Gerät.
-- Raumpanel: Mediaplayer und Saugroboter nehmen die volle Breite in einer Zeile ein (Lautstärke und Schaltflächen neben dem Namen); Fenster und Türen zeigen, wann sie zuletzt offen waren, statt ihres Zustands; die im Raum platzierten PIR- und Wasserleck-Sensoren stehen unter Sensoren.
+- Raumpanel: Mediaplayer und Saugroboter nehmen die volle Breite in einer Zeile ein (Lautstärke und Schaltflächen neben dem Namen); Fenster und Türen zeigen, wann sie zuletzt offen waren, statt ihres Zustands; die im Raum platzierten PIR- und Wasserleck-Sensoren stehen unter Sensoren (mit Zustand und Zeit der letzten Änderung).
 
 ## 1.0.1 bis 1.0.9
 

@@ -26,7 +26,7 @@ Panel je postavený z vlastních karet Home Assistantu, každá je vložená jak
 | **Média** | Přehrávače médií a ovladače (televize, reproduktory, přehrávače); přehrávač s nastavitelnou hlasitostí má posuvník hlasitosti vedle názvu; dlaždice zabírá celou šířku |
 | **Roboti** | Robotické vysavače se spuštěním / zastavením / návratem do doku, robotické sekačky; dlaždice zabírá celou šířku, tlačítka jsou vedle názvu |
 | **Zařízení** | Spotřebiče (zámek dostane příkazy zámku) |
-| **Senzory** | Senzory místnosti, včetně v ní umístěných senzorů pohybu (PIR) a úniku vody |
+| **Senzory** | Senzory místnosti, včetně v ní umístěných senzorů pohybu (PIR) a úniku vody (se stavem a časem poslední změny) |
 | **Ostatní** | Všechno ostatní |
 
 Zobrazí se jen položky, které jsou **umístěné v místnosti**, a entity ze `sheet_extra`. Oblasti Home Assistantu se automaticky nepřidávají. Robotický vysavač se objeví v místnosti, ve které má dok.

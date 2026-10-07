@@ -26,7 +26,7 @@ The panel is built from Home Assistant's own cards, each placed like on a dashbo
 | **Media** | Media players and remotes (TVs, speakers, players); a player that can set its volume gets a volume slider next to the name; the tile takes the full width |
 | **Robots** | Robot vacuums with start / stop / home, lawn mowers; the tile takes the full width with the buttons next to the name |
 | **Devices** | Appliances (a lock gets lock commands) |
-| **Sensors** | Sensors of the room, including the PIR and water leak sensors placed in it |
+| **Sensors** | Sensors of the room, including the PIR and water leak sensors placed in it (with the state and when it last changed) |
 | **Other** | Everything else |
 
 Only items that are **placed in the room** and the entities in `sheet_extra` are shown. Home Assistant areas are not added automatically. The robot vacuum appears in the room with its dock.
