@@ -24,8 +24,9 @@ Na telefonu (užším než 800 px) vyplní půdorys celou obrazovku a formulář
 |-------|--------------|--------|
 | **Vybavení** | Světla, LED pásky, spotřebiče, senzory, texty, nábytek, jmenovky místností | Místnosti jsou vidět, ale jsou zamčené |
 | **Místnosti** | Místnosti (rohy, stěny, celé místnosti), dveře a okna | Prvky jsou ztlumené a zamčené |
+| **Vzhled** | Barvy půdorysu | Půdorys je vidět jako živý náhled karty, nic se nedá přesouvat |
 
-Viz [Místnosti](rooms.md), [Dveře a okna](openings.md) a [Položky](items.md).
+Viz [Místnosti](rooms.md), [Dveře a okna](openings.md), [Položky](items.md) a [Vzhled](look.md).
 
 ## Výběr, přesouvání, posouvání šipkami
 

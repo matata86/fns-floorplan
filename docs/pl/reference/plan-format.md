@@ -22,6 +22,23 @@ Plan to jeden obiekt JSON przechowywany w `.storage/fns_floorplan`. Edytor go od
 | `outdoor` | string | brak | Id pomieszczenia, którego temperatura jest pokazywana jako temperatura zewnętrzna |
 | `backgrounds` | obiekt | `{}` | Podkład do obrysowania dla piętra `{level_id: {url, left, top, width, opacity}}`, tylko w edytorze |
 | `vacuum` | obiekt | brak | Przestarzałe: `entity`, `room_sensor`; edytor przekształca w stację dokującą |
+| `style` | obiekt | `{}` | Kolory planu z zakładki Wygląd edytora, zobacz [Wygląd](../editor/look.md) |
+
+## Styl { #style }
+
+Kolory planu z zakładki [Wygląd](../editor/look.md) edytora. Każdy klucz jest opcjonalny i zawiera `"#rrggbb"`; nieustawiony klucz zachowuje wartość domyślną.
+
+| Klucz | Co koloruje | Domyślnie |
+|---|---|---|
+| `wall_day` / `wall_night` | Ściany (dzień / noc) | kolor podstawowy motywu |
+| `floor_day` / `floor_night` | Podłoga (dzień / noc) | biały / ciemnoniebieski |
+| `text_day` / `text_night` | Etykiety pomieszczeń i teksty (dzień / noc) | ciemny / jasny |
+| `accent` | Akcent przycisków i wyróżnień | kolor podstawowy motywu |
+| `lamp` | Światło, które nie zgłasza własnego koloru | kolor aktywnego światła z motywu, rozjaśniony |
+| `open` | Otwarte drzwi lub okno, otwarty zamek, oczekujący alarm | kolor aktywnego czujnika binarnego z motywu, w przeciwnym razie pomarańczowy |
+| `alarm` | Wyzwolony alarm | kolor wyzwolonego alarmu z motywu, w przeciwnym razie czerwony |
+| `blind` | Rolety | kolor zamkniętej osłony z motywu, w przeciwnym razie akcent |
+| `cold` / `hot` | Zimna i ciepła temperatura na etykietach pomieszczeń | niebieski / pomarańczowy |
 
 ## Piętra { #levels }
 

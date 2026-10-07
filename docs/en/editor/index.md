@@ -24,8 +24,9 @@ On a phone (narrower than 800 px) the plan fills the screen and the form opens i
 |------|---------------|----------|
 | **Items** | Lights, LED strips, appliances, sensors, text items, furniture, room labels | Rooms are shown, but locked |
 | **Rooms** | Rooms (corners, walls, whole rooms), doors and windows | Items are dimmed and locked |
+| **Look** | The colours of the plan | The plan is shown as a live card preview, nothing can be moved |
 
-See [Rooms](rooms.md), [Doors and windows](openings.md) and [Items](items.md).
+See [Rooms](rooms.md), [Doors and windows](openings.md), [Items](items.md) and [Look](look.md).
 
 ## Selecting, moving, nudging
 

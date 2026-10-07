@@ -22,6 +22,23 @@ Der Plan ist ein JSON-Objekt, das in `.storage/fns_floorplan` gespeichert wird. 
 | `outdoor` | string | keiner | ID des Raums, dessen Temperatur als Außentemperatur angezeigt wird |
 | `backgrounds` | object | `{}` | Vorlagenbild pro Etage `{level_id: {url, left, top, width, opacity}}`, nur im Editor |
 | `vacuum` | object | keiner | Veraltet: `entity`, `room_sensor`; wird vom Editor in eine Station umgewandelt |
+| `style` | object | `{}` | Farben des Plans aus dem Tab Aussehen des Editors, siehe [Aussehen](../editor/look.md) |
+
+## Stil { #style }
+
+Farben des Plans aus dem Tab [Aussehen](../editor/look.md) des Editors. Jeder Schlüssel ist optional und enthält `"#rrggbb"`; ein nicht gesetzter Schlüssel behält seinen Standard.
+
+| Schlüssel | Was er einfärbt | Standard |
+|---|---|---|
+| `wall_day` / `wall_night` | Wände (Tag / Nacht) | Primärfarbe des Designs |
+| `floor_day` / `floor_night` | Boden (Tag / Nacht) | weiß / dunkelblau |
+| `text_day` / `text_night` | Raumbeschriftungen und Texte (Tag / Nacht) | dunkel / hell |
+| `accent` | Akzent von Schaltflächen und Hervorhebungen | Primärfarbe des Designs |
+| `lamp` | Ein Licht, das keine eigene Farbe meldet | die Designfarbe eines aktiven Lichts, aufgehellt |
+| `open` | Offene Tür oder Fenster, entsperrtes Schloss, ausstehender Alarm | die Designfarbe eines aktiven Binärsensors, sonst Orange |
+| `alarm` | Ausgelöster Alarm | die Designfarbe eines ausgelösten Alarms, sonst Rot |
+| `blind` | Rollläden | die Designfarbe einer geschlossenen Abdeckung, sonst der Akzent |
+| `cold` / `hot` | Kalte und warme Temperatur auf Raumbeschriftungen | blau / orange |
 
 ## Etagen { #levels }
 

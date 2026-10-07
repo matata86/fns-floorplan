@@ -24,8 +24,9 @@ Auf einem Smartphone (schmaler als 800 px) füllt der Plan den Bildschirm und da
 |-------|--------------------|----------|
 | **Ausstattung** | Lichter, LED-Streifen, Geräte, Sensoren, Textelemente, Möbel, Raumbeschriftungen | Räume werden angezeigt, sind aber gesperrt |
 | **Räume** | Räume (Ecken, Wände, ganze Räume), Türen und Fenster | Elemente sind abgedunkelt und gesperrt |
+| **Aussehen** | Die Farben des Plans | Der Plan wird als Live-Vorschau der Karte gezeigt, nichts lässt sich verschieben |
 
-Siehe [Räume](rooms.md), [Türen und Fenster](openings.md) und [Elemente](items.md).
+Siehe [Räume](rooms.md), [Türen und Fenster](openings.md), [Elemente](items.md) und [Aussehen](look.md).
 
 ## Auswählen, Verschieben, Feinjustieren
 

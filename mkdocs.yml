@@ -62,6 +62,7 @@ plugins:
             Doors and windows: Dveře a okna
             Items: Položky
             Rules: Pravidla
+            Look: Vzhled
             Features: Funkce
             Card: Karta
             Room panel: Panel místnosti
@@ -104,6 +105,7 @@ plugins:
             Doors and windows: Türen und Fenster
             Items: Elemente
             Rules: Regeln
+            Look: Aussehen
             Features: Funktionen
             Card: Karte
             Room panel: Raum-Panel
@@ -146,6 +148,7 @@ plugins:
             Doors and windows: "Drzwi i okna"
             Items: Elementy
             Rules: "Reguły"
+            Look: "Wygląd"
             Features: Funkcje
             Card: Karta
             Room panel: "Panel pomieszczenia"
@@ -226,6 +229,7 @@ nav:
       - Doors and windows: editor/openings.md
       - Items: editor/items.md
       - Rules: editor/rules.md
+      - Look: editor/look.md
       - History and check: history.md
   - When something doesn't work:
       - All topics: faq.md

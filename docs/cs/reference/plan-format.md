@@ -22,6 +22,23 @@ Půdorys je jeden objekt JSON uložený v `.storage/fns_floorplan`. Editor ho č
 | `outdoor` | string | žádné | Id místnosti, jejíž teplota se zobrazuje jako venkovní teplota |
 | `backgrounds` | object | `{}` | Podkladový obrázek pro každé patro `{level_id: {url, left, top, width, opacity}}`, jen v editoru |
 | `vacuum` | object | žádné | Zastaralé: `entity`, `room_sensor`; editor ho převede na dok |
+| `style` | object | `{}` | Barvy půdorysu ze záložky Vzhled v editoru, viz [Vzhled](../editor/look.md) |
+
+## Styl { #style }
+
+Barvy půdorysu ze záložky [Vzhled](../editor/look.md) v editoru. Každý klíč je volitelný a obsahuje `"#rrggbb"`; nenastavený klíč si ponechá výchozí hodnotu.
+
+| Klíč | Co obarvuje | Výchozí |
+|---|---|---|
+| `wall_day` / `wall_night` | Stěny (den / noc) | primární barva motivu |
+| `floor_day` / `floor_night` | Podlaha (den / noc) | bílá / tmavě modrá |
+| `text_day` / `text_night` | Jmenovky místností a texty (den / noc) | tmavá / světlá |
+| `accent` | Akcent tlačítek a zvýraznění | primární barva motivu |
+| `lamp` | Světlo, které nehlásí vlastní barvu | barva aktivního světla z motivu, zesvětlená |
+| `open` | Otevřené dveře nebo okno, odemčený zámek, čekající alarm | barva aktivního binárního senzoru z motivu, jinak oranžová |
+| `alarm` | Spuštěný alarm | barva spuštěného alarmu z motivu, jinak červená |
+| `blind` | Rolety | barva zavřeného krytu z motivu, jinak akcent |
+| `cold` / `hot` | Chladná a teplá teplota na jmenovkách místností | modrá / oranžová |
 
 ## Patra { #levels }
 

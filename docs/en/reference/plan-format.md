@@ -22,6 +22,23 @@ The plan is one JSON object stored in `.storage/fns_floorplan`. The editor reads
 | `outdoor` | string | none | Id of the room whose temperature is shown as the outside temperature |
 | `backgrounds` | object | `{}` | Tracing image per floor `{level_id: {url, left, top, width, opacity}}`, editor only |
 | `vacuum` | object | none | Legacy: `entity`, `room_sensor`; converted to a dock by the editor |
+| `style` | object | `{}` | Plan colours from the editor's Look tab, see [Look](../editor/look.md) |
+
+## Style { #style }
+
+Plan colours from the editor's [Look](../editor/look.md) tab. Every key is optional and holds `"#rrggbb"`; an unset key keeps its default.
+
+| Key | What it colours | Default |
+|---|---|---|
+| `wall_day` / `wall_night` | Walls (day / night) | theme primary colour |
+| `floor_day` / `floor_night` | Floor (day / night) | white / dark blue |
+| `text_day` / `text_night` | Room labels and text (day / night) | dark / light |
+| `accent` | Accent of buttons and highlights | theme primary colour |
+| `lamp` | A light that reports no colour of its own | the theme colour of an active light, paled |
+| `open` | Open door or window, unlocked lock, pending alarm | the theme colour of an active binary sensor, else orange |
+| `alarm` | Triggered alarm | the theme colour of a triggered alarm, else red |
+| `blind` | Blinds | the theme colour of a closed cover, else the accent |
+| `cold` / `hot` | Cold and warm temperature in room labels | blue / orange |
 
 ## Levels { #levels }
 

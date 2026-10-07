@@ -147,6 +147,15 @@ ha-dropdown-item[hidden] { display: none; }
 .top select { height: 36px; border-radius: 8px; padding: 6px 10px; border: 1px solid var(--divider-color, #e0e0e0); background: var(--card-background-color, #fff); color: var(--primary-text-color, #212121); }
 .main { display: flex; height: calc(100vh - 56px); }
 .stage { flex: 1; min-width: 0; padding: 12px; box-sizing: border-box; position: relative; }
+.look-card { display: none; }
+.main.look .look-card { display: block; position: absolute; inset: 0; overflow: auto; padding: 12px; box-sizing: border-box; }
+.main.look .stage > svg, .main.look .zoom { display: none; }
+.look-row { display: flex; align-items: center; gap: 8px; margin: 4px 0; font-size: 14px; }
+.look-row span { flex: 1; }
+.side .look-row input[type="color"] { width: 44px; height: 32px; padding: 2px; flex: none; cursor: pointer; }
+.side .look-row input.def { opacity: .5; }
+.rot button { flex: 1; padding: 7px; border-radius: 8px; border: 1px solid var(--divider-color, #e0e0e0); background: var(--primary-background-color, #fafafa); color: var(--primary-text-color, #212121); cursor: pointer; }
+.rot button.on { border-color: var(--primary-color); color: var(--primary-color); }
 .zoom { position: absolute; left: 20px; top: 20px; z-index: 1; display: flex; flex-direction: column; overflow: hidden;
   background: var(--ha-card-background, var(--card-background-color)); border-radius: var(--ha-card-border-radius, 12px);
   box-shadow: var(--ha-card-box-shadow, 0 2px 6px rgba(0,0,0,.18));
@@ -333,6 +342,8 @@ class FnsFloorplanPanel extends HTMLElement {
     const langChanged = setLang(hass.locale?.language || hass.language);
     if (first) this._load();
     else if (langChanged && this._plan) { this._skeleton(); this._draw(); this._form(); } // every text follows the language
+    const lc = this.shadowRoot?.querySelector(".look-card");
+    if (lc) lc.hass = hass;
     const menu = this.shadowRoot.querySelector("ha-menu-button");
     if (menu) menu.hass = hass;
   }
@@ -410,7 +421,7 @@ class FnsFloorplanPanel extends HTMLElement {
   <ha-menu-button></ha-menu-button>
   <h1>${t("panel.title")}</h1>
   <span class="state"></span>
-  ${nd("ha-tab-group") ? `<ha-tab-group class="modes"><ha-tab-group-tab slot="nav" panel="items">${t("panel.mode_items")}</ha-tab-group-tab><ha-tab-group-tab slot="nav" panel="rooms">${t("panel.mode_rooms")}</ha-tab-group-tab></ha-tab-group>` : `<div class="modes"><button data-m="items">${t("panel.mode_items")}</button><button data-m="rooms">${t("panel.mode_rooms")}</button></div>`}
+  ${nd("ha-tab-group") ? `<ha-tab-group class="modes"><ha-tab-group-tab slot="nav" panel="items">${t("panel.mode_items")}</ha-tab-group-tab><ha-tab-group-tab slot="nav" panel="rooms">${t("panel.mode_rooms")}</ha-tab-group-tab><ha-tab-group-tab slot="nav" panel="look">${t("panel.mode_look")}</ha-tab-group-tab></ha-tab-group>` : `<div class="modes"><button data-m="items">${t("panel.mode_items")}</button><button data-m="rooms">${t("panel.mode_rooms")}</button><button data-m="look">${t("panel.mode_look")}</button></div>`}
   ${nd("ha-selector") ? '<ha-selector class="level"></ha-selector>' : `<select class="level" title="${t("panel.level")}"></select>`}
   ${nd("ha-dropdown") ? `<ha-dropdown class="add"><ha-button slot="trigger" appearance="filled" size="small" with-caret><ha-icon slot="start" icon="mdi:plus"></ha-icon><span class="lbl">${t("panel.add")}</span></ha-button></ha-dropdown>` : `<select class="add"><option value="">+ ${t("panel.add")}</option></select>`}
   <ha-icon-button class="undo" label="${t("panel.undo")}" disabled><ha-icon icon="mdi:undo"></ha-icon></ha-icon-button>
@@ -551,12 +562,14 @@ class FnsFloorplanPanel extends HTMLElement {
     if (!m || m === this._mode) return; // the toggle group may report no value or the current one
     this._mode = m;
     this._sel = null;
+    if (m === "look") this._sheet = true; // on a phone the form opens right away
     this._draw();
     this._form();
   }
 
   // v: "room" or the index into ADD
   _addItem(v) {
+    if (this._mode === "look") this._mode = "items";
     this._sheet = true;
     if (v === "room") {
       const [cx, cz] = centroid(this._bounds()).map((v) => r3(snap(v)));
@@ -1531,14 +1544,16 @@ class FnsFloorplanPanel extends HTMLElement {
   // properties of the selected item
   // the phone sheet is shown while it is open and has something to show
   _sheetUI() {
-    this.shadowRoot.querySelector(".main")?.classList.toggle("sheet", !!this._sheet && !!(this._sel || this._multi?.length || this._sidePage));
+    this.shadowRoot.querySelector(".main")?.classList.toggle("sheet", !!this._sheet && !!(this._sel || this._multi?.length || this._sidePage || this._mode === "look"));
   }
 
   _form() {
     this._status();
     this._sheetUI();
+    this._lookPreview();
     if (this._sidePage && !this._sel) return; // history / check list stays until closed or an item is picked
     const side = this.shadowRoot.querySelector(".side");
+    if (this._mode === "look") return this._lookForm(side);
     const sel = this._sel, o = this._get();
     if (!o && this._mode === "rooms") {
       side.innerHTML = `<h2>${t("panel.f.rooms_title")}</h2><p class="hint">${t("panel.f.rooms_hint")}</p>`;
@@ -2193,6 +2208,52 @@ Request (may be in Czech): ${ask}`;
     for (const t of targets) if (data.length) t.rules = JSON.parse(JSON.stringify(data)); else delete t.rules;
     this._aiDraft = null; this._aiErr = "";
     this._changed();
+  }
+
+  // Look tab: a real card with the unsaved plan replaces the editing canvas
+  _lookPreview() {
+    const main = this.shadowRoot.querySelector(".main"), stage = this.shadowRoot.querySelector(".stage");
+    const on = this._mode === "look";
+    main?.classList.toggle("look", on);
+    let card = stage?.querySelector(".look-card");
+    if (!on || !stage) return card?.remove();
+    if (!customElements.get("fns-floorplan-card")) return;
+    if (!card) { card = document.createElement("fns-floorplan-card"); card.className = "look-card"; stage.appendChild(card); }
+    card.setConfig({ type: "custom:fns-floorplan-card", mode: this._lookMode || "night", level: this._level });
+    card.previewPlan(JSON.parse(JSON.stringify(this._plan)), this._hass);
+  }
+
+  _lookForm(side) {
+    const style = this._plan.style || {};
+    const css = getComputedStyle(this), varHex = (n, fb) => { const v = css.getPropertyValue(n).trim(); return /^#[0-9a-f]{6}$/i.test(v) ? v : fb; };
+    const primary = varHex("--primary-color", "#03a9f4");
+    const rows = [
+      ["panel.look.walls", [["wall_day", "panel.look.wall_day", primary], ["wall_night", "panel.look.wall_night", primary],
+        ["floor_day", "panel.look.floor_day", "#ffffff"], ["floor_night", "panel.look.floor_night", "#141b33"],
+        ["text_day", "panel.look.text_day", "#1b1f3b"], ["text_night", "panel.look.text_night", "#e8ebff"]]],
+      ["panel.look.states", [["accent", "panel.look.accent", primary], ["lamp", "panel.look.lamp", varHex("--state-light-active-color", "#ffd9a0")],
+        ["open", "panel.look.open", varHex("--state-binary_sensor-active-color", "#ffb02e")],
+        ["alarm", "panel.look.alarm", varHex("--state-alarm_control_panel-triggered-color", "#ff4d6d")],
+        ["blind", "panel.look.blind", varHex("--state-cover-closed-color", primary)],
+        ["cold", "panel.look.cold", "#60a5fa"], ["hot", "panel.look.hot", "#fb923c"]]],
+    ];
+    const mode = this._lookMode || "night";
+    side.innerHTML = `<h2>${t("panel.look.title")}</h2><p class="hint">${t("panel.look.hint")}</p>
+      <div class="rot"><button data-look-mode="day" class="${mode === "day" ? "on" : ""}">${t("panel.look.preview_day")}</button><button data-look-mode="night" class="${mode === "night" ? "on" : ""}">${t("panel.look.preview_night")}</button></div>
+      ${rows.map(([title, list]) => `<h3>${t(title)}</h3>${list.map(([k, label, def]) => `<div class="look-row"><span>${t(label)}</span>
+        <input type="color" data-look="${k}" value="${esc(style[k] || def)}" class="${style[k] ? "" : "def"}">
+        <ha-icon-button class="mini" data-look-reset="${k}" label="${t("panel.look.reset_one")}" ${style[k] ? "" : "disabled"}><ha-icon icon="mdi:restore"></ha-icon></ha-icon-button></div>`).join("")}`).join("")}
+      <div class="actions"><button data-a="look-reset">${t("panel.look.reset_all")}</button></div>`;
+    const set = (k, v) => {
+      const s = { ...(this._plan.style || {}) };
+      if (v) s[k] = v; else delete s[k];
+      if (Object.keys(s).length) this._plan.style = s; else delete this._plan.style;
+      this._changed();
+    };
+    side.querySelectorAll("input[data-look]").forEach((i) => i.addEventListener("change", () => set(i.dataset.look, i.value)));
+    side.querySelectorAll("[data-look-reset]").forEach((b) => b.addEventListener("click", () => set(b.dataset.lookReset, "")));
+    side.querySelector('[data-a="look-reset"]').addEventListener("click", () => { delete this._plan.style; this._changed(); });
+    side.querySelectorAll("[data-look-mode]").forEach((b) => b.addEventListener("click", () => { this._lookMode = b.dataset.lookMode; this._form(); }));
   }
 
   _roomForm(side, r) {

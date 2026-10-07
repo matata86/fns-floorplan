@@ -16,7 +16,7 @@ REPO = "https://github.com/matata86/fns-floorplan"
 RAW = "https://raw.githubusercontent.com/matata86/fns-floorplan/master/docs/"
 LANGS = {"en": ("", "English"), "cs": ("CS-", "Česky"), "de": ("DE-", "Deutsch"), "pl": ("PL-", "Polski")}
 ORDER = ["index", "installation", "quick-start", "editor/index", "editor/rooms", "editor/openings", "editor/items",
-         "editor/rules", "card", "room-panel", "robot-vacuum", "history", "reference/plan-format",
+         "editor/rules", "editor/look", "card", "room-panel", "robot-vacuum", "history", "reference/plan-format",
          "reference/websocket-api", "faq", "changelog"]
 KEYS = {"ctrl": "Ctrl", "alt": "Alt", "shift": "Shift", "esc": "Esc", "delete": "Delete", "cmd": "Cmd"}
 

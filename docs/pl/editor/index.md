@@ -24,8 +24,9 @@ Na telefonie (węższym niż 800 px) plan wypełnia ekran, a formularz otwiera s
 |------|---------------|----------|
 | **Elementy** | Światła, taśmy LED, urządzenia, czujniki, elementy tekstowe, meble, etykiety pomieszczeń | Pomieszczenia są widoczne, ale zablokowane |
 | **Pomieszczenia** | Pomieszczenia (narożniki, ściany, całe pomieszczenia), drzwi i okna | Elementy są przyciemnione i zablokowane |
+| **Wygląd** | Kolory planu | Plan jest pokazany jako podgląd działającej karty, niczego nie można przesuwać |
 
-Zobacz [Pomieszczenia](rooms.md), [Drzwi i okna](openings.md) oraz [Elementy](items.md).
+Zobacz [Pomieszczenia](rooms.md), [Drzwi i okna](openings.md), [Elementy](items.md) oraz [Wygląd](look.md).
 
 ## Zaznaczanie, przesuwanie, przesuwanie strzałkami
 
