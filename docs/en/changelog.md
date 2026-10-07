@@ -2,6 +2,14 @@
 
 Every release is listed with notes in the [GitHub releases](https://github.com/matata86/fns-floorplan/releases). This page summarises the 0.6.x line by theme.
 
+## 1.0.1 to 1.0.9
+
+- Room panel: cameras show their picture across the panel; blinds of the room's doors and windows (and covers among the extra entities) with open / stop / close next to the name and a position slider below.
+- Room lists (label details and extra entities): **Add an entity** picker under each field, a leading `- ` is accepted, and an entry can be a template that lists entity ids, also over several lines (`{% if %} … {% endif %}`).
+- Editor: "Call an action" picks the action from the actions Home Assistant knows, with search; searchable pickers show the translated name instead of the raw value.
+- Editor: the form no longer jumps to the top after a change.
+- Editor: a short hint under the room lists explains entries and templates.
+
 ## 1.0.0 (0.7.x line)
 
 - Editor tab **Look**: plan colours (walls, floor and labels for day and night, accent, lights, open doors and windows, alarm, blinds, temperature) with a live card preview. Default light, open and alarm colours follow the Home Assistant theme.

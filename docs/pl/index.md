@@ -29,6 +29,7 @@ Znajdziesz tu przewodniki po karcie i edytorze oraz rozwiązania najczęstszych 
 - [Drzwi i okna](editor/openings.md)
 - [Elementy](editor/items.md)
 - [Reguły](editor/rules.md)
+- [Wygląd](editor/look.md)
 - [Historia i kontrola](history.md)
 
 ## Odkurzacz

@@ -40,7 +40,8 @@ An animated 2D floor plan for Home Assistant that shows the live state of your h
 - Temperature and humidity overlays tint the rooms; a day replay bar replays the last 24 hours from the Home Assistant history.
 
 **Room panel**
-- Tap a room: an off-canvas panel slides in and looks like an area dashboard with a thermostat, lights with brightness, cameras, windows and doors, switches, devices, sensors and other entities of that room.
+- Tap a room: an off-canvas panel slides in and looks like an area dashboard: section headings with icons, a thermostat, lights (Mushroom light cards when installed, otherwise tiles with brightness), camera pictures, windows and doors with their blinds, switches, devices, sensors and other entities of that room. The cards are Home Assistant's own, so your theme (also card-mod / UIX) styles them.
+- Extra entities per room, picked from Home Assistant or listed by a template.
 
 **Editor** (sidebar panel "Floor plan")
 - Draw rooms by dragging corners and whole walls, with snapping to neighbours, shared walls, wall length labels and 15 degree angle snap.
@@ -48,6 +49,7 @@ An animated 2D floor plan for Home Assistant that shows the live state of your h
 - Place lights, LED strips, appliances, sensors, text items and over 30 furniture types; resize and rotate with handles.
 - Multi-select, copy / cut / paste, groups, layers, undo / redo, snap guides, tracing image under each floor.
 - Edit anything as a form or as YAML; native Home Assistant fields and pickers.
+- A **Look** tab with your own colours for walls, floors, labels, lights, open doors and windows, alarm, blinds and temperatures, with a live preview of the card.
 
 **Rules**
 - Conditional colours, glow, icons, text, hiding, ring animations and countdowns on any item, by entity states or by Jinja templates.
@@ -101,7 +103,7 @@ The plan lives in the integration's storage (`.storage/fns_floorplan`) and is ed
 
 | Key | Content |
 |-----|---------|
-| `rooms` | `id`, `name`, `points`, `temperature`, `humidity`, `sheet_extra` (more entities for the room panel); label options `label_info`, `label_name: false`, `label_hidden: true`, `label_rotation` |
+| `rooms` | `id`, `name`, `points`, `temperature`, `humidity`, `sheet_extra` (more entities for the room panel, entity ids or templates); label options `label_info`, `label_name: false`, `label_hidden: true`, `label_rotation` |
 | `openings` | `id`, `room_id`, `edge`, `offset`, `width`, `type` (door / window), `style` (`passage` = opening only), `hinge`, `swing`, `contact`, `blind`, `blind_side`, `blind_invert`, `lock` |
 | `furniture` | `id`, `type`, `x`, `z`, `rotation`, `w`, `d`; lights (`lamp_*`, `led_strip`) carry `entity` and optional `room_light`; `lamp_spot` has `beam`; `tv_wall` with a media player; `robot_vacuum` marks the dock |
 | `sensors` | binary sensors with `entity`, `x`, `z` |
@@ -111,6 +113,7 @@ The plan lives in the integration's storage (`.storage/fns_floorplan`) and is ed
 | `labels` | `{room_id: [x, z]}` to place a room label by hand |
 | `outdoor` | room id whose temperature shows as the outside temperature |
 | `levels` | floors `[{id, name}]`; rooms and items carry `level` (none = the first floor) |
+| `style` | plan colours from the editor's Look tab: `wall_day`, `wall_night`, `floor_day`, `floor_night`, `text_day`, `text_night`, `accent`, `lamp`, `open`, `alarm`, `blind`, `cold`, `hot` (`#rrggbb`) |
 
 Optional on any item: `icon` (any `mdi:` icon or `none`), `size` (`xs`, `s`, `m`, `l`, `xl`, `xxl`), `layer`, `sheet_hide`, and `tap_action`, `double_tap_action`, `hold_action` in Home Assistant's action format.
 

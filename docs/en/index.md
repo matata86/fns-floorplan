@@ -29,6 +29,7 @@ Here you will find guides to the card and the editor and solutions to the most c
 - [Doors and windows](editor/openings.md)
 - [Items](editor/items.md)
 - [Rules](editor/rules.md)
+- [Look](editor/look.md)
 - [History and check](history.md)
 
 ## Robot vacuum

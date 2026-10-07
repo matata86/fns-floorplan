@@ -2,6 +2,14 @@
 
 Każde wydanie wraz z uwagami znajdziesz w [wydaniach na GitHubie](https://github.com/matata86/fns-floorplan/releases). Ta strona podsumowuje linię 0.6.x tematycznie.
 
+## 1.0.1 do 1.0.9
+
+- Panel pomieszczenia: kamery pokazują obraz na całą szerokość panelu; rolety drzwi i okien pomieszczenia (i rolety z dodatkowych encji) z przyciskami otwórz / stop / zamknij obok nazwy i suwakiem położenia pod nimi.
+- Listy pomieszczenia (szczegóły etykiety i dodatkowe encje): wybór **Dodaj encję** pod każdym polem, początkowe `- ` jest akceptowane, a wpis może być szablonem, który zwraca id encji, także na kilka wierszy (`{% if %} … {% endif %}`).
+- Edytor: „Wywołaj akcję” wybiera akcję spośród akcji znanych Home Assistantowi, z wyszukiwaniem; wybierane pola z wyszukiwaniem pokazują przetłumaczoną nazwę zamiast surowej wartości.
+- Edytor: formularz po zmianie już nie skacze na górę.
+- Edytor: krótka wskazówka pod listami pomieszczenia wyjaśnia wpisy i szablony.
+
 ## 1.0.0 (seria 0.7.x)
 
 - Zakładka edytora **Wygląd**: kolory planu (ściany, podłoga i etykiety na dzień i noc, akcent, światła, otwarte drzwi i okna, alarm, rolety, temperatura) z podglądem karty na żywo. Domyślne kolory światła, otwarcia i alarmu wynikają z motywu Home Assistanta.

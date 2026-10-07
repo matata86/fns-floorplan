@@ -29,6 +29,7 @@ Hier findest du Anleitungen zu Karte und Editor und Lösungen für die häufigst
 - [Türen und Fenster](editor/openings.md)
 - [Elemente](editor/items.md)
 - [Regeln](editor/rules.md)
+- [Aussehen](editor/look.md)
 - [Verlauf und Prüfung](history.md)
 
 ## Saugroboter

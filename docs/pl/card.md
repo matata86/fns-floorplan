@@ -62,7 +62,7 @@ Wygląd samej karty można też ustawić niezależnie od motywu:
 
 ## Wygląd
 
-- Ściany i poświata przyjmują `--primary-color` twojego motywu; tło karty to ten sam kolor przy 5 % krycia. Kolory urządzeń pochodzą z kolorów stanów motywu.
+- Ściany i poświata przyjmują `--primary-color` twojego motywu; tło karty to ten sam kolor przy 5 % krycia. Włączone światło, otwarte drzwi lub okno i wywołany alarm przyjmują kolory stanów twojego motywu (`--state-light-active-color`, `--state-binary_sensor-active-color`, `--state-alarm_control_panel-triggered-color`), pozostałe urządzenia własne kolory stanów. Każdy z nich możesz zastąpić własnym kolorem w zakładce [Wygląd](editor/look.md) edytora.
 - Etykiety i ikony zachowują mniej więcej ten sam rozmiar na ekranie (tekst około 11 px): na małej karcie rosną (etykiety do 2,2 raza, ikony 1,5 raza), a na ogromnej maleją (0,5 raza).
 - Plan ma najwyżej 85 % wysokości okna; na bardzo szerokiej karcie pozostaje na środku.
 - Przy kilku piętrach zakładki pięter znajdują się w lewym górnym rogu.

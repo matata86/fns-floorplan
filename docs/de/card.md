@@ -62,7 +62,7 @@ Das Aussehen der Karte selbst lässt sich auch unabhängig vom Design einstellen
 
 ## Aussehen
 
-- Wände und Leuchten übernehmen die `--primary-color` deines Designs; der Kartenhintergrund hat dieselbe Farbe mit 5 % Deckkraft. Gerätefarben stammen aus den Zustandsfarben des Designs.
+- Wände und Leuchten übernehmen die `--primary-color` deines Designs; der Kartenhintergrund hat dieselbe Farbe mit 5 % Deckkraft. Ein eingeschaltetes Licht, eine offene Tür oder ein offenes Fenster und ein ausgelöster Alarm übernehmen die Zustandsfarben deines Designs (`--state-light-active-color`, `--state-binary_sensor-active-color`, `--state-alarm_control_panel-triggered-color`), andere Geräte ihre eigenen Zustandsfarben. Jede davon lässt sich im Reiter [Aussehen](editor/look.md) des Editors durch eigene Farben ersetzen.
 - Beschriftungen und Symbole behalten auf dem Bildschirm etwa dieselbe Größe (Text etwa 11 px): Auf einer kleinen Karte wachsen sie (Beschriftungen bis 2,2-fach, Symbole 1,5-fach), auf einer riesigen schrumpfen sie (0,5-fach).
 - Der Plan ist höchstens 85 % der Fensterhöhe hoch; auf einer sehr breiten Karte bleibt er in der Mitte.
 - Bei mehreren Etagen sitzen oben links Etagen-Tabs.

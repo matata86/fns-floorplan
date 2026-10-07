@@ -3,7 +3,7 @@
 Od nuly k funkčnímu půdorysu za deset kroků. Předpokládá, že je integrace [nainstalovaná](installation.md).
 
 1. **Otevři editor.** Klikni na **Půdorys** v postranním menu nebo otevři `/fns-floorplan`.
-2. **Přepni na Místnosti.** Přepínač režimu nahoře nabízí **Vybavení** a **Místnosti**. Zvol **Místnosti**.
+2. **Přepni na Místnosti.** Záložky nahoře jsou **Vybavení**, **Místnosti** a **Vzhled**. Zvol **Místnosti**.
 3. **Přidej místnost.** Otevři **Přidat** a zvol **Místnost**. Objeví se čtverec 2 × 2 metry. Modré body v rozích přetáhni do tvaru své místnosti, poloprůhledné body mezi rohy přidají nový roh. Podrobnosti v [Místnostech](editor/rooms.md).
 4. **Pojmenuj ji.** V bočním panelu zadej název místnosti a případně entitu teploty a vlhkosti.
 5. **Přidej další místnosti.** Přetáhni je k sobě, rohy se přichytí k rohům sousedů do vzdálenosti 15 cm.
@@ -46,3 +46,4 @@ FNS Floorplan vznikl z inspirace kartou [NeonPlan 3D](https://github.com/Masters
 - Přidej robotický vysavač: [Robotický vysavač](robot-vacuum.md).
 - Podlož pod půdorys obrázek a obkresli ho: [Přehled editoru](editor/index.md#tracing-image).
 - Více pater: [Přehled editoru](editor/index.md#levels-floors).
+- Změň barvy stěn, podlah, jmenovek a stavů v záložce [Vzhled](editor/look.md).

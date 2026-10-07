@@ -62,7 +62,7 @@ Vzhled samotné karty lze nastavit i nezávisle na motivu:
 
 ## Vzhled
 
-- Zdi a záře přebírají `--primary-color` tvého motivu; pozadí karty má stejnou barvu s 5% neprůhledností. Barvy zařízení pocházejí z barev stavů motivu.
+- Zdi a záře přebírají `--primary-color` tvého motivu; pozadí karty má stejnou barvu s 5% neprůhledností. Zapnuté světlo, otevřené dveře nebo okno a spuštěný alarm přebírají barvy stavů tvého motivu (`--state-light-active-color`, `--state-binary_sensor-active-color`, `--state-alarm_control_panel-triggered-color`), ostatní zařízení své vlastní barvy stavů. Kteroukoli z nich můžeš nahradit vlastní barvou v záložce [Vzhled](editor/look.md) editoru.
 - Jmenovky a ikony mají na obrazovce zhruba stejnou velikost (text asi 11 px): na malé kartě rostou (jmenovky až 2,2krát, ikony 1,5krát) a na obří se zmenšují (0,5krát).
 - Půdorys má nejvýše 85 % výšky okna; na velmi široké kartě zůstává uprostřed.
 - Při více patrech jsou vlevo nahoře záložky pater.

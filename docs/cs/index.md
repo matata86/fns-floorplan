@@ -29,6 +29,7 @@ Najdeš tu návody ke kartě a editoru i řešení nejčastějších problémů.
 - [Dveře a okna](editor/openings.md)
 - [Položky](editor/items.md)
 - [Pravidla](editor/rules.md)
+- [Vzhled](editor/look.md)
 - [Historie a kontrola](history.md)
 
 ## Robotický vysavač

@@ -2332,7 +2332,7 @@ Request (may be in Czech): ${ask}`;
       ${v != null ? `<div class="row2"><div><label>${t("panel.room.corner", { n: v + 1 })}</label><input data-k="vx" type="number" step="0.05" value="${r.points[v][0]}"></div><div><label>Z (m)</label><input data-k="vz" type="number" step="0.05" value="${r.points[v][1]}"></div></div>
         <div class="actions"><button data-a="delv" ${r.points.length <= 3 ? "disabled" : ""}>${t("panel.room.del_corner", { n: v + 1 })}</button></div>` : `<p class="hint">${t("panel.room.corners", { n: r.points.length })}</p>`}
       <label>${t("panel.room.sheet_extra")}</label>
-      <textarea data-k="sheet_extra" spellcheck="false" style="min-height:60px" placeholder="switch.zasuvka_pracovna">${esc((r.sheet_extra || []).join("\n"))}</textarea>
+      <textarea data-k="sheet_extra" spellcheck="false" style="min-height:60px" placeholder="switch.zasuvka_pracovna">${esc((r.sheet_extra || []).join("\n"))}</textarea><p class="hint">${t("panel.room.lists_hint")}</p>
       <label>${t("panel.room.add_wall")}</label><select data-k="wall">${walls}</select>
       <div class="actions"><button data-a="adddoor">${t("panel.room.add_door")}</button><button data-a="addwin">${t("panel.room.add_win")}</button></div>
       ${this._rulesUI(r, ["color", "glow", "hide"]).replace(t("panel.rule.head"), t("panel.rule.head_room"))}

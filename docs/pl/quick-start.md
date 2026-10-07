@@ -3,7 +3,7 @@
 Od zera do działającego planu w dziesięciu krokach. Zakładamy, że integracja jest [zainstalowana](installation.md).
 
 1. **Otwórz edytor.** Kliknij **Plan piętra** w pasku bocznym albo otwórz `/fns-floorplan`.
-2. **Przełącz na Pomieszczenia.** Przełącznik trybu u góry ma opcje **Elementy** i **Pomieszczenia**. Wybierz **Pomieszczenia**.
+2. **Przełącz na Pomieszczenia.** Zakładki u góry to **Elementy**, **Pomieszczenia** i **Wygląd**. Wybierz **Pomieszczenia**.
 3. **Dodaj pomieszczenie.** Otwórz **Dodaj** i wybierz **Pomieszczenie**. Pojawi się kwadrat 2 na 2 metry. Przeciągaj jego niebieskie punkty narożne, aż nada kształt twojemu pomieszczeniu; przeciągnij półprzezroczyste punkty między narożnikami, aby dodać nowy narożnik. Szczegóły w [Pomieszczenia](editor/rooms.md).
 4. **Nazwij je.** W panelu bocznym wpisz nazwę pomieszczenia i opcjonalnie encję temperatury i wilgotności.
 5. **Dodaj kolejne pomieszczenia.** Przeciągnij je obok siebie, narożniki przyciągają się do narożników sąsiadów w odległości do 15 cm.
@@ -46,3 +46,4 @@ FNS Floorplan powstał z inspiracji [NeonPlan 3D](https://github.com/Mastershort
 - Dodaj odkurzacz: [Odkurzacz](robot-vacuum.md).
 - Podłóż pod plan obraz rzutu i obrysuj go: [Przegląd edytora](editor/index.md#tracing-image).
 - Kilka pięter: [Przegląd edytora](editor/index.md#levels-floors).
+- Zmień kolory ścian, podłóg, etykiet i stanów w zakładce [Wygląd](editor/look.md).

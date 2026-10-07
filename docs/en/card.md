@@ -62,7 +62,7 @@ The look of the card itself can also be set independently of the theme:
 
 ## Look
 
-- Walls and glow take the `--primary-color` of your theme; the card background is the same colour at 5 % opacity. Device colours come from the theme's state colours.
+- Walls and glow take the `--primary-color` of your theme; the card background is the same colour at 5 % opacity. A light that is on, an open door or window and a triggered alarm take the state colours of your theme (`--state-light-active-color`, `--state-binary_sensor-active-color`, `--state-alarm_control_panel-triggered-color`), other devices their own state colours. Any of these can be replaced by your own colours in the editor's [Look](editor/look.md) tab.
 - Labels and icons keep roughly the same size on screen (text about 11 px): they grow on a small card (labels up to 2.2 times, icons 1.5 times) and shrink on a huge one (0.5 times).
 - The plan is at most 85 % of the window height; on a very wide card it stays in the middle.
 - With more floors, floor tabs sit at the top left.

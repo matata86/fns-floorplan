@@ -2,6 +2,14 @@
 
 Každé vydání je s poznámkami uvedeno na [GitHub releases](https://github.com/matata86/fns-floorplan/releases). Tato stránka shrnuje řadu 0.6.x podle témat.
 
+## 1.0.1 až 1.0.9
+
+- Panel místnosti: kamery ukazují obraz přes celou šířku panelu; rolety dveří a oken místnosti (i rolety z dalších entit) s tlačítky otevřít / stop / zavřít vedle názvu a posuvníkem polohy pod nimi.
+- Seznamy místnosti (podrobnosti jmenovky a další entity): výběr **Přidat entitu** pod každým polem, úvodní `- ` se přijme a záznam může být šablona, která vypíše id entit, i přes víc řádků (`{% if %} … {% endif %}`).
+- Editor: „Zavolat akci“ vybírá akci z akcí, které Home Assistant zná, s vyhledáváním; výběry s vyhledáváním ukazují přeložený název místo surové hodnoty.
+- Editor: formulář po změně už neskočí nahoru.
+- Editor: krátká nápověda pod seznamy místnosti vysvětluje záznamy a šablony.
+
 ## 1.0.0 (řada 0.7.x)
 
 - Záložka editoru **Vzhled**: barvy půdorysu (stěny, podlaha a popisky pro den a noc, akcent, světla, otevřené dveře a okna, alarm, rolety, teplota) s živým náhledem karty. Výchozí barvy světla, otevření a alarmu se řídí motivem Home Assistantu.

@@ -2,6 +2,14 @@
 
 Jede Version ist mit Hinweisen in den [GitHub-Releases](https://github.com/matata86/fns-floorplan/releases) aufgeführt. Diese Seite fasst die Reihe 0.6.x nach Themen zusammen.
 
+## 1.0.1 bis 1.0.9
+
+- Raum-Panel: Kameras zeigen ihr Bild über die ganze Breite des Panels; Rollläden der Türen und Fenster des Raums (und der weiteren Entitäten) mit Öffnen / Stopp / Schließen neben dem Namen und einem Positionsregler darunter.
+- Raumlisten (Details der Beschriftung und weitere Entitäten): Auswahl **Entität hinzufügen** unter jedem Feld, ein vorangestelltes `- ` wird akzeptiert, und ein Eintrag kann eine Vorlage sein, die Entitäts-IDs ausgibt, auch über mehrere Zeilen (`{% if %} … {% endif %}`).
+- Editor: „Aktion aufrufen“ wählt die Aktion aus den Aktionen, die Home Assistant kennt, mit Suche; Auswahlfelder mit Suche zeigen den übersetzten Namen statt des Rohwerts.
+- Editor: das Formular springt nach einer Änderung nicht mehr nach oben.
+- Editor: ein kurzer Hinweis unter den Raumlisten erklärt Einträge und Vorlagen.
+
 ## 1.0.0 (Reihe 0.7.x)
 
 - Editor-Reiter **Aussehen**: Farben des Plans (Wände, Boden und Beschriftungen für Tag und Nacht, Akzent, Lichter, offene Türen und Fenster, Alarm, Rollläden, Temperatur) mit Live-Vorschau der Karte. Standardfarben für Licht, Offen und Alarm folgen dem Home-Assistant-Design.

@@ -1,6 +1,6 @@
 # Raum-Panel
 
-Tippe auf der Karte auf einen Raum, und von der rechten Bildschirmkante fährt ein **seitliches Panel** ein. Es sieht aus wie ein Bereichs-Dashboard von Home Assistant: der Designhintergrund, eine Kopfzeile mit Raumsymbol, Name, Temperatur und Luftfeuchtigkeit und Kacheln in zwei Spalten. Schließe es mit dem Kreuz, ++esc++ oder einem Klick außerhalb.
+Tippe auf der Karte auf einen Raum, und von der rechten Bildschirmkante fährt ein **seitliches Panel** ein. Es sieht aus wie ein Bereichs-Dashboard von Home Assistant: der Designhintergrund, eine Kopfzeile mit Raumsymbol, Name, Temperatur und Luftfeuchtigkeit und Home-Assistant-Karten in zwei Spalten. Schließe es mit dem Kreuz, ++esc++ oder einem Klick außerhalb.
 
 | Dunkles Design | Helles Design |
 |---|---|
@@ -14,12 +14,12 @@ Tippe auf der Karte auf einen Raum, und von der rechten Bildschirmkante fährt e
 
 ## Abschnitte
 
-Das Panel ist aus den eigenen Kachelkarten von Home Assistant gebaut und sieht daher aus wie der Rest deiner Dashboards. Ein Klick auf eine Kachel öffnet die Details, das Symbol schaltet um, was sich umschalten lässt.
+Das Panel ist aus den eigenen Karten von Home Assistant gebaut, jede wie auf einem Dashboard platziert, sodass auch dein Design sie gestaltet (einschließlich card-mod- / UIX-Designs). Jeder Abschnitt hat eine Überschriftenkarte mit Symbol im Untertitel-Stil der Abschnittsüberschriften von Dashboards. Ein Tippen auf eine Karte öffnet die Details, das Symbol schaltet um, was sich umschalten lässt. Thermostate, Lichter mit Steuerung, Kameras und Rollläden nehmen die volle Breite ein, der Rest sitzt zu zweit in einer Reihe.
 
 | Abschnitt | Was dort steht |
 |-----------|----------------|
-| **Thermostat** | `climate`-Entitäten: Zieltemperatur minus und plus (wird nach 0,7 s gesendet), aktuelle Temperatur, Zustand, HVAC-Modi |
-| **Lichter** | Im Raum platzierte Lichter, mit der Helligkeit direkt neben dem Namen |
+| **Thermostat** | `climate`-Entitäten als Kachel mit der Regelung der Zieltemperatur |
+| **Lichter** | Im Raum platzierte Lichter. Mit installierten [Mushroom](https://github.com/piitaya/lovelace-mushroom)-Karten: eine Mushroom-Lichtkarte mit Helligkeitsbalken in der Farbe des Lichts und Schaltflächen für Farbtemperatur und Farbe (wenn das Licht sie hat); ein Tippen auf das Symbol schaltet das Licht. Ohne Mushroom: eine Kachel mit dem Helligkeitsbalken neben dem Namen |
 | **Kameras** | Kameras des Raums als Bild über die ganze Breite (ein Schnappschuss, alle paar Sekunden erneuert); ein Tippen öffnet das Livebild in den Details |
 | **Fenster und Türen** | Öffnungen des Raums mit Kontakt und ihre Rollläden (auch aus den weiteren Entitäten) mit Öffnen / Stopp / Schließen neben dem Namen und dem Positionsregler darunter |
 | **Schalter** | `switch` und `input_boolean` |
@@ -31,7 +31,7 @@ Angezeigt werden nur Elemente, die **im Raum platziert** sind, und die Entitäte
 
 ## Auswählen, was angezeigt wird
 
-- `sheet_extra`: eine Liste zusätzlicher Entitäten eines Raums (ein Feld im Formular des Raums). `light`, `switch`, `fan`, `input_boolean`, `humidifier` und `siren` erhalten einen Schalter, andere Entitäten eine Zeile mit dem Zustand.
+- `sheet_extra`: zusätzliche Entitäten eines Raums (ein Feld im Formular des Raums, eine pro Zeile, ein vorangestelltes `- ` ist erlaubt; **Entität hinzufügen** unter dem Feld wählt eine aus). Ein Eintrag kann auch eine Vorlage sein, die Entitäts-IDs ausgibt, siehe [Räume](editor/rooms.md). Jede Entität erhält die Karte ihres Abschnitts oben (ein Licht seine Lichtkarte, eine Kamera ihr Bild, ein Rollladen die Rollladensteuerung, der Rest eine Kachel).
 - `sheet_hide: true` bei einem beliebigen Element (Licht, Gerät, Fenster, Tür, Schloss, Roboter) lässt es weg.
 - Das Raumsymbol `icon` erscheint in der Kopfzeile.
 

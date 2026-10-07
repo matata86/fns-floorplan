@@ -3,7 +3,7 @@
 From zero to a working plan in ten steps. It assumes the integration is [installed](installation.md).
 
 1. **Open the editor.** Click **Floor plan** in the sidebar, or open `/fns-floorplan`.
-2. **Switch to Rooms.** The mode switch at the top has **Items** and **Rooms**. Choose **Rooms**.
+2. **Switch to Rooms.** The tabs at the top are **Items**, **Rooms** and **Look**. Choose **Rooms**.
 3. **Add a room.** Open **Add** and choose **Room**. A square of 2 by 2 metres appears. Drag its blue corner points to the shape of your room, drag the half-transparent points between corners to add a corner. Details in [Rooms](editor/rooms.md).
 4. **Name it.** In the side panel enter the room name, and optionally a temperature and a humidity entity.
 5. **Add more rooms.** Drag them next to each other, corners snap to the corners of neighbours within 15 cm.
@@ -46,3 +46,4 @@ FNS Floorplan was inspired by [NeonPlan 3D](https://github.com/Mastershort/neonp
 - Add a robot vacuum: [Robot vacuum](robot-vacuum.md).
 - Put a floor plan image under the plan and trace it: [Editor overview](editor/index.md#tracing-image).
 - Several floors: [Editor overview](editor/index.md#levels-floors).
+- Change the colours of walls, floors, labels and states in the [Look](editor/look.md) tab.
