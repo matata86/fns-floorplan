@@ -20,7 +20,7 @@ Panel je postavený z vlastních dlaždic Home Assistantu, takže vypadá jako z
 |-------|-----------|
 | **Termostat** | Entity `climate`: cílová teplota mínus a plus (odešle se po 0,7 s), aktuální teplota, stav, režimy HVAC |
 | **Světla** | Světla umístěná v místnosti, s jasem přímo vedle názvu |
-| **Kamery** | Kamery místnosti, živý obraz se otevře v detailu |
+| **Kamery** | Kamery místnosti jako náhled přes celou šířku panelu (snímek obnovovaný po pár sekundách); klepnutí otevře živý obraz v detailu |
 | **Okna a dveře** | Otvory místnosti s kontaktem |
 | **Spínače** | `switch` a `input_boolean` |
 | **Zařízení** | Spotřebiče (zámek dostane příkazy zámku, vysavač příkazy vysavače) |

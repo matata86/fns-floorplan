@@ -20,7 +20,7 @@ Panel jest zbudowany z własnych kart kafelkowych Home Assistanta, więc wygląd
 |---------|-----------------|
 | **Termostat** | encje `climate`: temperatura docelowa minus i plus (wysyłana po 0,7 s), temperatura bieżąca, stan, tryby HVAC |
 | **Światła** | Światła umieszczone w pomieszczeniu, z jasnością obok nazwy |
-| **Kamery** | Kamery pomieszczenia, obraz na żywo otwiera się w szczegółach |
+| **Kamery** | Kamery pomieszczenia jako podgląd na całą szerokość panelu (zdjęcie odświeżane co kilka sekund); dotknięcie otwiera obraz na żywo w szczegółach |
 | **Okna i drzwi** | Otwory pomieszczenia z czujnikiem kontaktowym |
 | **Przełączniki** | `switch` i `input_boolean` |
 | **Urządzenia** | Urządzenia (zamek dostaje polecenia zamka, odkurzacz polecenia odkurzacza) |

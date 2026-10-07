@@ -20,7 +20,7 @@ The panel is built from Home Assistant's own tile cards, so it looks like the re
 |---------|-----------------|
 | **Thermostat** | `climate` entities: target temperature minus and plus (sent after 0.7 s), current temperature, state, HVAC modes |
 | **Lights** | Lights placed in the room, with brightness inline next to the name |
-| **Cameras** | Cameras of the room, the live picture opens in their details |
+| **Cameras** | Cameras of the room as a picture across the panel (a snapshot refreshed every few seconds); a tap opens the live picture in their details |
 | **Windows & doors** | Openings of the room with a contact |
 | **Switches** | `switch` and `input_boolean` |
 | **Devices** | Appliances (a lock gets lock commands, a vacuum gets vacuum commands) |
