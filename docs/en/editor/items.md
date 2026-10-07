@@ -108,7 +108,7 @@ texts:
     background: none
 ```
 
-## Furniture { #furniture }
+## Furniture
 
 **Add, Furniture** adds one of these types (sorted by name in the picker, with a search; "Other" is last):
 
@@ -137,7 +137,6 @@ texts:
 - The **corner sofa** is L-shaped; the seat is 40 % of the shorter side.
 - `color` sets the default colour of a piece; a rule wins over it.
 - Furniture is dimmed in the editor so that it does not steal attention.
-- A piece with an **entity** (a dishwasher, washer, fridge, stove ...) behaves like an appliance badge while the entity runs: the form has the section **When running** with the states that count as running (`active`, default: anything but off), `color_on` (the colour of the icon and the circle), `fx` with `progress` (the circle animation, a countdown too) and **Animate the icon while it runs** (`anim: false` turns it off). The icon animates like an appliance's (the dishwasher bounces, the washer shakes ...). A rule can do the same by a template: `color`, `fx` and `animate: true` while its condition holds.
 
 ![Furniture in a living room with handles around a selected sofa](../../assets/screenshots/en/items-furniture.png){ loading=lazy }
 

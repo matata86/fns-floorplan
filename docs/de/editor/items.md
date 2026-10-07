@@ -137,7 +137,6 @@ texts:
 - Das **Ecksofa** ist L-förmig; die Sitzfläche beträgt 40 % der kürzeren Seite.
 - `color` legt die Standardfarbe eines Stücks fest; eine Regel hat Vorrang.
 - Möbel sind im Editor abgedunkelt, damit sie nicht die Aufmerksamkeit stehlen.
-- Ein Stück mit **Entität** (Geschirrspüler, Waschmaschine, Kühlschrank, Herd ...) verhält sich wie ein Geräte-Badge, solange die Entität läuft: Das Formular hat den Abschnitt **Wenn es läuft** mit den Zuständen, die als Laufen zählen (`active`, Standard: alles außer aus), `color_on` (Farbe von Symbol und Kreis), `fx` mit `progress` (Kreisanimation, auch Countdown) und **Symbol animieren, solange es läuft** (`anim: false` schaltet es ab). Das Symbol animiert wie bei einem Gerät (der Geschirrspüler hüpft, die Waschmaschine schüttelt sich ...). Dasselbe kann eine Regel mit Vorlage: `color`, `fx` und `animate: true`, solange ihre Bedingung gilt.
 
 ![Möbel in einem Wohnzimmer mit Griffen um ein ausgewähltes Sofa](../../assets/screenshots/de/items-furniture.png){ loading=lazy }
 

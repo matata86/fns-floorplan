@@ -137,7 +137,6 @@ texts:
 - **Rohová sedačka** má tvar L; sedák je 40 % kratší strany.
 - `color` nastavuje výchozí barvu kusu; pravidlo má přednost.
 - Nábytek je v editoru ztlumený, aby neodváděl pozornost.
-- Kus s **entitou** (myčka, pračka, lednice, sporák ...) se chová jako odznak spotřebiče, dokud entita běží: formulář má sekci **Když běží** se stavy, které se počítají jako běh (`active`, výchozí: cokoli kromě vypnuto), `color_on` (barva ikony a kolečka), `fx` s `progress` (animace kolečka, i odpočet) a **Animovat ikonu, když běží** (`anim: false` ji vypne). Ikona se animuje jako u spotřebiče (myčka poskakuje, pračka se třese ...). Totéž umí pravidlo se šablonou: `color`, `fx` a `animate: true`, dokud platí jeho podmínka.
 
 ![Nábytek v obývacím pokoji s úchyty kolem vybrané pohovky](../../assets/screenshots/cs/items-furniture.png){ loading=lazy }
 
