@@ -61,7 +61,7 @@ Each room has its own polygon, so a wall between two rooms is two walls on top o
 | Humidity | A humidity sensor (`humidity`) |
 | Extra entities | Entities for the room panel (`sheet_extra`), one per line; **Add an entity** below the field picks one from Home Assistant |
 
-Both lists (extra entities and the label's details) also take a **template** that renders entity ids, one per line, as a list or separated by commas. A template over several lines is one entry:
+Both lists (extra entities and the label's details) take one entry per line, with or without a leading `- `. They also take a **template** that renders entity ids, one per line, as a list or separated by commas. A template over several lines is one entry:
 
 ```jinja
 {% if is_state("sun.sun", "above_horizon") -%}

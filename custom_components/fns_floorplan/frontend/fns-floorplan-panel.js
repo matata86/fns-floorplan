@@ -97,7 +97,7 @@ const edgeOf = (r, k) => {
   const L = Math.hypot(c[0] - a[0], c[1] - a[1]) || 1e-9;
   return { a, c, L, u: [(c[0] - a[0]) / L, (c[1] - a[1]) / L] };
 };
-// one entry per line; a template over several lines ({% if %} … {% endif %}) stays one entry
+// one entry per line, with or without a leading "- "; a template over several lines ({% if %} … {% endif %}) stays one entry
 const entries = (text) => {
   const out = [];
   let open = 0, buf = [];
@@ -111,7 +111,8 @@ const entries = (text) => {
     buf = [];
   }
   if (buf.length) out.push(buf.join("\n").trim());
-  return out.filter(Boolean);
+  // "- light.a" (a YAML list line) is the same as "light.a"; a template keeps its text
+  return out.map((e) => (e.includes("{") ? e : e.replace(/^-\s*/, ""))).filter(Boolean);
 };
 const SIDE = (u) => (Math.abs(u[0]) > Math.abs(u[1]) ? (u[0] > 0 ? t("panel.side.top") : t("panel.side.bottom")) : u[1] > 0 ? t("panel.side.right") : t("panel.side.left"));
 const inPoly = ([x, z], pts) => {
