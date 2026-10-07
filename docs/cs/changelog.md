@@ -2,6 +2,14 @@
 
 Každé vydání je s poznámkami uvedeno na [GitHub releases](https://github.com/matata86/fns-floorplan/releases). Tato stránka shrnuje řadu 0.6.x podle témat.
 
+## 1.0.0 (řada 0.7.x)
+
+- Záložka editoru **Vzhled**: barvy půdorysu (stěny, podlaha a popisky pro den a noc, akcent, světla, otevřené dveře a okna, alarm, rolety, teplota) s živým náhledem karty. Výchozí barvy světla, otevření a alarmu se řídí motivem Home Assistantu.
+- Panel místnosti: karty jsou v `hui-card` jako na dashboardu, takže na ně platí styly motivu (UIX / card-mod); nadpisy sekcí jsou nadpisové karty ve stylu podtitulku s ikonami; světla jako Mushroom karta, je-li nainstalovaná, jinak dlaždice s ovládáním.
+- Popisky zařízení: umístění (nahoře, dole, vlevo, vpravo) a svislý text.
+- Editor na telefonu: formulář se otevře v listu skoro přes celou výšku jako more-info, s pevnou hlavičkou; kulaté tlačítko Uložit.
+- Opravy: výběr ikony v HA 2026.9, jednotka teploty v popiscích místností, plynulejší animace kruhů na telefonu.
+
 ## Panel místnosti (0.6.44 až 0.6.50)
 
 - Panel místnosti se nejdřív vysouval jako boční obrazovka a pak se stal panelem podobným dashboardu: dlaždice Home Assistantu, dva sloupce, pozadí z motivu, hlavička s ikonou místnosti, teplotou a vlhkostí.

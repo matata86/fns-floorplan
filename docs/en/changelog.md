@@ -2,6 +2,14 @@
 
 Every release is listed with notes in the [GitHub releases](https://github.com/matata86/fns-floorplan/releases). This page summarises the 0.6.x line by theme.
 
+## 1.0.0 (0.7.x line)
+
+- Editor tab **Look**: plan colours (walls, floor and labels for day and night, accent, lights, open doors and windows, alarm, blinds, temperature) with a live card preview. Default light, open and alarm colours follow the Home Assistant theme.
+- Room panel: cards sit in `hui-card` like on a dashboard, so theme styles (UIX / card-mod) apply; section headings are subtitle heading cards with icons; Mushroom light card when installed, tiles with features otherwise.
+- Device labels: position (top, bottom, left, right) and vertical text.
+- Phone editor: the form opens in a near full-height sheet like more-info, with a fixed header; round save button.
+- Fixes: icon pickers on HA 2026.9, temperature unit in room labels, smoother ring and ripple animations on phones.
+
 ## Room panel (0.6.44 to 0.6.50)
 
 - The room panel slid out as an off-canvas screen and then became a dashboard-like panel: Home Assistant tile cards, two columns, the theme background, a header with the room icon, temperature and humidity.

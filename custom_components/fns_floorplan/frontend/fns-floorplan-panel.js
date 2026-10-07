@@ -148,7 +148,8 @@ ha-dropdown-item[hidden] { display: none; }
 .main { display: flex; height: calc(100vh - 56px); }
 .stage { flex: 1; min-width: 0; padding: 12px; box-sizing: border-box; position: relative; }
 .look-card { display: none; }
-.main.look .look-card { display: block; position: absolute; inset: 0; overflow: auto; padding: 12px; box-sizing: border-box; }
+.main.look .look-card { display: block; position: absolute; inset: 0; overflow: auto; padding: 12px; box-sizing: border-box;
+  pointer-events: none; } /* a preview: a tap must not switch a real light; on a phone it reopens the form */
 .main.look .stage > svg, .main.look .zoom { display: none; }
 .look-row { display: flex; align-items: center; gap: 8px; margin: 4px 0; font-size: 14px; }
 .look-row span { flex: 1; }
@@ -477,6 +478,7 @@ class FnsFloorplanPanel extends HTMLElement {
     const side = $(".side"), grip = $(".grip"), main = $(".main");
     // phone sheet: ✕ or a tap on the dimmed plan closes it, the selection stays (the item can be dragged then)
     const closeSheet = () => { this._sheet = false; this._sheetUI(); };
+    $(".stage").addEventListener("click", () => { if (this._mode === "look" && !this._sheet) { this._sheet = true; this._sheetUI(); } });
     $(".sheet-x").addEventListener("click", closeSheet);
     main.addEventListener("click", (e) => { if (e.target === main) closeSheet(); });
     try { const w = Number(localStorage.getItem("fns-floorplan-side-w")); if (w > 0) side.style.width = w + "px"; } catch (err) { /* storage blocked */ }

@@ -2,6 +2,14 @@
 
 Każde wydanie wraz z uwagami znajdziesz w [wydaniach na GitHubie](https://github.com/matata86/fns-floorplan/releases). Ta strona podsumowuje linię 0.6.x tematycznie.
 
+## 1.0.0 (seria 0.7.x)
+
+- Zakładka edytora **Wygląd**: kolory planu (ściany, podłoga i etykiety na dzień i noc, akcent, światła, otwarte drzwi i okna, alarm, rolety, temperatura) z podglądem karty na żywo. Domyślne kolory światła, otwarcia i alarmu wynikają z motywu Home Assistanta.
+- Panel pomieszczenia: karty są w `hui-card` jak na dashboardzie, więc działają style motywu (UIX / card-mod); nagłówki sekcji to karty nagłówka w stylu podtytułu z ikonami; światła jako karta Mushroom, jeśli jest zainstalowana, w przeciwnym razie kafelki ze sterowaniem.
+- Etykiety urządzeń: położenie (góra, dół, lewo, prawo) i pionowy tekst.
+- Edytor na telefonie: formularz otwiera się w arkuszu prawie na całą wysokość jak more-info, ze stałym nagłówkiem; okrągły przycisk Zapisz.
+- Poprawki: wybór ikony w HA 2026.9, jednostka temperatury w etykietach pomieszczeń, płynniejsze animacje pierścieni na telefonach.
+
 ## Panel pomieszczenia (0.6.44 do 0.6.50)
 
 - Panel pomieszczenia najpierw wysuwał się jako ekran boczny, a potem stał się panelem podobnym do pulpitu: kafelki Home Assistanta, dwie kolumny, tło motywu, nagłówek z ikoną pomieszczenia, temperaturą i wilgotnością.

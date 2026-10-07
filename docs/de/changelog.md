@@ -2,6 +2,14 @@
 
 Jede Version ist mit Hinweisen in den [GitHub-Releases](https://github.com/matata86/fns-floorplan/releases) aufgeführt. Diese Seite fasst die Reihe 0.6.x nach Themen zusammen.
 
+## 1.0.0 (Reihe 0.7.x)
+
+- Editor-Reiter **Aussehen**: Farben des Plans (Wände, Boden und Beschriftungen für Tag und Nacht, Akzent, Lichter, offene Türen und Fenster, Alarm, Rollläden, Temperatur) mit Live-Vorschau der Karte. Standardfarben für Licht, Offen und Alarm folgen dem Home-Assistant-Design.
+- Raum-Panel: Karten liegen in `hui-card` wie auf einem Dashboard, Design-Stile (UIX / card-mod) greifen; Abschnittsüberschriften sind Überschriftenkarten im Untertitel-Stil mit Symbolen; Lichter als Mushroom-Karte, falls installiert, sonst Kacheln mit Steuerung.
+- Gerätebeschriftungen: Position (oben, unten, links, rechts) und senkrechter Text.
+- Editor auf dem Smartphone: das Formular öffnet sich in einem fast bildschirmhohen Blatt wie More-Info, mit festem Kopf; runder Speichern-Knopf.
+- Korrekturen: Symbolauswahl in HA 2026.9, Temperatureinheit in Raumbeschriftungen, flüssigere Ring-Animationen auf Smartphones.
+
 ## Raum-Panel (0.6.44 bis 0.6.50)
 
 - Das Raum-Panel fuhr zunächst als seitlicher Bildschirm aus und wurde dann zu einem dashboardähnlichen Panel: Kachelkarten von Home Assistant, zwei Spalten, der Designhintergrund, eine Kopfzeile mit Raumsymbol, Temperatur und Luftfeuchtigkeit.
