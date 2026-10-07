@@ -14,7 +14,7 @@ Tap a room on the card and an **off-canvas panel** slides in from the right edge
 
 ## Sections
 
-The panel is built from Home Assistant's own cards, each placed like on a dashboard, so your theme styles them as well (including card-mod / UIX themes). Every section has a heading card with an icon, in the subtitle style of dashboard section headings. A tap on a card opens the details, the icon toggles what can be toggled. Thermostats, lights with controls, cameras and blinds take the full width, the rest sits two in a row.
+The panel is built from Home Assistant's own cards, each placed like on a dashboard, so your theme styles them as well (including card-mod / UIX themes). Every section has a heading card with an icon, in the subtitle style of dashboard section headings. A tap on a card opens the details, the icon toggles what can be toggled. Thermostats, lights with controls, cameras, blinds and windows, doors and sensors with a time of last change take the full width, the rest sits two in a row.
 
 | Section | What goes there |
 |---------|-----------------|

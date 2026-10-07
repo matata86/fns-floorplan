@@ -14,7 +14,7 @@ Klepni na místnost na kartě a od pravého okraje obrazovky se vysune **boční
 
 ## Sekce
 
-Panel je postavený z vlastních karet Home Assistantu, každá je vložená jako na dashboardu, takže je styluje i tvůj motiv (včetně motivů card-mod / UIX). Každá sekce má nadpisovou kartu s ikonou ve stylu podtitulku nadpisů sekcí na dashboardu. Klepnutí na kartu otevře detail, ikona přepíná to, co jde přepnout. Termostaty, světla s ovládáním, kamery a rolety zabírají celou šířku, zbytek je po dvou v řadě.
+Panel je postavený z vlastních karet Home Assistantu, každá je vložená jako na dashboardu, takže je styluje i tvůj motiv (včetně motivů card-mod / UIX). Každá sekce má nadpisovou kartu s ikonou ve stylu podtitulku nadpisů sekcí na dashboardu. Klepnutí na kartu otevře detail, ikona přepíná to, co jde přepnout. Termostaty, světla s ovládáním, kamery, rolety a okna, dveře a senzory s časem poslední změny zabírají celou šířku, zbytek je po dvou v řadě.
 
 | Sekce | Co v ní je |
 |-------|-----------|
