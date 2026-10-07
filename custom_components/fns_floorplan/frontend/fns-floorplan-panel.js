@@ -2309,7 +2309,7 @@ Request (may be in Czech): ${ask}`;
     // an entity picker under each list: the pick is added as a new line (templates are still typed)
     if (customElements.get("ha-selector")) side.querySelectorAll('textarea[data-k="label_extra"], textarea[data-k="sheet_extra"]').forEach((ta) => {
       const pick = document.createElement("ha-selector");
-      Object.assign(pick, { hass: this._hass, selector: { entity: {} }, label: t("panel.room.add_entity"), disabled: !!ta.closest("fieldset[disabled]") });
+      Object.assign(pick, { hass: this._hass, selector: { entity: {} }, placeholder: t("panel.room.add_entity"), required: false, disabled: !!ta.closest("fieldset[disabled]") });
       pick.addEventListener("value-changed", (e) => {
         e.stopPropagation();
         const id = e.detail?.value;
