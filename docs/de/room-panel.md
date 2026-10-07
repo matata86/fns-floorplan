@@ -21,7 +21,7 @@ Das Panel ist aus den eigenen Kachelkarten von Home Assistant gebaut und sieht d
 | **Thermostat** | `climate`-Entitäten: Zieltemperatur minus und plus (wird nach 0,7 s gesendet), aktuelle Temperatur, Zustand, HVAC-Modi |
 | **Lichter** | Im Raum platzierte Lichter, mit der Helligkeit direkt neben dem Namen |
 | **Kameras** | Kameras des Raums als Bild über die ganze Breite (ein Schnappschuss, alle paar Sekunden erneuert); ein Tippen öffnet das Livebild in den Details |
-| **Fenster und Türen** | Öffnungen des Raums mit Kontakt und ihre Rollläden (auch aus den weiteren Entitäten) mit Positionsregler oder Öffnen / Stopp / Schließen |
+| **Fenster und Türen** | Öffnungen des Raums mit Kontakt und ihre Rollläden (auch aus den weiteren Entitäten) mit Öffnen / Stopp / Schließen neben dem Namen und dem Positionsregler darunter |
 | **Schalter** | `switch` und `input_boolean` |
 | **Geräte** | Haushaltsgeräte (ein Schloss erhält Schlossbefehle, ein Staubsauger Staubsaugerbefehle) |
 | **Sensoren** | Sensoren des Raums |
