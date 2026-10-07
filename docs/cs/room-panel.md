@@ -19,7 +19,7 @@ Panel je postavený z vlastních karet Home Assistantu, každá je vložená jak
 | Sekce | Co v ní je |
 |-------|-----------|
 | **Termostat** | Entity `climate` jako dlaždice s ovládáním cílové teploty |
-| **Světla** | Světla umístěná v místnosti. S nainstalovanými kartami [Mushroom](https://github.com/piitaya/lovelace-mushroom): karta světla Mushroom s lištou jasu v barvě světla a tlačítky pro teplotu chromatičnosti a barvu (má-li je světlo); klepnutí na ikonu světlo přepne. Bez Mushroom: dlaždice s lištou jasu vedle názvu |
+| **Světla** | Světla umístěná v místnosti. Dlaždice s lištou jasu vedle názvu; klepnutí na ikonu světlo přepne |
 | **Kamery** | Kamery místnosti jako náhled přes celou šířku panelu (snímek obnovovaný po pár sekundách); klepnutí otevře živý obraz v detailu |
 | **Okna a dveře** | Otvory místnosti s kontaktem a jejich rolety (i rolety z dalších entit) s tlačítky otevřít / stop / zavřít vedle názvu a posuvníkem polohy pod nimi; kontakt ukazuje jen to, kdy se naposledy změnil, ikona ukazuje, jestli je otevřený |
 | **Spínače** | `switch` a `input_boolean` |

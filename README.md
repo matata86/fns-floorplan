@@ -40,7 +40,7 @@ An animated 2D floor plan for Home Assistant that shows the live state of your h
 - Temperature and humidity overlays tint the rooms; a day replay bar replays the last 24 hours from the Home Assistant history.
 
 **Room panel**
-- Tap a room: an off-canvas panel slides in and looks like an area dashboard: section headings with icons, a thermostat, lights (Mushroom light cards when installed, otherwise tiles with brightness), camera pictures, windows and doors with their blinds, switches, media players, robot vacuums, devices, sensors and other entities of that room. The cards are Home Assistant's own, so your theme (also card-mod / UIX) styles them.
+- Tap a room: an off-canvas panel slides in and looks like an area dashboard: section headings with icons, a thermostat, lights (tiles with brightness), camera pictures, windows and doors with their blinds, switches, media players, robot vacuums, devices, sensors and other entities of that room. The cards are Home Assistant's own, so your theme (also card-mod / UIX) styles them.
 - Extra entities per room, picked from Home Assistant or listed by a template.
 
 **Editor** (sidebar panel "Floor plan")

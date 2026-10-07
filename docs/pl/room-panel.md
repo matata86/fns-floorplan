@@ -19,7 +19,7 @@ Panel jest zbudowany z własnych kart Home Assistanta, każda umieszczona jak na
 | Sekcja | Co się tam znajduje |
 |---------|-----------------|
 | **Termostat** | Encje `climate` jako kafelek ze sterowaniem temperaturą docelową |
-| **Światła** | Światła umieszczone w pomieszczeniu. Z zainstalowanymi kartami [Mushroom](https://github.com/piitaya/lovelace-mushroom): karta światła Mushroom z paskiem jasności w kolorze światła i przyciskami temperatury barwowej i koloru (jeśli światło je ma); dotknięcie ikony przełącza światło. Bez Mushroom: kafelek z paskiem jasności obok nazwy |
+| **Światła** | Światła umieszczone w pomieszczeniu. Kafelek z paskiem jasności obok nazwy; dotknięcie ikony przełącza światło |
 | **Kamery** | Kamery pomieszczenia jako podgląd na całą szerokość panelu (zdjęcie odświeżane co kilka sekund); dotknięcie otwiera obraz na żywo w szczegółach |
 | **Okna i drzwi** | Otwory pomieszczenia z czujnikiem kontaktowym i ich rolety (także z dodatkowych encji) z przyciskami otwórz / stop / zamknij obok nazwy i suwakiem położenia pod nimi; czujnik kontaktowy pokazuje tylko, kiedy ostatnio się zmienił, ikona pokazuje, czy jest otwarty |
 | **Przełączniki** | `switch` i `input_boolean` |

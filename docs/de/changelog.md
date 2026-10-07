@@ -2,7 +2,9 @@
 
 Jede Version ist mit Hinweisen in den [GitHub-Releases](https://github.com/matata86/fns-floorplan/releases) aufgeführt. Diese Seite fasst die Reihe 0.6.x nach Themen zusammen.
 
-## 1.0.11 – 1.0.17
+## 1.0.11 – 1.0.20
+
+- Raum-Panel: die Zieltemperatur des Thermostats sitzt in der Kachelzeile; Lichter sind immer einfache Kacheln (keine Mushroom-Karte; ein Schalter unter den Lichtern lässt sich jetzt über sein Symbol schalten); eine Kachel wird nur aktualisiert, wenn sich ihre eigene Entität ändert, das Panel ruckelt nicht mehr.
 
 - Raumpanel: Mediaplayer und Fernbedienungen haben einen eigenen Abschnitt **Medien** (mit Lautstärkeregler), Saug- und Mähroboter den Abschnitt **Roboter**.
 - Editor: Ein nach der Suche im Symbolwähler einer Regel gewähltes Symbol bleibt erhalten, und das Formular behält seine Scrollposition, auch wenn sich die Seitenhöhe nach einer Änderung in die eine oder andere Richtung ändert.

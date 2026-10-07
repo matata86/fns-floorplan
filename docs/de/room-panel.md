@@ -19,7 +19,7 @@ Das Panel ist aus den eigenen Karten von Home Assistant gebaut, jede wie auf ein
 | Abschnitt | Was dort steht |
 |-----------|----------------|
 | **Thermostat** | `climate`-Entitäten als Kachel mit der Regelung der Zieltemperatur |
-| **Lichter** | Im Raum platzierte Lichter. Mit installierten [Mushroom](https://github.com/piitaya/lovelace-mushroom)-Karten: eine Mushroom-Lichtkarte mit Helligkeitsbalken in der Farbe des Lichts und Schaltflächen für Farbtemperatur und Farbe (wenn das Licht sie hat); ein Tippen auf das Symbol schaltet das Licht. Ohne Mushroom: eine Kachel mit dem Helligkeitsbalken neben dem Namen |
+| **Lichter** | Im Raum platzierte Lichter. Eine Kachel mit dem Helligkeitsbalken neben dem Namen; ein Tippen auf das Symbol schaltet das Licht |
 | **Kameras** | Kameras des Raums als Bild über die ganze Breite (ein Schnappschuss, alle paar Sekunden erneuert); ein Tippen öffnet das Livebild in den Details |
 | **Fenster und Türen** | Öffnungen des Raums mit Kontakt und ihre Rollläden (auch aus den weiteren Entitäten) mit Öffnen / Stopp / Schließen neben dem Namen und dem Positionsregler darunter; der Kontakt zeigt nur, wann er sich zuletzt geändert hat, das Symbol zeigt, ob er offen ist |
 | **Schalter** | `switch` und `input_boolean` |

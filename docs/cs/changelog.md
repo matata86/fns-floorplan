@@ -2,7 +2,9 @@
 
 Každé vydání je s poznámkami uvedeno na [GitHub releases](https://github.com/matata86/fns-floorplan/releases). Tato stránka shrnuje řadu 0.6.x podle témat.
 
-## 1.0.11 – 1.0.17
+## 1.0.11 – 1.0.20
+
+- Panel místnosti: cílová teplota termostatu je v řádku dlaždice; světla jsou vždy obyčejné dlaždice (žádná karta Mushroom; spínač mezi světly se teď přepíná ikonou); dlaždice se obnoví jen při změně vlastní entity, panel už nelaguje.
 
 - Panel místnosti: přehrávače médií a ovladače mají vlastní sekci **Média** (s posuvníkem hlasitosti), robotické vysavače a sekačky sekci **Roboti**.
 - Editor: ikona vybraná po hledání ve výběru ikony pravidla se uloží a formulář drží pozici posunu, i když se po změně pole stránka zvětší nebo zmenší.
