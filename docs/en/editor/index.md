@@ -16,7 +16,7 @@ The editor is the sidebar panel **Floor plan** (URL `/fns-floorplan`, administra
 - **The plan** in the middle. Scroll the wheel to zoom around the cursor, drag an empty spot to pan, pinch with two fingers on a touch screen.
 - **The side panel** on the right shows the form of the selected item. Drag the strip between the plan and the panel to change its width (260 px to 60 % of the window, at most 720 px); the width is remembered in the browser.
 
-On a phone (narrower than 800 px) the plan fills the screen and the form opens as a bottom sheet when you tap an item, add one or open History or Check. Dragging an item does not open the sheet. Close it with the cross or by tapping the dimmed plan.
+On a phone (narrower than 800 px) the plan fills the screen and the form opens in a near full-height sheet, like an entity's more-info dialog, when you tap an item, add one or open History or Check. Dragging an item does not open the sheet. Close it with the cross.
 
 ## Modes
 

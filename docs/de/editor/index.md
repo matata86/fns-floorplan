@@ -16,7 +16,7 @@ Der Editor ist das Seitenleisten-Panel **Grundriss** (URL `/fns-floorplan`, nur 
 - **Der Plan** in der Mitte. Mit dem Mausrad zoomst du um den Cursor, durch Ziehen einer leeren Stelle verschiebst du den Plan, auf dem Touchscreen zoomst du mit zwei Fingern.
 - **Das Seitenpanel** rechts zeigt das Formular des ausgewählten Elements. Zieh den Streifen zwischen Plan und Panel, um dessen Breite zu ändern (260 px bis 60 % des Fensters, höchstens 720 px); die Breite wird im Browser gespeichert.
 
-Auf einem Smartphone (schmaler als 800 px) füllt der Plan den Bildschirm und das Formular öffnet sich als unteres Blatt, wenn du ein Element antippst, eines hinzufügst oder Verlauf oder Prüfung öffnest. Beim Ziehen eines Elements öffnet sich das Blatt nicht. Schließe es mit dem Kreuz oder durch Tippen auf den abgedunkelten Plan.
+Auf einem Smartphone (schmaler als 800 px) füllt der Plan den Bildschirm und das Formular öffnet sich in einem fast bildschirmhohen Blatt wie der More-Info-Dialog einer Entität, wenn du ein Element antippst, eines hinzufügst oder Verlauf oder Prüfung öffnest. Beim Ziehen eines Elements öffnet sich das Blatt nicht. Schließe es mit dem Kreuz.
 
 ## Modi
 

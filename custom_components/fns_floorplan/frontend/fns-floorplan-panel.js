@@ -285,18 +285,18 @@ div.modes button.on { background: var(--primary-color, #03a9f4); color: var(--te
 .side h3 { font-size: 14px; margin: 18px 0 4px; }
 @media (max-width: 800px) {
   .main { flex-direction: column; }
-  /* phone: the plan fills the screen, the item's form opens as a sheet over its lower part (tap an item, ✕ or the dimmed plan closes it) */
+  /* phone: the plan fills the screen, the item's form opens as a near full-height sheet like more-info (tap an item; ✕ closes it) */
   .grip { display: none; }
   .side { display: none; }
   .main.sheet::before { content: ""; position: fixed; inset: 0; background: rgba(0, 0, 0, .35); z-index: 9; }
   /* looks like HA's more-info sheet: grab handle, ✕ left of the title, the header stays while the form scrolls */
-  .main.sheet .side { display: block; position: fixed; left: 0; right: 0; top: 30vh; bottom: 0; width: auto !important; z-index: 10;
+  .main.sheet .side { display: block; position: fixed; left: 0; right: 0; top: calc(8px + env(safe-area-inset-top, 0px)); bottom: 0; width: auto !important; z-index: 10;
     border-radius: var(--ha-dialog-border-radius, 28px) var(--ha-dialog-border-radius, 28px) 0 0; box-shadow: 0 -4px 24px rgba(0, 0, 0, .3); padding-top: 0; }
   .main.sheet .side > h2:first-child { position: sticky; top: 0; z-index: 2; margin: 0 -16px 8px; padding: 22px 16px 14px 60px;
     background: var(--card-background-color, #fff); font-size: 20px; font-weight: 500; line-height: 28px; }
   .main.sheet .side > h2:first-child::before { content: ""; position: absolute; top: 8px; left: 50%; width: 32px; height: 4px; margin-left: -16px;
     border-radius: 2px; background: var(--secondary-text-color, #727272); opacity: .4; }
-  .main.sheet .sheet-x { display: block; position: fixed; top: calc(30vh + 16px); left: 8px; z-index: 11; }
+  .main.sheet .sheet-x { display: block; position: fixed; top: calc(24px + env(safe-area-inset-top, 0px)); left: 8px; z-index: 11; }
   .top .state { display: none; }
   /* the toolbar wraps to two rows instead of scrolling the page sideways */
   :host { display: flex; flex-direction: column; height: 100vh; }

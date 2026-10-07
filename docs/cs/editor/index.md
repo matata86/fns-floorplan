@@ -16,7 +16,7 @@ Editor je panel **Půdorys** v postranním menu (adresa `/fns-floorplan`, jen pr
 - **Půdorys** uprostřed. Kolečkem myši přibližuješ kolem kurzoru, tažením za prázdné místo plán posouváš, na dotykovém displeji přibližuješ dvěma prsty.
 - **Boční panel** vpravo zobrazuje formulář vybraného prvku. Tažením za proužek mezi plánem a panelem měníš jeho šířku (od 260 px do 60 % okna, nejvýše 720 px); šířka se pamatuje v prohlížeči.
 
-Na telefonu (užším než 800 px) vyplní půdorys celou obrazovku a formulář se otevře jako spodní list, když klepneš na prvek, přidáš nový nebo otevřeš historii či kontrolu. Táhnutí prvku list neotevírá. Zavřeš ho křížkem nebo klepnutím na ztmavený půdorys.
+Na telefonu (užším než 800 px) vyplní půdorys celou obrazovku a formulář se otevře v listu skoro přes celou výšku, jako more-info entity, když klepneš na prvek, přidáš nový nebo otevřeš historii či kontrolu. Táhnutí prvku list neotevírá. Zavřeš ho křížkem.
 
 ## Režimy
 

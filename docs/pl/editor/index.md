@@ -16,7 +16,7 @@ Edytor to panel boczny **Plan piętra** (adres `/fns-floorplan`, tylko dla admin
 - **Plan** pośrodku. Kółkiem myszy powiększasz wokół kursora, przeciągnięciem pustego miejsca przesuwasz widok, na ekranie dotykowym ściskasz dwoma palcami.
 - **Panel boczny** po prawej pokazuje formularz zaznaczonego elementu. Przeciągnij pasek między planem a panelem, aby zmienić jego szerokość (od 260 px do 60 % okna, maksymalnie 720 px); szerokość jest zapamiętywana w przeglądarce.
 
-Na telefonie (węższym niż 800 px) plan wypełnia ekran, a formularz otwiera się jako dolny arkusz, gdy dotkniesz elementu, dodasz go albo otworzysz Historię lub Kontrolę. Przeciąganie elementu nie otwiera arkusza. Zamkniesz go krzyżykiem albo dotknięciem przyciemnionego planu.
+Na telefonie (węższym niż 800 px) plan wypełnia ekran, a formularz otwiera się w arkuszu prawie na całą wysokość, jak okno more-info encji, gdy dotkniesz elementu, dodasz go albo otworzysz Historię lub Kontrolę. Przeciąganie elementu nie otwiera arkusza. Zamkniesz go krzyżykiem.
 
 ## Tryby
 
