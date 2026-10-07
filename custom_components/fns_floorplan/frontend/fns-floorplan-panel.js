@@ -316,6 +316,10 @@ div.modes button.on { background: var(--primary-color, #03a9f4); color: var(--te
   .top > :not(ha-menu-button):not(.modes):not(.save), .top > ha-dropdown > * { order: 1; } /* a dropdown is display: contents, its trigger is the flex item */
   .top ha-selector.level { width: 100px; }
   .top .lbl { display: none; }
+  /* without its label the save button is a circle, like an icon button */
+  .top ha-button.save::part(base) { aspect-ratio: 1; padding: 0; justify-content: center; border-radius: 50%; }
+  .top ha-button.save::part(label) { display: none; }
+  .top ha-button.save::part(start) { margin: 0; }
   .main { flex: 1; min-height: 0; height: auto; }
 }
 `;
