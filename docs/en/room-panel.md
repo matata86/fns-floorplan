@@ -23,7 +23,7 @@ The panel is built from Home Assistant's own cards, each placed like on a dashbo
 | **Cameras** | Cameras of the room as a picture across the panel (a snapshot refreshed every few seconds); a tap opens the live picture in their details |
 | **Windows & doors** | Openings of the room with a contact, and their blinds (and covers among the extra entities) with open / stop / close next to the name and a position slider below |
 | **Switches** | `switch` and `input_boolean` |
-| **Media** | Media players and remotes (TVs, speakers, players) |
+| **Media** | Media players and remotes (TVs, speakers, players); a player that can set its volume gets a volume slider |
 | **Robots** | Robot vacuums with start / stop / home, lawn mowers |
 | **Devices** | Appliances (a lock gets lock commands) |
 | **Sensors** | Sensors of the room |

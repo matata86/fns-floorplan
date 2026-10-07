@@ -23,7 +23,7 @@ Panel je postavený z vlastních karet Home Assistantu, každá je vložená jak
 | **Kamery** | Kamery místnosti jako náhled přes celou šířku panelu (snímek obnovovaný po pár sekundách); klepnutí otevře živý obraz v detailu |
 | **Okna a dveře** | Otvory místnosti s kontaktem a jejich rolety (i rolety z dalších entit) s tlačítky otevřít / stop / zavřít vedle názvu a posuvníkem polohy pod nimi |
 | **Spínače** | `switch` a `input_boolean` |
-| **Média** | Přehrávače médií a ovladače (televize, reproduktory, přehrávače) |
+| **Média** | Přehrávače médií a ovladače (televize, reproduktory, přehrávače); přehrávač s nastavitelnou hlasitostí má posuvník hlasitosti |
 | **Roboti** | Robotické vysavače se spuštěním / zastavením / návratem do doku, robotické sekačky |
 | **Zařízení** | Spotřebiče (zámek dostane příkazy zámku) |
 | **Senzory** | Senzory místnosti |

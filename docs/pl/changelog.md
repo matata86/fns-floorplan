@@ -2,9 +2,9 @@
 
 Każde wydanie wraz z uwagami znajdziesz w [wydaniach na GitHubie](https://github.com/matata86/fns-floorplan/releases). Ta strona podsumowuje linię 0.6.x tematycznie.
 
-## 1.0.11
+## 1.0.11 – 1.0.12
 
-- Panel pomieszczenia: odtwarzacze multimediów i piloty mają własną sekcję **Multimedia**, odkurzacze i kosiarki automatyczne sekcję **Roboty**.
+- Panel pomieszczenia: odtwarzacze multimediów i piloty mają własną sekcję **Multimedia** (z suwakiem głośności), odkurzacze i kosiarki automatyczne sekcję **Roboty**.
 
 ## 1.0.1 do 1.0.9
 

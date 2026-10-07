@@ -2,9 +2,9 @@
 
 Jede Version ist mit Hinweisen in den [GitHub-Releases](https://github.com/matata86/fns-floorplan/releases) aufgeführt. Diese Seite fasst die Reihe 0.6.x nach Themen zusammen.
 
-## 1.0.11
+## 1.0.11 – 1.0.12
 
-- Raumpanel: Mediaplayer und Fernbedienungen haben einen eigenen Abschnitt **Medien**, Saug- und Mähroboter den Abschnitt **Roboter**.
+- Raumpanel: Mediaplayer und Fernbedienungen haben einen eigenen Abschnitt **Medien** (mit Lautstärkeregler), Saug- und Mähroboter den Abschnitt **Roboter**.
 
 ## 1.0.1 bis 1.0.9
 

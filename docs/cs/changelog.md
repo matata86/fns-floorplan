@@ -2,9 +2,9 @@
 
 Každé vydání je s poznámkami uvedeno na [GitHub releases](https://github.com/matata86/fns-floorplan/releases). Tato stránka shrnuje řadu 0.6.x podle témat.
 
-## 1.0.11
+## 1.0.11 – 1.0.12
 
-- Panel místnosti: přehrávače médií a ovladače mají vlastní sekci **Média**, robotické vysavače a sekačky sekci **Roboti**.
+- Panel místnosti: přehrávače médií a ovladače mají vlastní sekci **Média** (s posuvníkem hlasitosti), robotické vysavače a sekačky sekci **Roboti**.
 
 ## 1.0.1 až 1.0.9
 

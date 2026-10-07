@@ -23,7 +23,7 @@ Das Panel ist aus den eigenen Karten von Home Assistant gebaut, jede wie auf ein
 | **Kameras** | Kameras des Raums als Bild über die ganze Breite (ein Schnappschuss, alle paar Sekunden erneuert); ein Tippen öffnet das Livebild in den Details |
 | **Fenster und Türen** | Öffnungen des Raums mit Kontakt und ihre Rollläden (auch aus den weiteren Entitäten) mit Öffnen / Stopp / Schließen neben dem Namen und dem Positionsregler darunter |
 | **Schalter** | `switch` und `input_boolean` |
-| **Medien** | Mediaplayer und Fernbedienungen (Fernseher, Lautsprecher, Player) |
+| **Medien** | Mediaplayer und Fernbedienungen (Fernseher, Lautsprecher, Player); ein Player mit einstellbarer Lautstärke erhält einen Lautstärkeregler |
 | **Roboter** | Saugroboter mit Start / Stopp / zur Station, Mähroboter |
 | **Geräte** | Haushaltsgeräte (ein Schloss erhält Schlossbefehle) |
 | **Sensoren** | Sensoren des Raums |
