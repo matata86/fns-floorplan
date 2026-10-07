@@ -1547,6 +1547,18 @@ class FnsFloorplanPanel extends HTMLElement {
     $(".state").textContent = this._dirty ? t("panel.state_dirty") : "";
   }
 
+  // HA's searchable select (custom_value → ha-generic-picker) shows the raw value ("lamp_table"); show its label instead
+  async _nameSearchPick(h, options) {
+    const names = new Map(options.map((o) => [o.value, o.label]));
+    await h.updateComplete;
+    await customElements.whenDefined("ha-selector-select");
+    const s = h.shadowRoot?.querySelector("ha-selector-select");
+    await s?.updateComplete;
+    const p = s?.shadowRoot?.querySelector("ha-generic-picker");
+    if (!p) return;
+    p.valueRenderer = (v) => Object.assign(document.createElement("span"), { slot: "headline", textContent: names.get(v) ?? v });
+  }
+
   // properties of the selected item
   // the phone sheet is shown while it is open and has something to show
   _sheetUI() {
@@ -1773,6 +1785,7 @@ class FnsFloorplanPanel extends HTMLElement {
         h.addEventListener("value-changed", (e) => { e.stopPropagation(); const v = norm(e.detail.value), same = v === norm(h.value); h.value = e.detail.value; if (!same) set(k, v, h); });
       }
       (chk || el).replaceWith(h);
+      if (selector.select?.custom_value) this._nameSearchPick(h, selector.select.options);
     });
     // buttons: icon buttons for data-icon, otherwise ha-button; data-a clicks are bound by _bind afterwards
     if (!customElements.get("ha-button")) return;
