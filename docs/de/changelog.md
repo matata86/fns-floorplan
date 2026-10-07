@@ -2,6 +2,10 @@
 
 Jede Version ist mit Hinweisen in den [GitHub-Releases](https://github.com/matata86/fns-floorplan/releases) aufgeführt. Diese Seite fasst die Reihe 0.6.x nach Themen zusammen.
 
+## 1.0.11
+
+- Raumpanel: Mediaplayer und Fernbedienungen haben einen eigenen Abschnitt **Medien**, Saug- und Mähroboter den Abschnitt **Roboter**.
+
 ## 1.0.1 bis 1.0.9
 
 - Raum-Panel: Kameras zeigen ihr Bild über die ganze Breite des Panels; Rollläden der Türen und Fenster des Raums (und der weiteren Entitäten) mit Öffnen / Stopp / Schließen neben dem Namen und einem Positionsregler darunter.

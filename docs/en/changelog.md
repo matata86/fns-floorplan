@@ -2,6 +2,10 @@
 
 Every release is listed with notes in the [GitHub releases](https://github.com/matata86/fns-floorplan/releases). This page summarises the 0.6.x line by theme.
 
+## 1.0.11
+
+- Room panel: media players and remotes have their own section **Media**, robot vacuums and lawn mowers the section **Robots**.
+
 ## 1.0.1 to 1.0.9
 
 - Room panel: cameras show their picture across the panel; blinds of the room's doors and windows (and covers among the extra entities) with open / stop / close next to the name and a position slider below.

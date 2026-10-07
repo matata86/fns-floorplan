@@ -23,7 +23,9 @@ Panel jest zbudowany z własnych kart Home Assistanta, każda umieszczona jak na
 | **Kamery** | Kamery pomieszczenia jako podgląd na całą szerokość panelu (zdjęcie odświeżane co kilka sekund); dotknięcie otwiera obraz na żywo w szczegółach |
 | **Okna i drzwi** | Otwory pomieszczenia z czujnikiem kontaktowym i ich rolety (także z dodatkowych encji) z przyciskami otwórz / stop / zamknij obok nazwy i suwakiem położenia pod nimi |
 | **Przełączniki** | `switch` i `input_boolean` |
-| **Urządzenia** | Urządzenia (zamek dostaje polecenia zamka, odkurzacz polecenia odkurzacza) |
+| **Multimedia** | Odtwarzacze multimediów i piloty (telewizory, głośniki, odtwarzacze) |
+| **Roboty** | Odkurzacze automatyczne ze start / stop / powrót do stacji, kosiarki automatyczne |
+| **Urządzenia** | Urządzenia (zamek dostaje polecenia zamka) |
 | **Czujniki** | Czujniki pomieszczenia |
 | **Inne** | Cała reszta |
 

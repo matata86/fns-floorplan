@@ -2,6 +2,10 @@
 
 Každé vydání je s poznámkami uvedeno na [GitHub releases](https://github.com/matata86/fns-floorplan/releases). Tato stránka shrnuje řadu 0.6.x podle témat.
 
+## 1.0.11
+
+- Panel místnosti: přehrávače médií a ovladače mají vlastní sekci **Média**, robotické vysavače a sekačky sekci **Roboti**.
+
 ## 1.0.1 až 1.0.9
 
 - Panel místnosti: kamery ukazují obraz přes celou šířku panelu; rolety dveří a oken místnosti (i rolety z dalších entit) s tlačítky otevřít / stop / zavřít vedle názvu a posuvníkem polohy pod nimi.
