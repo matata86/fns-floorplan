@@ -59,7 +59,7 @@ Každá místnost má vlastní mnohoúhelník, takže stěna mezi dvěma místno
 | Ikona | Zobrazuje se v hlavičce [panelu místnosti](../room-panel.md) (`icon`) |
 | Teplota | Senzor teploty (`temperature`) |
 | Vlhkost | Senzor vlhkosti (`humidity`) |
-| Další entity | Entity pro panel místnosti (`sheet_extra`) |
+| Další entity | Entity pro panel místnosti (`sheet_extra`), každá na řádek; **Přidat entitu** pod polem ji vybere z Home Assistantu |
 
 ## Jmenovka místnosti
 
@@ -67,7 +67,7 @@ Každá místnost ukazuje **jmenovku** (odznak) s názvem a hodnotami. Volby:
 
 | Klíč | Efekt |
 |------|-------|
-| `label_info` | Seznam toho, co zobrazit: `temperature`, `humidity`, id entit nebo šablony. Výchozí: teplota a vlhkost |
+| `label_info` | Seznam toho, co zobrazit: `temperature`, `humidity`, id entit nebo šablony. Výchozí: teplota a vlhkost. Ve formuláři přidá **Přidat entitu** entitu jako nový řádek |
 | `label_name: false` | Skryje název, hodnoty nechá |
 | `label_hidden: true` | Skryje celou jmenovku |
 | `label_rotation` | Otočí jmenovku (ve stupních) |

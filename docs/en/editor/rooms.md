@@ -59,7 +59,7 @@ Each room has its own polygon, so a wall between two rooms is two walls on top o
 | Icon | Shown in the header of the [room panel](../room-panel.md) (`icon`) |
 | Temperature | A temperature sensor (`temperature`) |
 | Humidity | A humidity sensor (`humidity`) |
-| Extra entities | Entities for the room panel (`sheet_extra`) |
+| Extra entities | Entities for the room panel (`sheet_extra`), one per line; **Add an entity** below the field picks one from Home Assistant |
 
 ## Room label
 
@@ -67,7 +67,7 @@ Every room shows a **label** (a badge) with its name and the values. Options:
 
 | Key | Effect |
 |-----|--------|
-| `label_info` | A list of what to show: `temperature`, `humidity`, entity ids or templates. Default: temperature and humidity |
+| `label_info` | A list of what to show: `temperature`, `humidity`, entity ids or templates. Default: temperature and humidity. In the form, **Add an entity** adds an entity as a new line |
 | `label_name: false` | Hides the name, keeps the values |
 | `label_hidden: true` | Hides the whole label |
 | `label_rotation` | Rotates the label (degrees) |

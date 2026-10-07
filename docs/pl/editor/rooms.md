@@ -59,7 +59,7 @@ Każde pomieszczenie ma własny wielokąt, więc ściana między dwoma pomieszcz
 | Ikona | Pokazywana w nagłówku [panelu pomieszczenia](../room-panel.md) (`icon`) |
 | Temperatura | Czujnik temperatury (`temperature`) |
 | Wilgotność | Czujnik wilgotności (`humidity`) |
-| Dodatkowe encje | Encje do panelu pomieszczenia (`sheet_extra`) |
+| Dodatkowe encje | Encje do panelu pomieszczenia (`sheet_extra`), jedna w linii; **Dodaj encję** pod polem wybiera ją z Home Assistanta |
 
 ## Etykieta pomieszczenia
 
@@ -67,7 +67,7 @@ Każde pomieszczenie pokazuje **etykietę** (znacznik) z nazwą i wartościami. 
 
 | Klucz | Efekt |
 |-----|--------|
-| `label_info` | Lista tego, co pokazać: `temperature`, `humidity`, id encji lub szablony. Domyślnie: temperatura i wilgotność |
+| `label_info` | Lista tego, co pokazać: `temperature`, `humidity`, id encji lub szablony. Domyślnie: temperatura i wilgotność. W formularzu **Dodaj encję** dodaje encję jako nową linię |
 | `label_name: false` | Ukrywa nazwę, zostawia wartości |
 | `label_hidden: true` | Ukrywa całą etykietę |
 | `label_rotation` | Obraca etykietę (stopnie) |

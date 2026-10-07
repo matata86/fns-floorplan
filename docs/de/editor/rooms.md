@@ -59,7 +59,7 @@ Jeder Raum hat sein eigenes Polygon, eine Wand zwischen zwei Räumen sind also z
 | Symbol | Wird in der Kopfzeile des [Raum-Panels](../room-panel.md) angezeigt (`icon`) |
 | Temperatur | Ein Temperatursensor (`temperature`) |
 | Luftfeuchtigkeit | Ein Feuchtigkeitssensor (`humidity`) |
-| Weitere Entitäten | Entitäten für das Raum-Panel (`sheet_extra`) |
+| Weitere Entitäten | Entitäten für das Raum-Panel (`sheet_extra`), eine pro Zeile; **Entität hinzufügen** unter dem Feld wählt eine aus Home Assistant |
 
 ## Raumbeschriftung
 
@@ -67,7 +67,7 @@ Jeder Raum zeigt eine **Beschriftung** (ein Badge) mit seinem Namen und den Wert
 
 | Schlüssel | Wirkung |
 |-----------|---------|
-| `label_info` | Eine Liste dessen, was angezeigt wird: `temperature`, `humidity`, Entitäts-IDs oder Vorlagen. Standard: Temperatur und Luftfeuchtigkeit |
+| `label_info` | Eine Liste dessen, was angezeigt wird: `temperature`, `humidity`, Entitäts-IDs oder Vorlagen. Standard: Temperatur und Luftfeuchtigkeit. Im Formular fügt **Entität hinzufügen** eine Entität als neue Zeile hinzu |
 | `label_name: false` | Blendet den Namen aus, behält die Werte |
 | `label_hidden: true` | Blendet die ganze Beschriftung aus |
 | `label_rotation` | Dreht die Beschriftung (in Grad) |

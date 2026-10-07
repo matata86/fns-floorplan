@@ -2306,6 +2306,19 @@ Request (may be in Czech): ${ask}`;
       <div class="actions"><button data-a="adddoor">${t("panel.room.add_door")}</button><button data-a="addwin">${t("panel.room.add_win")}</button></div>
       ${this._rulesUI(r, ["color", "glow", "hide"]).replace(t("panel.rule.head"), t("panel.rule.head_room"))}
       <div class="actions"><button data-a="delroom" class="del">${t("panel.room.delete")}</button></div>`;
+    // an entity picker under each list: the pick is added as a new line (templates are still typed)
+    if (customElements.get("ha-selector")) side.querySelectorAll('textarea[data-k="label_extra"], textarea[data-k="sheet_extra"]').forEach((ta) => {
+      const pick = document.createElement("ha-selector");
+      Object.assign(pick, { hass: this._hass, selector: { entity: {} }, label: t("panel.room.add_entity"), disabled: !!ta.closest("fieldset[disabled]") });
+      pick.addEventListener("value-changed", (e) => {
+        e.stopPropagation();
+        const id = e.detail?.value;
+        if (!id) return;
+        ta.value = [...ta.value.split("\n").map((x) => x.trim()).filter(Boolean), id].join("\n");
+        ta.dispatchEvent(new Event("change"));
+      }, true);
+      ta.after(pick);
+    });
     this._bind(side, async (k, val, inp) => {
       if (await this._setShared([r], k, val, inp)) return;
       if (k === "wall") return (this._wall = Number(val));
