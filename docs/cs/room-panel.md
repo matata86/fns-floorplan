@@ -14,19 +14,19 @@ Klepni na místnost na kartě a od pravého okraje obrazovky se vysune **boční
 
 ## Sekce
 
-Panel je postavený z vlastních karet Home Assistantu, každá je vložená jako na dashboardu, takže je styluje i tvůj motiv (včetně motivů card-mod / UIX). Každá sekce má nadpisovou kartu s ikonou ve stylu podtitulku nadpisů sekcí na dashboardu. Klepnutí na kartu otevře detail, ikona přepíná to, co jde přepnout. Termostaty, světla s ovládáním, kamery, rolety a okna, dveře a senzory s časem poslední změny zabírají celou šířku, zbytek je po dvou v řadě.
+Panel je postavený z vlastních karet Home Assistantu, každá je vložená jako na dashboardu, takže je styluje i tvůj motiv (včetně motivů card-mod / UIX). Každá sekce má nadpisovou kartu s ikonou ve stylu podtitulku nadpisů sekcí na dashboardu. Klepnutí na kartu otevře detail, ikona přepíná to, co jde přepnout. Termostaty, světla s ovládáním, kamery a rolety zabírají celou šířku, zbytek je po dvou v řadě.
 
 | Sekce | Co v ní je |
 |-------|-----------|
 | **Termostat** | Entity `climate` jako dlaždice s ovládáním cílové teploty |
 | **Světla** | Světla umístěná v místnosti. S nainstalovanými kartami [Mushroom](https://github.com/piitaya/lovelace-mushroom): karta světla Mushroom s lištou jasu v barvě světla a tlačítky pro teplotu chromatičnosti a barvu (má-li je světlo); klepnutí na ikonu světlo přepne. Bez Mushroom: dlaždice s lištou jasu vedle názvu |
 | **Kamery** | Kamery místnosti jako náhled přes celou šířku panelu (snímek obnovovaný po pár sekundách); klepnutí otevře živý obraz v detailu |
-| **Okna a dveře** | Otvory místnosti s kontaktem a jejich rolety (i rolety z dalších entit) s tlačítky otevřít / stop / zavřít vedle názvu a posuvníkem polohy pod nimi; kontakt ukazuje, kdy se naposledy změnil (u zavřeného: kdy byl naposledy otevřený), otevřený svůj stav a od kdy |
+| **Okna a dveře** | Otvory místnosti s kontaktem a jejich rolety (i rolety z dalších entit) s tlačítky otevřít / stop / zavřít vedle názvu a posuvníkem polohy pod nimi; kontakt ukazuje jen to, kdy se naposledy změnil, ikona ukazuje, jestli je otevřený |
 | **Spínače** | `switch` a `input_boolean` |
 | **Média** | Přehrávače médií a ovladače (televize, reproduktory, přehrávače); přehrávač s nastavitelnou hlasitostí má posuvník hlasitosti vedle názvu; dlaždice zabírá celou šířku |
 | **Roboti** | Robotické vysavače se spuštěním / zastavením / návratem do doku, robotické sekačky; dlaždice zabírá celou šířku, tlačítka jsou vedle názvu |
 | **Zařízení** | Spotřebiče (zámek dostane příkazy zámku) |
-| **Senzory** | Senzory místnosti, včetně v ní umístěných senzorů pohybu (PIR) a úniku vody (se stavem a časem poslední změny) |
+| **Senzory** | Senzory místnosti, včetně v ní umístěných senzorů pohybu (PIR) a úniku vody (jen s časem poslední změny, stav ukazuje ikona) |
 | **Ostatní** | Všechno ostatní |
 
 Zobrazí se jen položky, které jsou **umístěné v místnosti**, a entity ze `sheet_extra`. Oblasti Home Assistantu se automaticky nepřidávají. Robotický vysavač se objeví v místnosti, ve které má dok.

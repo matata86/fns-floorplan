@@ -14,19 +14,19 @@ Dotknij pomieszczenia na karcie, a **panel wysuwany** wsunie się od prawej kraw
 
 ## Sekcje
 
-Panel jest zbudowany z własnych kart Home Assistanta, każda umieszczona jak na pulpicie, więc style nadaje im także twój motyw (łącznie z motywami card-mod / UIX). Każda sekcja ma kartę nagłówka z ikoną w stylu podtytułu nagłówków sekcji pulpitu. Dotknięcie karty otwiera szczegóły, a ikona przełącza to, co da się przełączyć. Termostaty, światła ze sterowaniem, kamery, rolety oraz okna, drzwi i czujniki z czasem ostatniej zmiany zajmują całą szerokość, reszta leży po dwie w rzędzie.
+Panel jest zbudowany z własnych kart Home Assistanta, każda umieszczona jak na pulpicie, więc style nadaje im także twój motyw (łącznie z motywami card-mod / UIX). Każda sekcja ma kartę nagłówka z ikoną w stylu podtytułu nagłówków sekcji pulpitu. Dotknięcie karty otwiera szczegóły, a ikona przełącza to, co da się przełączyć. Termostaty, światła ze sterowaniem, kamery i rolety zajmują całą szerokość, reszta leży po dwie w rzędzie.
 
 | Sekcja | Co się tam znajduje |
 |---------|-----------------|
 | **Termostat** | Encje `climate` jako kafelek ze sterowaniem temperaturą docelową |
 | **Światła** | Światła umieszczone w pomieszczeniu. Z zainstalowanymi kartami [Mushroom](https://github.com/piitaya/lovelace-mushroom): karta światła Mushroom z paskiem jasności w kolorze światła i przyciskami temperatury barwowej i koloru (jeśli światło je ma); dotknięcie ikony przełącza światło. Bez Mushroom: kafelek z paskiem jasności obok nazwy |
 | **Kamery** | Kamery pomieszczenia jako podgląd na całą szerokość panelu (zdjęcie odświeżane co kilka sekund); dotknięcie otwiera obraz na żywo w szczegółach |
-| **Okna i drzwi** | Otwory pomieszczenia z czujnikiem kontaktowym i ich rolety (także z dodatkowych encji) z przyciskami otwórz / stop / zamknij obok nazwy i suwakiem położenia pod nimi; czujnik kontaktowy pokazuje, kiedy ostatnio się zmienił (zamknięty: kiedy był ostatnio otwarty), otwarty swój stan i od kiedy |
+| **Okna i drzwi** | Otwory pomieszczenia z czujnikiem kontaktowym i ich rolety (także z dodatkowych encji) z przyciskami otwórz / stop / zamknij obok nazwy i suwakiem położenia pod nimi; czujnik kontaktowy pokazuje tylko, kiedy ostatnio się zmienił, ikona pokazuje, czy jest otwarty |
 | **Przełączniki** | `switch` i `input_boolean` |
 | **Multimedia** | Odtwarzacze multimediów i piloty (telewizory, głośniki, odtwarzacze); odtwarzacz z regulacją głośności dostaje suwak głośności obok nazwy; kafelek zajmuje całą szerokość |
 | **Roboty** | Odkurzacze automatyczne ze start / stop / powrót do stacji, kosiarki automatyczne; kafelek zajmuje całą szerokość, przyciski są obok nazwy |
 | **Urządzenia** | Urządzenia (zamek dostaje polecenia zamka) |
-| **Czujniki** | Czujniki pomieszczenia, także umieszczone w nim czujniki ruchu (PIR) i wycieku wody (ze stanem i czasem ostatniej zmiany) |
+| **Czujniki** | Czujniki pomieszczenia, także umieszczone w nim czujniki ruchu (PIR) i wycieku wody (tylko z czasem ostatniej zmiany, stan pokazuje ikona) |
 | **Inne** | Cała reszta |
 
 Pokazywane są tylko elementy **umieszczone w pomieszczeniu** oraz encje z `sheet_extra`. Obszary Home Assistanta nie są dodawane automatycznie. Odkurzacz pojawia się w pomieszczeniu ze swoją stacją dokującą.
