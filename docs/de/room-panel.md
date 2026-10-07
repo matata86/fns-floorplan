@@ -19,7 +19,7 @@ Das Panel ist aus den eigenen Kachelkarten von Home Assistant gebaut und sieht d
 | Abschnitt | Was dort steht |
 |-----------|----------------|
 | **Thermostat** | `climate`-Entitäten: Zieltemperatur minus und plus (wird nach 0,7 s gesendet), aktuelle Temperatur, Zustand, HVAC-Modi |
-| **Lichter** | Im Raum platzierte Lichter: Helligkeit, Farbtemperatur und Lieblingsfarben, soweit das Licht sie kann (Helligkeit allein steht direkt neben dem Namen) |
+| **Lichter** | Im Raum platzierte Lichter, mit der Helligkeit direkt neben dem Namen |
 | **Kameras** | Kameras des Raums, das Livebild öffnet sich in den Details |
 | **Fenster und Türen** | Öffnungen des Raums mit Kontakt |
 | **Schalter** | `switch` und `input_boolean` |
