@@ -97,6 +97,22 @@ const edgeOf = (r, k) => {
   const L = Math.hypot(c[0] - a[0], c[1] - a[1]) || 1e-9;
   return { a, c, L, u: [(c[0] - a[0]) / L, (c[1] - a[1]) / L] };
 };
+// one entry per line; a template over several lines ({% if %} … {% endif %}) stays one entry
+const entries = (text) => {
+  const out = [];
+  let open = 0, buf = [];
+  for (const line of text.split("\n")) {
+    if (!line.trim() && !open) continue;
+    buf.push(line);
+    open += (line.match(/{%-?\s*(if|for|macro|raw)\b/g) || []).length - (line.match(/{%-?\s*end(if|for|macro|raw)\b/g) || []).length;
+    if (open > 0) continue;
+    open = 0;
+    out.push(buf.join("\n").trim());
+    buf = [];
+  }
+  if (buf.length) out.push(buf.join("\n").trim());
+  return out.filter(Boolean);
+};
 const SIDE = (u) => (Math.abs(u[0]) > Math.abs(u[1]) ? (u[0] > 0 ? t("panel.side.top") : t("panel.side.bottom")) : u[1] > 0 ? t("panel.side.right") : t("panel.side.left"));
 const inPoly = ([x, z], pts) => {
   let c = false;
@@ -1408,7 +1424,7 @@ class FnsFloorplanPanel extends HTMLElement {
     });
     plan.rooms.forEach((r, i) => {
       const sel = { cat: "rooms", i };
-      for (const id of [r.temperature, r.humidity, ...(r.sheet_extra || [])]) if (id) check(id, r.name, sel, r.level, "rooms");
+      for (const id of [r.temperature, r.humidity, ...(r.sheet_extra || [])]) if (id && !id.includes("{")) check(id, r.name, sel, r.level, "rooms");
       rules(r, r.name, sel, "rooms");
     });
     const vdock = plan.furniture.find((f) => f.type === "robot_vacuum");
@@ -1565,12 +1581,26 @@ class FnsFloorplanPanel extends HTMLElement {
     this.shadowRoot.querySelector(".main")?.classList.toggle("sheet", !!this._sheet && !!(this._sel || this._multi?.length || this._sidePage || this._mode === "look"));
   }
 
+  // the form is rebuilt after every change and HA's fields grow in a moment later: the shorter page clamped
+  // the scroll position and the form jumped; the same form gets its position back
+  _keepScroll(side) {
+    const key = [this._mode, this._sel?.cat, this._sel?.i, this._sel?.v, this._multi?.length].join("|");
+    const top = key === this._formKey ? side.scrollTop : 0;
+    this._formKey = key;
+    if (!top) return;
+    // only undoes the clamp, never fights the user scrolling up
+    const fix = () => { if (this._formKey === key && side.scrollTop < top) side.scrollTop = top; };
+    requestAnimationFrame(fix);
+    for (const ms of [60, 200, 500]) setTimeout(fix, ms);
+  }
+
   _form() {
     this._status();
     this._sheetUI();
     this._lookPreview();
     if (this._sidePage && !this._sel) return; // history / check list stays until closed or an item is picked
     const side = this.shadowRoot.querySelector(".side");
+    this._keepScroll(side);
     if (this._mode === "look") return this._lookForm(side);
     const sel = this._sel, o = this._get();
     if (!o && this._mode === "rooms") {
@@ -2324,14 +2354,14 @@ Request (may be in Czech): ${ask}`;
       if (k === "wall") return (this._wall = Number(val));
       if (k === "r:icon") { if (val) r.icon = val; else delete r.icon; return this._changed(); }
       if (k === "vx" || k === "vz") r.points[v][k === "vx" ? 0 : 1] = r3(Math.max(0, Number(val)));
-      else if (k === "sheet_extra") { const list = val.split("\n").map((x) => x.trim()).filter(Boolean); if (list.length) r.sheet_extra = list; else delete r.sheet_extra; }
+      else if (k === "sheet_extra") { const list = entries(val); if (list.length) r.sheet_extra = list; else delete r.sheet_extra; }
       else if (k === "label_show") { if (val) delete r.label_hidden; else r.label_hidden = true; }
       else if (k === "label_name") { if (val) delete r.label_name; else r.label_name = false; }
       else if (k === "label_t" || k === "label_h" || k === "label_extra") {
         const q = (x) => side.querySelector(`[data-k="${x}"]`);
         const on = (x) => { const n = q(x); return n.localName === "ha-selector" ? !!n.value : n.checked; }; // checkbox or its ha-selector twin
         const list = [...(on("label_t") ? ["temperature"] : []), ...(on("label_h") ? ["humidity"] : []),
-          ...q("label_extra").value.split("\n").map((x) => x.trim()).filter(Boolean)];
+          ...entries(q("label_extra").value)];
         if (list.join() === "temperature,humidity") delete r.label_info; else r.label_info = list;
       } else r[k] = k === "name" ? val : val || null;
       this._changed();

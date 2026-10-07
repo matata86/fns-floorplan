@@ -60,7 +60,7 @@ Rooms, furniture, devices, sensors and texts take `level` with the floor id; wit
 | `icon` | string | none | `mdi:` icon for the room panel header |
 | `temperature` | entity | null | Temperature sensor |
 | `humidity` | entity | null | Humidity sensor |
-| `sheet_extra` | list of entities | `[]` | Extra entities for the room panel |
+| `sheet_extra` | list of entities | `[]` | Extra entities for the room panel; an entry may be a template that renders entity ids ([Rooms](../editor/rooms.md)) |
 | `label_info` | list | `temperature`, `humidity` | What the label shows: `temperature`, `humidity`, entity ids or templates |
 | `label_name` | boolean | `true` | `false` hides the name |
 | `label_hidden` | boolean | `false` | `true` hides the label |

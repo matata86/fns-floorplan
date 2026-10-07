@@ -60,7 +60,7 @@ Pomieszczenia, meble, urządzenia, czujniki i teksty przyjmują `level` z id pi�
 | `icon` | string | brak | Ikona `mdi:` dla nagłówka panelu pomieszczenia |
 | `temperature` | encja | null | Czujnik temperatury |
 | `humidity` | encja | null | Czujnik wilgotności |
-| `sheet_extra` | lista encji | `[]` | Dodatkowe encje dla panelu pomieszczenia |
+| `sheet_extra` | lista encji | `[]` | Dodatkowe encje dla panelu pomieszczenia; wpis może być szablonem zwracającym id encji ([Pomieszczenia](../editor/rooms.md)) |
 | `label_info` | lista | `temperature`, `humidity` | Co pokazuje etykieta: `temperature`, `humidity`, id encji lub szablony |
 | `label_name` | boolean | `true` | `false` ukrywa nazwę |
 | `label_hidden` | boolean | `false` | `true` ukrywa etykietę |

@@ -61,6 +61,17 @@ Jeder Raum hat sein eigenes Polygon, eine Wand zwischen zwei Räumen sind also z
 | Luftfeuchtigkeit | Ein Feuchtigkeitssensor (`humidity`) |
 | Weitere Entitäten | Entitäten für das Raum-Panel (`sheet_extra`), eine pro Zeile; **Entität hinzufügen** unter dem Feld wählt eine aus Home Assistant |
 
+Beide Listen (weitere Entitäten und die Angaben der Beschriftung) nehmen auch eine **Vorlage**, die Entitäts-IDs ausgibt – eine pro Zeile, als Liste oder durch Kommas getrennt. Eine Vorlage über mehrere Zeilen ist ein Eintrag:
+
+```jinja
+{% if is_state("sun.sun", "above_horizon") -%}
+- light.terrace
+- switch.blinds
+{%- else -%}
+- light.night_lamp
+{%- endif %}
+```
+
 ## Raumbeschriftung
 
 Jeder Raum zeigt eine **Beschriftung** (ein Badge) mit seinem Namen und den Werten. Optionen:

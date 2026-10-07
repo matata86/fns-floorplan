@@ -61,6 +61,17 @@ Každá místnost má vlastní mnohoúhelník, takže stěna mezi dvěma místno
 | Vlhkost | Senzor vlhkosti (`humidity`) |
 | Další entity | Entity pro panel místnosti (`sheet_extra`), každá na řádek; **Přidat entitu** pod polem ji vybere z Home Assistantu |
 
+Oba seznamy (další entity i údaje jmenovky) berou také **šablonu**, která vypíše id entit – každé na řádek, jako seznam nebo oddělené čárkou. Šablona přes víc řádků je jeden záznam:
+
+```jinja
+{% if is_state("sun.sun", "above_horizon") -%}
+- light.terrace
+- switch.blinds
+{%- else -%}
+- light.night_lamp
+{%- endif %}
+```
+
 ## Jmenovka místnosti
 
 Každá místnost ukazuje **jmenovku** (odznak) s názvem a hodnotami. Volby:

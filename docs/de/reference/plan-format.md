@@ -60,7 +60,7 @@ Räume, Möbel, Geräte, Sensoren und Texte nehmen `level` mit der Etagen-ID; oh
 | `icon` | string | keines | `mdi:`-Symbol für die Kopfzeile des Raum-Panels |
 | `temperature` | entity | null | Temperatursensor |
 | `humidity` | entity | null | Feuchtigkeitssensor |
-| `sheet_extra` | list of entities | `[]` | Zusätzliche Entitäten für das Raum-Panel |
+| `sheet_extra` | list of entities | `[]` | Zusätzliche Entitäten für das Raum-Panel; ein Eintrag kann eine Vorlage sein, die Entitäts-IDs ausgibt ([Räume](../editor/rooms.md)) |
 | `label_info` | list | `temperature`, `humidity` | Was die Beschriftung zeigt: `temperature`, `humidity`, Entitäts-IDs oder Vorlagen |
 | `label_name` | boolean | `true` | `false` blendet den Namen aus |
 | `label_hidden` | boolean | `false` | `true` blendet die Beschriftung aus |

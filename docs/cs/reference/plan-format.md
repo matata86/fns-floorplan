@@ -60,7 +60,7 @@ Místnosti, nábytek, zařízení, senzory a texty berou `level` s id patra; bez
 | `icon` | string | žádná | Ikona `mdi:` pro hlavičku panelu místnosti |
 | `temperature` | entity | null | Senzor teploty |
 | `humidity` | entity | null | Senzor vlhkosti |
-| `sheet_extra` | list of entities | `[]` | Další entity pro panel místnosti |
+| `sheet_extra` | list of entities | `[]` | Další entity pro panel místnosti; záznam může být šablona, která vypíše id entit ([Místnosti](../editor/rooms.md)) |
 | `label_info` | list | `temperature`, `humidity` | Co jmenovka ukazuje: `temperature`, `humidity`, id entit nebo šablony |
 | `label_name` | boolean | `true` | `false` skryje název |
 | `label_hidden` | boolean | `false` | `true` skryje jmenovku |

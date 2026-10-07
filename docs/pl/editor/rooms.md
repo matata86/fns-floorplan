@@ -61,6 +61,17 @@ Każde pomieszczenie ma własny wielokąt, więc ściana między dwoma pomieszcz
 | Wilgotność | Czujnik wilgotności (`humidity`) |
 | Dodatkowe encje | Encje do panelu pomieszczenia (`sheet_extra`), jedna w linii; **Dodaj encję** pod polem wybiera ją z Home Assistanta |
 
+Obie listy (dodatkowe encje i dane etykiety) przyjmują też **szablon**, który zwraca id encji – po jednym w wierszu, jako listę lub rozdzielone przecinkami. Szablon na kilka wierszy to jeden wpis:
+
+```jinja
+{% if is_state("sun.sun", "above_horizon") -%}
+- light.terrace
+- switch.blinds
+{%- else -%}
+- light.night_lamp
+{%- endif %}
+```
+
 ## Etykieta pomieszczenia
 
 Każde pomieszczenie pokazuje **etykietę** (znacznik) z nazwą i wartościami. Opcje:
