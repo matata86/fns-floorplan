@@ -1589,8 +1589,10 @@ class FnsFloorplanPanel extends HTMLElement {
     const top = key === this._formKey ? side.scrollTop : 0;
     this._formKey = key;
     if (!top) return;
-    // only undoes the clamp, never fights the user scrolling up
-    const fix = () => { if (this._formKey === key && side.scrollTop < top) side.scrollTop = top; };
+    // puts the position back (the page may jump up or down), never fights the user scrolling meanwhile
+    if (!side._scrollSeen) { side._scrollSeen = true; for (const ev of ["wheel", "touchmove", "keydown"]) side.addEventListener(ev, () => (this._scrollT = performance.now()), { passive: true }); }
+    const t0 = performance.now();
+    const fix = () => { if (this._formKey === key && Math.abs(side.scrollTop - top) > 1 && !(this._scrollT > t0)) side.scrollTop = top; };
     requestAnimationFrame(fix);
     for (const ms of [60, 200, 500]) setTimeout(fix, ms);
   }
@@ -1878,7 +1880,8 @@ class FnsFloorplanPanel extends HTMLElement {
       if (el.localName === "details") el.addEventListener("toggle", () => rec(el.open));
       else el.addEventListener("expanded-changed", (e) => rec(e.detail.expanded));
     });
-    side.querySelectorAll("[data-k]:not(ha-selector)").forEach((inp) => inp.addEventListener("change", () => set(inp.dataset.k, inp.type === "checkbox" ? inp.checked : inp.value, inp)));
+    // not the icon picker: the change of its search box bubbles out of it and would reset the choice
+    side.querySelectorAll("[data-k]:not(ha-selector):not(ha-icon-picker)").forEach((inp) => inp.addEventListener("change", () => set(inp.dataset.k, inp.type === "checkbox" ? inp.checked : inp.value, inp)));
     side.querySelectorAll("[data-a]").forEach((btn) => btn.addEventListener("click", () => act(btn.dataset.a)));
   }
 

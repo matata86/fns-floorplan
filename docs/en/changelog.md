@@ -2,9 +2,11 @@
 
 Every release is listed with notes in the [GitHub releases](https://github.com/matata86/fns-floorplan/releases). This page summarises the 0.6.x line by theme.
 
-## 1.0.11 – 1.0.12
+## 1.0.11 – 1.0.13
 
 - Room panel: media players and remotes have their own section **Media** (with a volume slider), robot vacuums and lawn mowers the section **Robots**.
+- Editor: an icon chosen in a rule's icon picker after searching is kept, and the form keeps its scroll position when a field changes the page height either way.
+- Rules: a rule that sets a ring effect (for example a countdown driven by a timer) now runs it even while the device itself is off.
 
 ## 1.0.1 to 1.0.9
 
