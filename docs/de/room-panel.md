@@ -21,12 +21,12 @@ Das Panel ist aus den eigenen Karten von Home Assistant gebaut, jede wie auf ein
 | **Thermostat** | `climate`-Entitäten als Kachel mit der Regelung der Zieltemperatur |
 | **Lichter** | Im Raum platzierte Lichter. Mit installierten [Mushroom](https://github.com/piitaya/lovelace-mushroom)-Karten: eine Mushroom-Lichtkarte mit Helligkeitsbalken in der Farbe des Lichts und Schaltflächen für Farbtemperatur und Farbe (wenn das Licht sie hat); ein Tippen auf das Symbol schaltet das Licht. Ohne Mushroom: eine Kachel mit dem Helligkeitsbalken neben dem Namen |
 | **Kameras** | Kameras des Raums als Bild über die ganze Breite (ein Schnappschuss, alle paar Sekunden erneuert); ein Tippen öffnet das Livebild in den Details |
-| **Fenster und Türen** | Öffnungen des Raums mit Kontakt und ihre Rollläden (auch aus den weiteren Entitäten) mit Öffnen / Stopp / Schließen neben dem Namen und dem Positionsregler darunter |
+| **Fenster und Türen** | Öffnungen des Raums mit Kontakt und ihre Rollläden (auch aus den weiteren Entitäten) mit Öffnen / Stopp / Schließen neben dem Namen und dem Positionsregler darunter; der Kontakt zeigt, wann er sich zuletzt geändert hat (bei einem geschlossenen: wann er zuletzt offen war), ein offener seinen Zustand und seit wann |
 | **Schalter** | `switch` und `input_boolean` |
-| **Medien** | Mediaplayer und Fernbedienungen (Fernseher, Lautsprecher, Player); ein Player mit einstellbarer Lautstärke erhält einen Lautstärkeregler |
-| **Roboter** | Saugroboter mit Start / Stopp / zur Station, Mähroboter |
+| **Medien** | Mediaplayer und Fernbedienungen (Fernseher, Lautsprecher, Player); ein Player mit einstellbarer Lautstärke erhält einen Lautstärkeregler neben dem Namen; die Kachel nimmt die volle Breite ein |
+| **Roboter** | Saugroboter mit Start / Stopp / zur Station, Mähroboter; die Kachel nimmt die volle Breite ein, die Schaltflächen stehen neben dem Namen |
 | **Geräte** | Haushaltsgeräte (ein Schloss erhält Schlossbefehle) |
-| **Sensoren** | Sensoren des Raums |
+| **Sensoren** | Sensoren des Raums, auch die darin platzierten PIR- und Wasserleck-Sensoren |
 | **Sonstige** | Alles andere |
 
 Angezeigt werden nur Elemente, die **im Raum platziert** sind, und die Entitäten in `sheet_extra`. Bereiche von Home Assistant werden nicht automatisch hinzugefügt. Der Saugroboter erscheint in dem Raum, in dem seine Station steht.

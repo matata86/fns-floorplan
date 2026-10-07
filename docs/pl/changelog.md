@@ -2,11 +2,12 @@
 
 Każde wydanie wraz z uwagami znajdziesz w [wydaniach na GitHubie](https://github.com/matata86/fns-floorplan/releases). Ta strona podsumowuje linię 0.6.x tematycznie.
 
-## 1.0.11 – 1.0.13
+## 1.0.11 – 1.0.14
 
 - Panel pomieszczenia: odtwarzacze multimediów i piloty mają własną sekcję **Multimedia** (z suwakiem głośności), odkurzacze i kosiarki automatyczne sekcję **Roboty**.
 - Edytor: ikona wybrana po wyszukaniu w selektorze ikon reguły zostaje zapamiętana, a formularz zachowuje pozycję przewijania, gdy po zmianie pola strona się wydłuża lub skraca.
 - Reguły: reguła ustawiająca pierścień (np. odliczanie sterowane timerem) uruchamia go teraz także wtedy, gdy samo urządzenie jest wyłączone.
+- Panel pomieszczenia: odtwarzacze multimediów i odkurzacze zajmują całą szerokość w jednym wierszu (głośność i przyciski obok nazwy); okna i drzwi pokazują, kiedy były ostatnio otwarte, zamiast swojego stanu; czujniki ruchu (PIR) i wycieku wody umieszczone w pomieszczeniu są w Czujnikach.
 
 ## 1.0.1 do 1.0.9
 

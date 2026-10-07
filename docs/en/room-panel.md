@@ -21,12 +21,12 @@ The panel is built from Home Assistant's own cards, each placed like on a dashbo
 | **Thermostat** | `climate` entities as a tile with the target temperature control |
 | **Lights** | Lights placed in the room. With the [Mushroom](https://github.com/piitaya/lovelace-mushroom) cards installed: a Mushroom light card with the brightness bar in the light's colour and buttons for colour temperature and colour (when the light has them); a tap on the icon switches the light. Without Mushroom: a tile with the brightness bar next to the name |
 | **Cameras** | Cameras of the room as a picture across the panel (a snapshot refreshed every few seconds); a tap opens the live picture in their details |
-| **Windows & doors** | Openings of the room with a contact, and their blinds (and covers among the extra entities) with open / stop / close next to the name and a position slider below |
+| **Windows & doors** | Openings of the room with a contact, and their blinds (and covers among the extra entities) with open / stop / close next to the name and a position slider below; the contact shows when it last changed (for a closed one: when it was last open), an open one its state and since when |
 | **Switches** | `switch` and `input_boolean` |
-| **Media** | Media players and remotes (TVs, speakers, players); a player that can set its volume gets a volume slider |
-| **Robots** | Robot vacuums with start / stop / home, lawn mowers |
+| **Media** | Media players and remotes (TVs, speakers, players); a player that can set its volume gets a volume slider next to the name; the tile takes the full width |
+| **Robots** | Robot vacuums with start / stop / home, lawn mowers; the tile takes the full width with the buttons next to the name |
 | **Devices** | Appliances (a lock gets lock commands) |
-| **Sensors** | Sensors of the room |
+| **Sensors** | Sensors of the room, including the PIR and water leak sensors placed in it |
 | **Other** | Everything else |
 
 Only items that are **placed in the room** and the entities in `sheet_extra` are shown. Home Assistant areas are not added automatically. The robot vacuum appears in the room with its dock.
