@@ -860,8 +860,8 @@ class FnsFloorplanPanel extends HTMLElement {
           const pt = (t) => `${Math.cos(t) * L} ${Math.sin(t) * L}`;
           el("path", { d: `M0 0 L${pt(a - h)} A${L} ${L} 0 0 1 ${pt(a + h)} Z`, class: "spot-cone" }, g);
         }
-        el("circle", { r: 11, class: "lamp" + (missing ? " noent" : "") }, g);
-        icon(g, f, 14, lightIcon(f.type), "ico lamp-ico");
+        el("circle", { r: 15, class: "lamp" + (missing ? " noent" : "") }, g);
+        icon(g, f, 18, lightIcon(f.type), "ico lamp-ico");
       } else if (f.type === "robot_vacuum") {
         el("circle", { r: 12, class: "dev" }, g);
         icon(g, f, 16, "mdiRobotVacuum");
@@ -877,10 +877,10 @@ class FnsFloorplanPanel extends HTMLElement {
       const sel = { cat: "furniture", i: members[0], g: members }, o = this._get(sel);
       const g = group(sel, o.x, o.z, 0, SIZES[o.size] || 1);
       if (ruled(o).hide) g.classList.add("rhid");
-      el("circle", { r: 11, class: "lamp" }, g);
-      icon(g, o, 14, lightIcon(o.type), "ico lamp-ico");
-      el("circle", { cx: 10, cy: -10, r: 7, class: "count" }, g);
-      el("text", { class: "count-t", "text-anchor": "middle", x: 10, y: -6.5 }, g).textContent = members.length;
+      el("circle", { r: 15, class: "lamp" }, g);
+      icon(g, o, 18, lightIcon(o.type), "ico lamp-ico");
+      el("circle", { cx: 13, cy: -13, r: 7, class: "count" }, g);
+      el("text", { class: "count-t", "text-anchor": "middle", x: 13, y: -9.5 }, g).textContent = members.length;
     }
     plan.devices.map((d, i) => [d, i]).filter(([d]) => this._on(d)).sort((a, b) => layer(a[0]) - layer(b[0])).forEach(([d, i]) => {
       const g = group({ cat: "devices", i }, d.x, d.z, 0, SIZES[d.size] || 1);
