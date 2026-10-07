@@ -1782,7 +1782,8 @@ class FnsFloorplanPanel extends HTMLElement {
       const pick = document.createElement("ha-icon-picker");
       Object.assign(pick, { hass: this._hass, value: inp.value, label: t("panel.f.icon"), helper: t("panel.f.icon_helper_item") });
       pick.dataset.k = inp.dataset.k;
-      pick.addEventListener("value-changed", (e) => { e.stopPropagation(); set(inp.dataset.k, e.detail.value || "", pick); });
+      // HA 2026.9: the choice is only announced by the picker's inner combo box, so it is caught on the way down
+      pick.addEventListener("value-changed", (e) => set(inp.dataset.k, e.detail?.value || "", pick), true);
       inp.replaceWith(pick);
     });
     // the rules YAML gets HA's own code editor (syntax colours, entity completion); commits on blur
@@ -1819,7 +1820,7 @@ class FnsFloorplanPanel extends HTMLElement {
       pick.hass = this._hass;
       pick.value = inp.value;
       Object.assign(pick, { label: t("panel.f.icon"), placeholder: inp.placeholder, helper: t("panel.f.icon_helper_default") });
-      pick.addEventListener("value-changed", (e) => this._set("icon", e.detail.value || ""));
+      pick.addEventListener("value-changed", (e) => this._set("icon", e.detail?.value || ""), true);
       // the default of a generic item is its entity's own icon: show that one in the empty picker
       const o = this._get(), so = o && !o.icon && o.kind === "generic" && this._hass.states[o.entity];
       if (so) { pick.placeholder = so.attributes.icon || ""; resolveIcon(null, so, this._hass).then((x) => x && (pick.fallbackPath = x)); }
