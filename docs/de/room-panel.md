@@ -14,7 +14,7 @@ Tippe auf der Karte auf einen Raum, und von der rechten Bildschirmkante fährt e
 
 ## Abschnitte
 
-Das Panel ist aus den eigenen Karten von Home Assistant gebaut, jede wie auf einem Dashboard platziert, sodass auch dein Design sie gestaltet (einschließlich card-mod- / UIX-Designs). Jeder Abschnitt hat eine Überschriftenkarte mit Symbol im Untertitel-Stil der Abschnittsüberschriften von Dashboards. Ein Tippen auf eine Karte öffnet die Details, das Symbol schaltet um, was sich umschalten lässt. Thermostate, Lichter mit Steuerung, Kameras und Rollläden nehmen die volle Breite ein, der Rest sitzt zu zweit in einer Reihe.
+Das Panel ist aus den eigenen Karten von Home Assistant gebaut, jede wie auf einem Dashboard platziert, sodass auch dein Design sie gestaltet (einschließlich card-mod- / UIX-Designs). Jeder Abschnitt hat eine Überschriftenkarte mit Symbol im Untertitel-Stil der Abschnittsüberschriften von Dashboards. Ein Tippen auf eine Karte öffnet die Details, das Symbol schaltet um, was sich umschalten lässt. Thermostate, Lichter mit Steuerung, Kameras, Rollläden sowie Fenster, Türen und Sensoren mit der Zeit der letzten Änderung nehmen die volle Breite ein, der Rest sitzt zu zweit in einer Reihe.
 
 | Abschnitt | Was dort steht |
 |-----------|----------------|

@@ -14,7 +14,7 @@ Dotknij pomieszczenia na karcie, a **panel wysuwany** wsunie się od prawej kraw
 
 ## Sekcje
 
-Panel jest zbudowany z własnych kart Home Assistanta, każda umieszczona jak na pulpicie, więc style nadaje im także twój motyw (łącznie z motywami card-mod / UIX). Każda sekcja ma kartę nagłówka z ikoną w stylu podtytułu nagłówków sekcji pulpitu. Dotknięcie karty otwiera szczegóły, a ikona przełącza to, co da się przełączyć. Termostaty, światła ze sterowaniem, kamery i rolety zajmują całą szerokość, reszta leży po dwie w rzędzie.
+Panel jest zbudowany z własnych kart Home Assistanta, każda umieszczona jak na pulpicie, więc style nadaje im także twój motyw (łącznie z motywami card-mod / UIX). Każda sekcja ma kartę nagłówka z ikoną w stylu podtytułu nagłówków sekcji pulpitu. Dotknięcie karty otwiera szczegóły, a ikona przełącza to, co da się przełączyć. Termostaty, światła ze sterowaniem, kamery, rolety oraz okna, drzwi i czujniki z czasem ostatniej zmiany zajmują całą szerokość, reszta leży po dwie w rzędzie.
 
 | Sekcja | Co się tam znajduje |
 |---------|-----------------|
