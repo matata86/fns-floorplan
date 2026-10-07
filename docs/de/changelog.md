@@ -2,7 +2,7 @@
 
 Jede Version ist mit Hinweisen in den [GitHub-Releases](https://github.com/matata86/fns-floorplan/releases) aufgeführt. Diese Seite fasst die Reihe 0.6.x nach Themen zusammen.
 
-## 1.0.11 – 1.0.17
+## 1.0.11 – 1.0.18
 
 - Raumpanel: Mediaplayer und Fernbedienungen haben einen eigenen Abschnitt **Medien** (mit Lautstärkeregler), Saug- und Mähroboter den Abschnitt **Roboter**.
 - Editor: Ein nach der Suche im Symbolwähler einer Regel gewähltes Symbol bleibt erhalten, und das Formular behält seine Scrollposition, auch wenn sich die Seitenhöhe nach einer Änderung in die eine oder andere Richtung ändert.
@@ -10,6 +10,7 @@ Jede Version ist mit Hinweisen in den [GitHub-Releases](https://github.com/matat
 - Raumpanel: Mediaplayer und Saugroboter nehmen die volle Breite in einer Zeile ein (Lautstärke und Schaltflächen neben dem Namen); Fenster und Türen zeigen, wann sie zuletzt offen waren, statt ihres Zustands; die im Raum platzierten PIR- und Wasserleck-Sensoren stehen unter Sensoren (mit Zustand und Zeit der letzten Änderung).
 - Raumpanel: Fenster, Türen und platzierte Sensoren mit der Zeit der letzten Änderung nehmen die volle Breite ein, damit der Text nicht abgeschnitten wird.
 - Raumpanel: Fenster, Türen und platzierte Sensoren zeigen nur die Zeit der letzten Änderung (den Zustand zeigt das Symbol) und sitzen wieder zu zweit in einer Reihe.
+- Möbel mit Entität verhalten sich wie ein Geräte-Badge: Symbolfarbe (`color_on`), Symbol- und Kreisanimation, solange die Entität läuft; siehe [Elemente](editor/items.md#furniture).
 
 ## 1.0.1 bis 1.0.9
 

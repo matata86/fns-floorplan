@@ -1655,13 +1655,19 @@ class FnsFloorplanPanel extends HTMLElement {
         ${dock ? this._sec(t("panel.f.sec_running_vac"), `<label>${t("panel.f.color_cleaning")}</label>${this._colorPick("color_on", o.color_on)}
         <p class="hint">${t("panel.f.state_color_hint")}</p>
         ${this._fxPicker("fx", o.fx, t("panel.f.fx_none_drive"), "none", "mdiRobotVacuum", "progress", o.progress, t("panel.f.none_lc"), t("panel.f.fx_title_cleaning"), o.progress_total).replace(/<button class="fxt[^"]*" data-fx="none"[\s\S]*?<\/button>/, "")}`) : ""}
+        ${!light && !dock && !point && o.type !== "tv_wall" && o.entity ? this._sec(t("panel.f.sec_running"), `<label>${t("panel.f.active_state")}</label><input data-k="active" value="${esc(Array.isArray(o.active) ? o.active.join(", ") : o.active ? JSON.stringify(o.active) : "")}" placeholder="on, run">
+        <p class="hint">${t("panel.f.active_hint")}</p>
+        <label>${t("panel.f.color_on")}</label>${this._colorPick("color_on", o.color_on)}
+        <p class="hint">${t("panel.f.color_on_furn_hint")}</p>
+        <label class="chk"><input type="checkbox" data-k="anim" ${o.anim === false ? "" : "checked"}> ${t("panel.f.anim_icon")}</label>
+        ${this._fxPicker("fx", o.fx, t("panel.f.fx_no_anim"), "none", FURNITURE[o.type]?.[1] || "mdiShapeOutline", "progress", o.progress, t("panel.f.none_lc"), t("panel.f.fx_title_rule"), o.progress_total)}`) : ""}
         ${look.replace(/\s/g, "") ? this._sec(t("panel.f.sec_look"), look) : ""}
         ${this._sec(dock ? t("panel.f.sec_dock") : point ? t("panel.f.sec_pos") : t("panel.f.sec_dims"), `${xz}
         ${point ? "" : o.type === "led_strip" ? num(t("panel.f.length"), "w", o.w) : `<div class="row2"><div>${num(t("panel.f.width"), "w", o.w)}</div><div>${num(t("panel.f.depth"), "d", o.d)}</div></div>`}
         ${point ? "" : rotation}
         ${this._layerField(o)}${dock ? `<p class="hint">${t("panel.f.dock_layer_hint")}</p>` : ""}`)}
         ${this._actionsUI(o, light ? { tap: ACTIONS.toggle, hold: ACTIONS["more-info"] } : { tap: ACTIONS["more-info"] })}
-        ${this._rulesUI(o, o.type === "led_strip" ? ["color", "fx", "hide"] : light || dock ? ["color", "fx", "icon", "hide"] : ["color", "glow", "fx", "icon", "hide"])}`;
+        ${this._rulesUI(o, o.type === "led_strip" ? ["color", "fx", "hide"] : light || dock ? ["color", "fx", "icon", "hide"] : ["color", "glow", ...(o.entity ? ["animate"] : []), "fx", "icon", "hide"])}`;
     } else if (sel.cat === "devices") {
       // domain defaults of a generic item: hint, default ring, default tap
       const dom = o.kind === "generic" ? String(o.entity || "").split(".")[0] : "", dd = DOMAIN_DEV[dom];
@@ -2465,6 +2471,7 @@ Request (may be in Czech): ${ask}`;
       else if (key === "type" && value === "led_strip" && !(t.w >= 0.5)) Object.assign(t, { type: value, w: 1, d: 0.04 }); // a lamp turned into a strip gets a usable length
       else if (key === "beam") { if (value === "") delete t.beam; else t.beam = Math.min(180, Math.max(5, Number(value))); }
       else if (key === "sheet_hide" || key === "label_vertical") { if (value) t[key] = true; else delete t[key]; }
+      else if (key === "anim") { if (value) delete t.anim; else t.anim = false; }
       else if (key === "room_light") { if (value === "") delete t.room_light; else t.room_light = Math.max(0, Number(value)) / 100; }
       else if (key === "color" || key === "color_on" || key === "background") {
         const v = value === "custom" ? inp.nextElementSibling.value : value;

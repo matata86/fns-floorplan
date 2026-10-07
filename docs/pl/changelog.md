@@ -2,7 +2,7 @@
 
 Każde wydanie wraz z uwagami znajdziesz w [wydaniach na GitHubie](https://github.com/matata86/fns-floorplan/releases). Ta strona podsumowuje linię 0.6.x tematycznie.
 
-## 1.0.11 – 1.0.17
+## 1.0.11 – 1.0.18
 
 - Panel pomieszczenia: odtwarzacze multimediów i piloty mają własną sekcję **Multimedia** (z suwakiem głośności), odkurzacze i kosiarki automatyczne sekcję **Roboty**.
 - Edytor: ikona wybrana po wyszukaniu w selektorze ikon reguły zostaje zapamiętana, a formularz zachowuje pozycję przewijania, gdy po zmianie pola strona się wydłuża lub skraca.
@@ -10,6 +10,7 @@ Każde wydanie wraz z uwagami znajdziesz w [wydaniach na GitHubie](https://githu
 - Panel pomieszczenia: odtwarzacze multimediów i odkurzacze zajmują całą szerokość w jednym wierszu (głośność i przyciski obok nazwy); okna i drzwi pokazują, kiedy były ostatnio otwarte, zamiast swojego stanu; czujniki ruchu (PIR) i wycieku wody umieszczone w pomieszczeniu są w Czujnikach (ze stanem i czasem ostatniej zmiany).
 - Panel pomieszczenia: okna, drzwi i umieszczone czujniki z czasem ostatniej zmiany zajmują całą szerokość, aby tekst nie był ucinany.
 - Panel pomieszczenia: okna, drzwi i umieszczone czujniki pokazują tylko czas ostatniej zmiany (stan pokazuje ikona) i znów są po dwa w rzędzie.
+- Meble z encją zachowują się jak odznaka urządzenia: kolor ikony (`color_on`), animacja ikony i kółka, dopóki encja działa; zobacz [Elementy](editor/items.md#furniture).
 
 ## 1.0.1 do 1.0.9
 

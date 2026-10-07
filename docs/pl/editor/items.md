@@ -137,6 +137,7 @@ texts:
 - **Sofa narożna** ma kształt litery L; siedzisko to 40 % krótszego boku.
 - `color` ustawia domyślny kolor mebla; reguła ma nad nim pierwszeństwo.
 - Meble są w edytorze przyciemnione, aby nie odciągały uwagi.
+- Element z **encją** (zmywarka, pralka, lodówka, kuchenka ...) zachowuje się jak odznaka urządzenia, dopóki encja działa: formularz ma sekcję **Gdy działa** ze stanami uznawanymi za działanie (`active`, domyślnie: wszystko oprócz wyłączone), `color_on` (kolor ikony i kółka), `fx` z `progress` (animacja kółka, także odliczanie) oraz **Animuj ikonę, gdy działa** (`anim: false` ją wyłącza). Ikona animuje się jak w urządzeniu (zmywarka podskakuje, pralka się trzęsie ...). To samo potrafi reguła z szablonem: `color`, `fx` i `animate: true`, dopóki spełniony jest jej warunek.
 
 ![Meble w salonie z uchwytami wokół zaznaczonej sofy](../../assets/screenshots/pl/items-furniture.png){ loading=lazy }
 

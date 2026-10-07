@@ -2,7 +2,7 @@
 
 Každé vydání je s poznámkami uvedeno na [GitHub releases](https://github.com/matata86/fns-floorplan/releases). Tato stránka shrnuje řadu 0.6.x podle témat.
 
-## 1.0.11 – 1.0.17
+## 1.0.11 – 1.0.18
 
 - Panel místnosti: přehrávače médií a ovladače mají vlastní sekci **Média** (s posuvníkem hlasitosti), robotické vysavače a sekačky sekci **Roboti**.
 - Editor: ikona vybraná po hledání ve výběru ikony pravidla se uloží a formulář drží pozici posunu, i když se po změně pole stránka zvětší nebo zmenší.
@@ -10,6 +10,7 @@ Každé vydání je s poznámkami uvedeno na [GitHub releases](https://github.co
 - Panel místnosti: přehrávače médií a robotické vysavače zabírají celou šířku v jednom řádku (hlasitost a tlačítka vedle názvu); okna a dveře ukazují, kdy byly naposledy otevřené, místo svého stavu; senzory pohybu (PIR) a úniku vody umístěné v místnosti jsou v Senzorech (se stavem a časem poslední změny).
 - Panel místnosti: okna, dveře a umístěné senzory s časem poslední změny zabírají celou šířku, aby se text neořezával.
 - Panel místnosti: okna, dveře a umístěné senzory ukazují jen čas poslední změny (stav ukazuje ikona) a jsou zase po dvou v řadě.
+- Nábytek s entitou se chová jako odznak spotřebiče: barva ikony (`color_on`), animace ikony a kolečka, dokud entita běží; viz [Položky](editor/items.md#furniture).
 
 ## 1.0.1 až 1.0.9
 
