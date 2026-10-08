@@ -179,7 +179,7 @@ const states = {
   "switch.fireplace": S("on"),
   "media_player.tv": S("playing", { media_title: "Evening news", device_class: "tv" }),
   "vacuum.robot": S("docked"),
-  "sensor.robot_current_room": S("Living room", { options: ["Living room", "Kitchen"] }),
+  "sensor.robot_current_room": S("Living room", { options: ["Living room", "Kitchen", "Hall", "Bathroom", "Bedroom"] }),
   "sensor.robot_battery": S("100", { device_class: "battery", unit_of_measurement: "%" }),
   "sensor.living_room_temperature": S("21.4", { device_class: "temperature", unit_of_measurement: "°C" }),
   "sensor.living_room_humidity": S("46", { device_class: "humidity", unit_of_measurement: "%" }),
@@ -220,7 +220,10 @@ function vac(go) {
   }
 }
 setInterval(() => { // the robot moves between rooms; the dishwasher counts down
-  if (states["vacuum.robot"].state === "cleaning") set("sensor.robot_current_room", states["sensor.robot_current_room"].state === "Kitchen" ? "Living room" : "Kitchen");
+  if (states["vacuum.robot"].state === "cleaning") { // a tour of the flat: Living room, Kitchen, Hall, Bathroom, Bedroom
+    const tour = ["Living room", "Kitchen", "Hall", "Bathroom", "Bedroom"];
+    set("sensor.robot_current_room", tour[(tour.indexOf(states["sensor.robot_current_room"].state) + 1) % tour.length]);
+  }
   if (states["sensor.dishwasher_state"].state === "run") { const m = dishLeft(); m ? set("sensor.dishwasher_remaining", String(m)) : dish(false); }
   push();
 }, 6000);
