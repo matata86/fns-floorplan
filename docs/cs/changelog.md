@@ -2,7 +2,9 @@
 
 Každé vydání je s poznámkami uvedeno na [GitHub releases](https://github.com/matata86/fns-floorplan/releases). Tato stránka shrnuje řadu 0.6.x podle témat.
 
-## 1.0.11 – 1.0.20
+## 1.0.11 – 1.0.21
+
+- Editor: po čerstvé instalaci (prázdný plán) jde zase přidat místnost; dřív se nic nestalo. Panel místnosti: binární senzory ukazují jen čas poslední změny a každá sekce je seřazená podle typu.
 
 - Panel místnosti: cílová teplota termostatu je v řádku dlaždice; světla jsou vždy obyčejné dlaždice (žádná karta Mushroom; spínač mezi světly se teď přepíná ikonou); dlaždice se obnoví jen při změně vlastní entity, panel už nelaguje.
 

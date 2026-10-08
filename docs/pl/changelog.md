@@ -2,7 +2,9 @@
 
 Każde wydanie wraz z uwagami znajdziesz w [wydaniach na GitHubie](https://github.com/matata86/fns-floorplan/releases). Ta strona podsumowuje linię 0.6.x tematycznie.
 
-## 1.0.11 – 1.0.20
+## 1.0.11 – 1.0.21
+
+- Edytor: po świeżej instalacji (pusty plan) znów można dodać pomieszczenie; wcześniej nic się nie działo. Panel pomieszczenia: czujniki binarne pokazują tylko czas ostatniej zmiany, a każda sekcja jest posortowana według typu.
 
 - Panel pomieszczenia: temperatura docelowa termostatu jest w wierszu kafelka; światła to zawsze zwykłe kafelki (bez karty Mushroom; przełącznik wśród świateł działa teraz z ikony); kafelek odświeża się tylko po zmianie własnej encji, panel już nie zwalnia.
 

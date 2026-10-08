@@ -2,7 +2,9 @@
 
 Jede Version ist mit Hinweisen in den [GitHub-Releases](https://github.com/matata86/fns-floorplan/releases) aufgeführt. Diese Seite fasst die Reihe 0.6.x nach Themen zusammen.
 
-## 1.0.11 – 1.0.20
+## 1.0.11 – 1.0.21
+
+- Editor: Nach einer Neuinstallation (leerer Plan) lässt sich wieder ein Raum hinzufügen; vorher passierte nichts. Raum-Panel: Binärsensoren zeigen nur die Zeit der letzten Änderung, jeder Abschnitt ist nach Art sortiert.
 
 - Raum-Panel: die Zieltemperatur des Thermostats sitzt in der Kachelzeile; Lichter sind immer einfache Kacheln (keine Mushroom-Karte; ein Schalter unter den Lichtern lässt sich jetzt über sein Symbol schalten); eine Kachel wird nur aktualisiert, wenn sich ihre eigene Entität ändert, das Panel ruckelt nicht mehr.
 

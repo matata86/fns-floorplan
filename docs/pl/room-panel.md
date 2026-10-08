@@ -26,7 +26,7 @@ Panel jest zbudowany z własnych kart Home Assistanta, każda umieszczona jak na
 | **Multimedia** | Odtwarzacze multimediów i piloty (telewizory, głośniki, odtwarzacze); odtwarzacz z regulacją głośności dostaje suwak głośności obok nazwy; kafelek zajmuje całą szerokość |
 | **Roboty** | Odkurzacze automatyczne ze start / stop / powrót do stacji, kosiarki automatyczne; kafelek zajmuje całą szerokość, przyciski są obok nazwy |
 | **Urządzenia** | Urządzenia (zamek dostaje polecenia zamka) |
-| **Czujniki** | Czujniki pomieszczenia, także umieszczone w nim czujniki ruchu (PIR) i wycieku wody (tylko z czasem ostatniej zmiany, stan pokazuje ikona) |
+| **Czujniki** | Czujniki pomieszczenia, także umieszczone w nim czujniki ruchu (PIR) i wycieku wody; czujniki binarne (obecność, ruch, wyciek) pokazują tylko czas ostatniej zmiany, stan pokazuje ikona |
 | **Inne** | Cała reszta |
 
 Pokazywane są tylko elementy **umieszczone w pomieszczeniu** oraz encje z `sheet_extra`. Obszary Home Assistanta nie są dodawane automatycznie. Odkurzacz pojawia się w pomieszczeniu ze swoją stacją dokującą.

@@ -2,7 +2,9 @@
 
 Every release is listed with notes in the [GitHub releases](https://github.com/matata86/fns-floorplan/releases). This page summarises the 0.6.x line by theme.
 
-## 1.0.11 – 1.0.20
+## 1.0.11 – 1.0.21
+
+- Editor: on a fresh install (empty plan) rooms can be added again; before, nothing happened. Room panel: binary sensors show only when they last changed, and each section is sorted by kind.
 
 - Room panel: the thermostat's target temperature sits in the tile row; lights are always plain tiles (no Mushroom card; a switch among the lights now toggles from its icon); the panel only refreshes a tile when its own entity changed, so it no longer lags.
 

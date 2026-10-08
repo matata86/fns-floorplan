@@ -400,7 +400,7 @@ class FnsFloorplanPanel extends HTMLElement {
       return;
     }
     this._tries = 0;
-    for (const k of ["furniture", "devices", "sensors", "texts"]) this._plan[k] ||= [];
+    for (const k of ["rooms", "openings", "furniture", "devices", "sensors", "texts"]) this._plan[k] ||= []; // a fresh install stores an empty plan
     this._plan.labels ||= {};
     // vacuum settings moved from plan.vacuum to the dock; saved with the next save
     const vdock = this._plan.vacuum && this._plan.furniture.find((f) => f.type === "robot_vacuum");
@@ -1492,7 +1492,7 @@ class FnsFloorplanPanel extends HTMLElement {
           const rev = this._plan.rev;
           this._plan = old;
           this._plan.rev = rev;
-          for (const k of ["furniture", "devices", "sensors", "texts"]) this._plan[k] ||= [];
+          for (const k of ["rooms", "openings", "furniture", "devices", "sensors", "texts"]) this._plan[k] ||= []; // a fresh install stores an empty plan
           this._plan.labels ||= {};
           this._sel = null; this._multi = null; this._sidePage = null;
           this._changed();
