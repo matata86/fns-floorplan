@@ -958,7 +958,7 @@ class FnsFloorplanPanel extends HTMLElement {
     for (const r of plan.rooms) {
       if (!this._on(r)) continue;
       const [x, z] = plan.labels[r.id] || centroid(r.points);
-      const g = group({ cat: "labels", id: r.id }, x, z, r.label_rotation || 0);
+      const g = group({ cat: "labels", id: r.id }, x, z, r.label_rotation || 0, SIZES[r.label_size] || 1);
       g.classList.add("label");
       if (r.label_hidden || ruled(r).hide) g.classList.add("rhid");
       const rect = el("rect", { rx: 8 }, g);
@@ -2326,6 +2326,7 @@ Request (may be in Czech): ${ask}`;
       <label>${t("panel.room.hum")}</label><input data-k="humidity" value="${esc(r.humidity || "")}" list="ents">
       ${this._sec(t("panel.room.badge_sec"), `<label class="chk"><input type="checkbox" data-k="label_show" ${r.label_hidden ? "" : "checked"}> ${t("panel.room.show_badge")}</label>
         <fieldset class="badge-opts" ${r.label_hidden ? "disabled" : ""}>
+        <label>${t("panel.f.size")}</label><select data-k="label_size">${Object.entries(SIZE_NAMES).map(([k, v]) => `<option value="${k}" ${(r.label_size || "") === k ? "selected" : ""}>${v}</option>`).join("")}</select>
         <label class="chk"><input type="checkbox" data-k="label_name" ${r.label_name === false ? "" : "checked"}> ${t("panel.room.show_name")}</label>
         <label class="chk"><input type="checkbox" data-k="label_t" ${info.includes("temperature") ? "checked" : ""}> ${t("panel.room.show_temp")}</label>
         <label class="chk"><input type="checkbox" data-k="label_h" ${info.includes("humidity") ? "checked" : ""}> ${t("panel.room.show_hum")}</label>
@@ -2360,6 +2361,7 @@ Request (may be in Czech): ${ask}`;
       if (k === "vx" || k === "vz") r.points[v][k === "vx" ? 0 : 1] = r3(Math.max(0, Number(val)));
       else if (k === "sheet_extra") { const list = entries(val); if (list.length) r.sheet_extra = list; else delete r.sheet_extra; }
       else if (k === "label_show") { if (val) delete r.label_hidden; else r.label_hidden = true; }
+      else if (k === "label_size") { if (val) r.label_size = val; else delete r.label_size; }
       else if (k === "label_name") { if (val) delete r.label_name; else r.label_name = false; }
       else if (k === "label_t" || k === "label_h" || k === "label_extra") {
         const q = (x) => side.querySelector(`[data-k="${x}"]`);

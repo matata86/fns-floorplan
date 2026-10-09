@@ -65,6 +65,7 @@ Pomieszczenia, meble, urządzenia, czujniki i teksty przyjmują `level` z id pi�
 | `label_name` | boolean | `true` | `false` ukrywa nazwę |
 | `label_hidden` | boolean | `false` | `true` ukrywa etykietę |
 | `label_rotation` | liczba | 0 | Obrót etykiety w stopniach |
+| `label_size` | tekst | `m` | Rozmiar etykiety: `xs`, `s`, `m`, `l`, `xl`, `xxl` |
 | `rules` | lista | `[]` | [Reguły](#rules) |
 
 ## Otwory (drzwi i okna) { #openings }

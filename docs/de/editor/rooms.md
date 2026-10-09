@@ -82,6 +82,7 @@ Jeder Raum zeigt eine **Beschriftung** (ein Badge) mit seinem Namen und den Wert
 | `label_name: false` | Blendet den Namen aus, behält die Werte |
 | `label_hidden: true` | Blendet die ganze Beschriftung aus |
 | `label_rotation` | Dreht die Beschriftung (in Grad) |
+| `label_size` | Größe der Beschriftung: `xs`, `s`, `l`, `xl` oder `xxl` (Standard `m`) |
 
 Im Modus **Ausstattung** kannst du eine Beschriftung an eine neue Stelle ziehen; die Position wird in `labels` gespeichert. Räume nehmen auch [Regeln](rules.md): `tint` färbt den Boden ein, `hide` blendet die Beschriftung aus.
 

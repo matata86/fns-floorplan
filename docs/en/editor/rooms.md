@@ -82,6 +82,7 @@ Every room shows a **label** (a badge) with its name and the values. Options:
 | `label_name: false` | Hides the name, keeps the values |
 | `label_hidden: true` | Hides the whole label |
 | `label_rotation` | Rotates the label (degrees) |
+| `label_size` | Size of the label: `xs`, `s`, `l`, `xl` or `xxl` (default `m`) |
 
 In the **Items** mode you can drag a label to a new place; the position is stored in `labels`. Rooms also take [rules](rules.md): `tint` colours the floor, `hide` hides the label.
 

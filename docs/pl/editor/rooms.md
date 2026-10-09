@@ -82,6 +82,7 @@ Każde pomieszczenie pokazuje **etykietę** (znacznik) z nazwą i wartościami. 
 | `label_name: false` | Ukrywa nazwę, zostawia wartości |
 | `label_hidden: true` | Ukrywa całą etykietę |
 | `label_rotation` | Obraca etykietę (stopnie) |
+| `label_size` | Rozmiar etykiety: `xs`, `s`, `l`, `xl` lub `xxl` (domyślnie `m`) |
 
 W trybie **Elementy** możesz przeciągnąć etykietę w nowe miejsce; pozycja jest zapisywana w `labels`. Pomieszczenia przyjmują także [reguły](rules.md): `tint` koloruje podłogę, `hide` ukrywa etykietę.
 

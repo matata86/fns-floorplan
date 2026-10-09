@@ -65,6 +65,7 @@ Räume, Möbel, Geräte, Sensoren und Texte nehmen `level` mit der Etagen-ID; oh
 | `label_name` | boolean | `true` | `false` blendet den Namen aus |
 | `label_hidden` | boolean | `false` | `true` blendet die Beschriftung aus |
 | `label_rotation` | number | 0 | Drehung der Beschriftung in Grad |
+| `label_size` | string | `m` | Größe der Beschriftung: `xs`, `s`, `m`, `l`, `xl`, `xxl` |
 | `rules` | list | `[]` | [Regeln](#rules) |
 
 ## Öffnungen (Türen und Fenster) { #openings }

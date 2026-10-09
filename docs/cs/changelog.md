@@ -2,7 +2,9 @@
 
 Každé vydání je s poznámkami uvedeno na [GitHub releases](https://github.com/matata86/fns-floorplan/releases). Tato stránka shrnuje řadu 0.6.x podle témat.
 
-## 1.0.11 – 1.0.21
+## 1.0.11 – 1.0.22
+
+- Místnosti: jde nastavit velikost jmenovky (`label_size`, od XS po XXL).
 
 - Editor: po čerstvé instalaci (prázdný plán) jde zase přidat místnost; dřív se nic nestalo. Panel místnosti: binární senzory ukazují jen čas poslední změny a každá sekce je seřazená podle typu.
 

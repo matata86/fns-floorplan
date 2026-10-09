@@ -65,6 +65,7 @@ Místnosti, nábytek, zařízení, senzory a texty berou `level` s id patra; bez
 | `label_name` | boolean | `true` | `false` skryje název |
 | `label_hidden` | boolean | `false` | `true` skryje jmenovku |
 | `label_rotation` | number | 0 | Otočení jmenovky ve stupních |
+| `label_size` | string | `m` | Velikost jmenovky: `xs`, `s`, `m`, `l`, `xl`, `xxl` |
 | `rules` | list | `[]` | [Pravidla](#rules) |
 
 ## Otvory (dveře a okna) { #openings }

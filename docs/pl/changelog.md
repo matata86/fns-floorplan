@@ -2,7 +2,9 @@
 
 Każde wydanie wraz z uwagami znajdziesz w [wydaniach na GitHubie](https://github.com/matata86/fns-floorplan/releases). Ta strona podsumowuje linię 0.6.x tematycznie.
 
-## 1.0.11 – 1.0.21
+## 1.0.11 – 1.0.22
+
+- Pomieszczenia: można ustawić rozmiar etykiety (`label_size`, od XS do XXL).
 
 - Edytor: po świeżej instalacji (pusty plan) znów można dodać pomieszczenie; wcześniej nic się nie działo. Panel pomieszczenia: czujniki binarne pokazują tylko czas ostatniej zmiany, a każda sekcja jest posortowana według typu.
 

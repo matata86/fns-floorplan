@@ -82,6 +82,7 @@ Každá místnost ukazuje **jmenovku** (odznak) s názvem a hodnotami. Volby:
 | `label_name: false` | Skryje název, hodnoty nechá |
 | `label_hidden: true` | Skryje celou jmenovku |
 | `label_rotation` | Otočí jmenovku (ve stupních) |
+| `label_size` | Velikost jmenovky: `xs`, `s`, `l`, `xl` nebo `xxl` (výchozí `m`) |
 
 V režimu **Vybavení** můžeš jmenovku přetáhnout na nové místo; poloha se ukládá do `labels`. Místnosti berou i [pravidla](rules.md): `tint` podbarví podlahu, `hide` skryje jmenovku.
 

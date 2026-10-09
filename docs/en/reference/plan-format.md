@@ -65,6 +65,7 @@ Rooms, furniture, devices, sensors and texts take `level` with the floor id; wit
 | `label_name` | boolean | `true` | `false` hides the name |
 | `label_hidden` | boolean | `false` | `true` hides the label |
 | `label_rotation` | number | 0 | Label rotation in degrees |
+| `label_size` | string | `m` | Label size: `xs`, `s`, `m`, `l`, `xl`, `xxl` |
 | `rules` | list | `[]` | [Rules](#rules) |
 
 ## Openings

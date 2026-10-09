@@ -2,7 +2,9 @@
 
 Every release is listed with notes in the [GitHub releases](https://github.com/matata86/fns-floorplan/releases). This page summarises the 0.6.x line by theme.
 
-## 1.0.11 – 1.0.21
+## 1.0.11 – 1.0.22
+
+- Rooms: the size of the label can be set (`label_size`, from XS to XXL).
 
 - Editor: on a fresh install (empty plan) rooms can be added again; before, nothing happened. Room panel: binary sensors show only when they last changed, and each section is sorted by kind.
 
