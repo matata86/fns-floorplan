@@ -2,7 +2,9 @@
 
 Každé vydání je s poznámkami uvedeno na [GitHub releases](https://github.com/matata86/fns-floorplan/releases). Tato stránka shrnuje řadu 0.6.x podle témat.
 
-## 1.0.11 – 1.0.24
+## 1.0.11 – 1.0.25
+
+- Karta: radar zastřeženého alarmu se na Androidu už neslévá do plného kotouče (výseč se posouvá přes odsazení tahu, ne rotací skupiny). Animace stojí, když je karta mimo obrazovku nebo je otevřený panel místnosti, obyčejný prstenec prvku se animuje jen tehdy, když je opravdu zobrazený, a záře LED pásků rozmazává jen svou oblast. Plynulejší na telefonech.
 
 - Prvky: „Text, když běží“ se řídí skutečným stavem entity; efekt z pravidla (třeba odpočet u vypnutého zařízení) ho už nezobrazí.
 

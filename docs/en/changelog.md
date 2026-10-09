@@ -2,7 +2,9 @@
 
 Every release is listed with notes in the [GitHub releases](https://github.com/matata86/fns-floorplan/releases). This page summarises the 0.6.x line by theme.
 
-## 1.0.11 – 1.0.24
+## 1.0.11 – 1.0.25
+
+- Card: the radar of an armed alarm no longer smears into a solid disc on Android (the sweep moves by stroke offset instead of a rotating group). Animations pause while the card is off screen or the room panel is open, the plain ring of an item animates only when it is the shown effect, and light-strip glows blur only their own area. Smoother on phones.
 
 - Items: "Text when running" now follows the real state of the entity; a rule's effect (e.g. a countdown on a switched-off device) no longer makes it show.
 

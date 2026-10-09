@@ -2,7 +2,9 @@
 
 Jede Version ist mit Hinweisen in den [GitHub-Releases](https://github.com/matata86/fns-floorplan/releases) aufgeführt. Diese Seite fasst die Reihe 0.6.x nach Themen zusammen.
 
-## 1.0.11 – 1.0.24
+## 1.0.11 – 1.0.25
+
+- Karte: Das Radar einer scharfen Alarmanlage verschmiert auf Android nicht mehr zu einer vollen Scheibe (der Sektor bewegt sich über den Strich-Versatz statt über eine rotierende Gruppe). Animationen pausieren, solange die Karte außerhalb des Bildschirms ist oder das Raum-Panel offen ist, der einfache Ring eines Elements animiert nur, wenn er der angezeigte Effekt ist, und das Leuchten von LED-Streifen wird nur im eigenen Bereich weichgezeichnet. Flüssiger auf Smartphones.
 
 - Elemente: „Text bei Aktivität“ folgt dem tatsächlichen Zustand der Entität; der Effekt einer Regel (z. B. ein Countdown bei einem ausgeschalteten Gerät) blendet ihn nicht mehr ein.
 
