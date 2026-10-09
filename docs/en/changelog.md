@@ -2,7 +2,9 @@
 
 Every release is listed with notes in the [GitHub releases](https://github.com/matata86/fns-floorplan/releases). This page summarises the 0.6.x line by theme.
 
-## 1.0.11 – 1.0.33
+## 1.0.11 – 1.0.34
+
+- Card: in daylight a light in colour-temperature mode is drawn no whiter than 5000 K, so it shows on a white floor.
 
 - Room panel: with the Mushroom cards installed a light is a Mushroom light card (brightness bar with colour temperature and colour buttons next to it); without Mushroom a tile with the brightness bar.
 

@@ -2,7 +2,9 @@
 
 Jede Version ist mit Hinweisen in den [GitHub-Releases](https://github.com/matata86/fns-floorplan/releases) aufgeführt. Diese Seite fasst die Reihe 0.6.x nach Themen zusammen.
 
-## 1.0.11 – 1.0.33
+## 1.0.11 – 1.0.34
+
+- Karte: bei Tag wird ein Licht im Farbtemperatur-Modus höchstens als 5000 K gezeichnet, damit es auf weißem Boden sichtbar bleibt.
 
 - Raum-Panel: mit installierten Mushroom-Karten ist ein Licht eine Mushroom Light Card (Helligkeitsbalken mit Schaltflächen für Farbtemperatur und Farbe daneben); ohne Mushroom eine Kachel mit Helligkeitsbalken.
 

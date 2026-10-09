@@ -2,7 +2,9 @@
 
 Každé vydání je s poznámkami uvedeno na [GitHub releases](https://github.com/matata86/fns-floorplan/releases). Tato stránka shrnuje řadu 0.6.x podle témat.
 
-## 1.0.11 – 1.0.33
+## 1.0.11 – 1.0.34
+
+- Karta: ve dne se světlo v režimu teploty barvy kreslí nejvýš jako 5000 K, aby bylo vidět na bílé podlaze.
 
 - Panel místnosti: s nainstalovaným Mushroomem je světlo Mushroom light card (lišta jasu a vedle ní tlačítka teploty barvy a barvy); bez Mushroomu tile s lištou jasu.
 
