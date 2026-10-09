@@ -2,7 +2,13 @@
 
 Každé vydání je s poznámkami uvedeno na [GitHub releases](https://github.com/matata86/fns-floorplan/releases). Tato stránka shrnuje řadu 0.6.x podle témat.
 
-## 1.0.11 – 1.0.34
+## 1.0.11 – 1.0.35
+
+- Karta: text zařízení umí každou sekundu odpočítávat časovač: `{left:timer.x}` ukáže zbývající čas jako m:ss (i senzor zbývajícího času nebo času dokončení; samotné `{left}` čas odpočtového kruhu).
+
+- Karta: výrazně svižnější, hlavně na telefonu. Změna stavu překreslí jen části plánu, které danou entitu ukazují (dřív jakákoli změna v domě překreslila všechna světla, záře, odznaky i jmenovky). Odznaky, jmenovky a vše, co se hýbe, mají vlastní vrstvu nad statickým plánem, takže animace nepřekresluje záře světel pod sebou. Radar zastřeženého alarmu a odpočtové kruhy se posouvají několikrát za sekundu místo překreslování karty 60× za sekundu, dýchající kruh, hrající televize a vlnky pohybu běží na grafické kartě a stopa robota se kreslí po krátkých úsecích. Rozsvícené světlo má klidný kruh místo pulzování (na Androidu pak mohl jeho odznak zůstat nevykreslený).
+
+- Panel místnosti: otevírá se rychleji. Kód karet Home Assistantu se načte dopředu, když dashboard nic nedělá, všechny karty místnosti vzniknou najednou a už jednou otevřená místnost se vrátí okamžitě. Kontakt dveří nebo okna bez třídy zařízení teď mění ikonu i při otevřeném panelu. Otevření místnosti už nezapíše do konzole chybu „Cannot build card without config“ za každou kartu.
 
 - Karta: ve dne se světlo v režimu teploty barvy kreslí nejvýš jako 5000 K, aby bylo vidět na bílé podlaze.
 

@@ -2,7 +2,13 @@
 
 Jede Version ist mit Hinweisen in den [GitHub-Releases](https://github.com/matata86/fns-floorplan/releases) aufgeführt. Diese Seite fasst die Reihe 0.6.x nach Themen zusammen.
 
-## 1.0.11 – 1.0.34
+## 1.0.11 – 1.0.35
+
+- Karte: ein Gerätetext kann einen Timer jede Sekunde herunterzählen: `{left:timer.x}` zeigt seine Restzeit als m:ss (auch ein Restzeit- oder Endzeit-Sensor; `{left}` allein die des Countdown-Rings).
+
+- Karte: deutlich flüssiger, vor allem auf dem Handy. Eine Zustandsänderung zeichnet nur die Teile des Plans neu, die diese Entität zeigen (vorher zeichnete jede Änderung im Haus alle Lichter, Lichtscheine, Badges und Beschriftungen neu). Badges, Beschriftungen und alles, was sich bewegt, liegen in einer eigenen Ebene über dem ruhenden Plan, sodass eine Animation die Lichtscheine darunter nie neu zeichnet. Der Radar einer scharfen Alarmanlage und die Countdown-Ringe bewegen sich einige Male pro Sekunde, statt die Karte 60-mal pro Sekunde neu zu zeichnen; der atmende Ring, ein laufender Fernseher und die Bewegungswellen laufen auf der Grafikkarte, und die Spur des Roboters wird in kurzen Stücken gezeichnet. Ein eingeschaltetes Licht hat einen ruhigen Ring statt zu pulsieren (auf Android blieb sein Badge sonst manchmal ungezeichnet).
+
+- Raumpanel: öffnet schneller. Der Kartencode von Home Assistant wird im Voraus geladen, während das Dashboard ruht, alle Karten eines Raums entstehen auf einmal, und ein schon geöffneter Raum ist sofort wieder da. Ein Tür- oder Fensterkontakt ohne Geräteklasse wechselt sein Symbol jetzt auch bei offenem Panel. Beim Öffnen eines Raums erscheint nicht mehr für jede Karte der Fehler „Cannot build card without config“ in der Konsole.
 
 - Karte: bei Tag wird ein Licht im Farbtemperatur-Modus höchstens als 5000 K gezeichnet, damit es auf weißem Boden sichtbar bleibt.
 

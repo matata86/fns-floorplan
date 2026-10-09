@@ -2,7 +2,13 @@
 
 Every release is listed with notes in the [GitHub releases](https://github.com/matata86/fns-floorplan/releases). This page summarises the 0.6.x line by theme.
 
-## 1.0.11 – 1.0.34
+## 1.0.11 – 1.0.35
+
+- Card: a device text can count a timer down every second: `{left:timer.x}` shows its time left as m:ss (also a remaining-time or end-time sensor; `{left}` alone that of the countdown ring).
+
+- Card: much lighter, above all on phones. A state change redraws only the parts of the plan that show that entity (before, any change in the house redrew every light, glow, badge and label). Badges, labels and everything that moves sit in a layer of their own over the still plan, so an animation never repaints the light glows under it. The radar of an armed alarm and the countdown rings move a few times a second instead of repainting the card 60 times a second, the breathing ring, a playing TV and motion ripples run on the graphics card, and the robot's trail is drawn in short pieces. A lit lamp keeps a steady ring instead of pulsing (on Android its badge could stay unpainted).
+
+- Room panel: opens faster. Home Assistant's card code is loaded ahead while the dashboard is idle, all cards of a room are made at once, and a room opened before comes back instantly. A door or window contact without a device class now changes its icon while the panel is open. Opening a room no longer logs a "Cannot build card without config" error for every card.
 
 - Card: in daylight a light in colour-temperature mode is drawn no whiter than 5000 K, so it shows on a white floor.
 

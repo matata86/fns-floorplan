@@ -2,7 +2,13 @@
 
 Każde wydanie wraz z uwagami znajdziesz w [wydaniach na GitHubie](https://github.com/matata86/fns-floorplan/releases). Ta strona podsumowuje linię 0.6.x tematycznie.
 
-## 1.0.11 – 1.0.34
+## 1.0.11 – 1.0.35
+
+- Karta: tekst urządzenia może co sekundę odliczać timer: `{left:timer.x}` pokazuje pozostały czas jako m:ss (także sensor pozostałego czasu lub czasu zakończenia; samo `{left}` czas pierścienia odliczania).
+
+- Karta: znacznie płynniejsza, zwłaszcza na telefonie. Zmiana stanu przerysowuje tylko te części planu, które pokazują daną encję (wcześniej każda zmiana w domu przerysowywała wszystkie światła, poświaty, plakietki i etykiety). Plakietki, etykiety i wszystko, co się porusza, mają własną warstwę nad nieruchomym planem, więc animacja nigdy nie przerysowuje poświat świateł pod sobą. Radar uzbrojonego alarmu i pierścienie odliczania przesuwają się kilka razy na sekundę zamiast przerysowywać kartę 60 razy na sekundę, oddychający pierścień, grający telewizor i fale ruchu działają na karcie graficznej, a ślad robota jest rysowany krótkimi odcinkami. Włączone światło ma spokojny pierścień zamiast pulsowania (na Androidzie jego plakietka mogła pozostać nienarysowana).
+
+- Panel pokoju: otwiera się szybciej. Kod kart Home Assistanta ładuje się z wyprzedzeniem, gdy dashboard nic nie robi, wszystkie karty pokoju powstają naraz, a raz otwarty pokój wraca natychmiast. Kontakt drzwi lub okna bez klasy urządzenia zmienia teraz ikonę także przy otwartym panelu. Otwarcie pokoju nie zapisuje już w konsoli błędu „Cannot build card without config” dla każdej karty.
 
 - Karta: w dzień światło w trybie temperatury barwowej jest rysowane najwyżej jako 5000 K, by było widać je na białej podłodze.
 
