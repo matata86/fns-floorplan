@@ -19,7 +19,7 @@ The panel is built from Home Assistant's own cards, each placed like on a dashbo
 | Section | What goes there |
 |---------|-----------------|
 | **Thermostat** | `climate` entities as a tile with the target temperature control |
-| **Lights** | Lights placed in the room. A tile with the brightness bar next to the name; a light with colour temperature or colour has its brightness, temperature and favourite colours below the name; a tap on the icon switches the light |
+| **Lights** | Lights placed in the room. A tile with the brightness bar next to the name; with the Mushroom cards installed a light is a Mushroom light card: the brightness bar in the light's colour with buttons for colour temperature and colour next to it; a tap on the icon switches the light |
 | **Cameras** | Cameras of the room as a picture across the panel (a snapshot refreshed every few seconds); a tap opens the live picture in their details |
 | **Windows & doors** | Openings of the room with a contact, and their blinds (and covers among the extra entities) with open / stop / close next to the name and a position slider below; the contact shows only when it last changed, the icon shows whether it is open |
 | **Switches** | `switch` and `input_boolean` |
