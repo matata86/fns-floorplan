@@ -2,7 +2,9 @@
 
 Every release is listed with notes in the [GitHub releases](https://github.com/matata86/fns-floorplan/releases). This page summarises the 0.6.x line by theme.
 
-## 1.0.11 – 1.0.22
+## 1.0.11 – 1.0.23
+
+- Items: "Text when running" now follows the real state of the entity; a rule's effect (e.g. a countdown on a switched-off device) no longer makes it show.
 
 - Rooms: the size of the label can be set (`label_size`, from XS to XXL).
 

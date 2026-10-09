@@ -2,7 +2,9 @@
 
 Každé vydání je s poznámkami uvedeno na [GitHub releases](https://github.com/matata86/fns-floorplan/releases). Tato stránka shrnuje řadu 0.6.x podle témat.
 
-## 1.0.11 – 1.0.22
+## 1.0.11 – 1.0.23
+
+- Prvky: „Text, když běží“ se řídí skutečným stavem entity; efekt z pravidla (třeba odpočet u vypnutého zařízení) ho už nezobrazí.
 
 - Místnosti: jde nastavit velikost jmenovky (`label_size`, od XS po XXL).
 

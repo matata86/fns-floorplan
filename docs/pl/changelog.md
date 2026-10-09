@@ -2,7 +2,9 @@
 
 Każde wydanie wraz z uwagami znajdziesz w [wydaniach na GitHubie](https://github.com/matata86/fns-floorplan/releases). Ta strona podsumowuje linię 0.6.x tematycznie.
 
-## 1.0.11 – 1.0.22
+## 1.0.11 – 1.0.23
+
+- Elementy: „Tekst podczas działania” zależy od rzeczywistego stanu encji; efekt reguły (np. odliczanie przy wyłączonym urządzeniu) już go nie pokazuje.
 
 - Pomieszczenia: można ustawić rozmiar etykiety (`label_size`, od XS do XXL).
 
