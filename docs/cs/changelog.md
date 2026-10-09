@@ -2,7 +2,9 @@
 
 Každé vydání je s poznámkami uvedeno na [GitHub releases](https://github.com/matata86/fns-floorplan/releases). Tato stránka shrnuje řadu 0.6.x podle témat.
 
-## 1.0.11 – 1.0.31
+## 1.0.11 – 1.0.32
+
+- Panel místnosti: dlaždice světel jsou zase přes celou šířku, jas vedle názvu, teplota barvy a barvy pod ním.
 
 - Panel místnosti: světlo s teplotou barvy nebo barvou má pod názvem opět jas, teplotu a oblíbené barvy.
 
