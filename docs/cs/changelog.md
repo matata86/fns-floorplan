@@ -2,7 +2,9 @@
 
 Každé vydání je s poznámkami uvedeno na [GitHub releases](https://github.com/matata86/fns-floorplan/releases). Tato stránka shrnuje řadu 0.6.x podle témat.
 
-## 1.0.11 – 1.0.25
+## 1.0.11 – 1.0.29
+
+- Panel místnosti: světlo s teplotou barvy nebo barvou má pod názvem opět jas, teplotu a oblíbené barvy.
 
 - Karta: radar zastřeženého alarmu se na Androidu už neslévá do plného kotouče (výseč se posouvá přes odsazení tahu, ne rotací skupiny). Animace stojí, když je karta mimo obrazovku nebo je otevřený panel místnosti, obyčejný prstenec prvku se animuje jen tehdy, když je opravdu zobrazený, a záře LED pásků rozmazává jen svou oblast. Plynulejší na telefonech.
 

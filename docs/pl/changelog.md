@@ -2,7 +2,9 @@
 
 Każde wydanie wraz z uwagami znajdziesz w [wydaniach na GitHubie](https://github.com/matata86/fns-floorplan/releases). Ta strona podsumowuje linię 0.6.x tematycznie.
 
-## 1.0.11 – 1.0.23
+## 1.0.11 – 1.0.29
+
+- Panel pomieszczenia: światło z temperaturą barwową lub kolorem znów ma pod nazwą jasność, temperaturę i ulubione kolory.
 
 - Elementy: „Tekst podczas działania” zależy od rzeczywistego stanu encji; efekt reguły (np. odliczanie przy wyłączonym urządzeniu) już go nie pokazuje.
 
