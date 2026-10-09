@@ -2,7 +2,9 @@
 
 Every release is listed with notes in the [GitHub releases](https://github.com/matata86/fns-floorplan/releases). This page summarises the 0.6.x line by theme.
 
-## 1.0.11 – 1.0.32
+## 1.0.11 – 1.0.33
+
+- Room panel: with the Mushroom cards installed a light is a Mushroom light card (brightness bar with colour temperature and colour buttons next to it); without Mushroom a tile with the brightness bar.
 
 - Room panel: light tiles span the panel again, with brightness next to the name and colour temperature and colours below it.
 

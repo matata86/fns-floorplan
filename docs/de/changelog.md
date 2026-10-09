@@ -2,7 +2,9 @@
 
 Jede Version ist mit Hinweisen in den [GitHub-Releases](https://github.com/matata86/fns-floorplan/releases) aufgeführt. Diese Seite fasst die Reihe 0.6.x nach Themen zusammen.
 
-## 1.0.11 – 1.0.32
+## 1.0.11 – 1.0.33
+
+- Raum-Panel: mit installierten Mushroom-Karten ist ein Licht eine Mushroom Light Card (Helligkeitsbalken mit Schaltflächen für Farbtemperatur und Farbe daneben); ohne Mushroom eine Kachel mit Helligkeitsbalken.
 
 - Raum-Panel: Lichtkacheln wieder über die ganze Breite, Helligkeit neben dem Namen, Farbtemperatur und Farben darunter.
 

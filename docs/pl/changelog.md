@@ -2,7 +2,9 @@
 
 Każde wydanie wraz z uwagami znajdziesz w [wydaniach na GitHubie](https://github.com/matata86/fns-floorplan/releases). Ta strona podsumowuje linię 0.6.x tematycznie.
 
-## 1.0.11 – 1.0.32
+## 1.0.11 – 1.0.33
+
+- Panel pomieszczenia: z zainstalowanymi kartami Mushroom światło to Mushroom light card (pasek jasności z przyciskami temperatury barwowej i koloru obok); bez Mushroom kafelek z paskiem jasności.
 
 - Panel pomieszczenia: kafelki świateł znów na całą szerokość, jasność obok nazwy, temperatura barwowa i kolory pod nią.
 

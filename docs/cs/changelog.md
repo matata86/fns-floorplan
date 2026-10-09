@@ -2,7 +2,9 @@
 
 Každé vydání je s poznámkami uvedeno na [GitHub releases](https://github.com/matata86/fns-floorplan/releases). Tato stránka shrnuje řadu 0.6.x podle témat.
 
-## 1.0.11 – 1.0.32
+## 1.0.11 – 1.0.33
+
+- Panel místnosti: s nainstalovaným Mushroomem je světlo Mushroom light card (lišta jasu a vedle ní tlačítka teploty barvy a barvy); bez Mushroomu tile s lištou jasu.
 
 - Panel místnosti: dlaždice světel jsou zase přes celou šířku, jas vedle názvu, teplota barvy a barvy pod ním.
 
