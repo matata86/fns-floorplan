@@ -2,9 +2,11 @@
 
 Jede Version ist mit Hinweisen in den [GitHub-Releases](https://github.com/matata86/fns-floorplan/releases) aufgeführt. Diese Seite fasst die Reihe 0.6.x nach Themen zusammen.
 
-## 1.0.11 – 1.0.23
+## 1.0.11 – 1.0.24
 
 - Elemente: „Text bei Aktivität“ folgt dem tatsächlichen Zustand der Entität; der Effekt einer Regel (z. B. ein Countdown bei einem ausgeschalteten Gerät) blendet ihn nicht mehr ein.
+
+- Elemente: Größe des Kreises (`size`) und der Beschriftung (`label_size`) sind getrennt einstellbar.
 
 - Räume: die Größe der Beschriftung ist einstellbar (`label_size`, von XS bis XXL).
 

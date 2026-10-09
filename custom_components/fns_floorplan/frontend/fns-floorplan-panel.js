@@ -1687,7 +1687,8 @@ class FnsFloorplanPanel extends HTMLElement {
         <label class="chk"><input type="checkbox" data-k="label_vertical" ${o.label_vertical ? "checked" : ""}> ${t("panel.f.label_vertical")}</label>
         <label>${t("panel.f.color")}</label>${this._colorPick("color", o.color)}
         ${this._iconField(o, DEVICE_ICON[o.kind])}
-        ${this._sizeField(o)}`)}
+        ${this._sizeField(o, "size", "panel.f.icon_size")}
+        ${this._sizeField(o, "label_size", "panel.f.label_size")}`)}
         ${this._sec(t("panel.f.sec_pos"), `${xz}
         ${this._layerField(o)}`)}
         ${this._actionsUI(o, { tap: domTap ? (domTap.includes("press") ? t("panel.f.act_press") : t("panel.f.act_run")) : ACTIONS["more-info"] })}
@@ -1981,8 +1982,8 @@ class FnsFloorplanPanel extends HTMLElement {
     this._move(sel, x, z);
   }
 
-  _sizeField(o) {
-    return `<label>${t("panel.f.size")}</label><select data-k="size">${Object.entries(SIZE_NAMES).map(([k, v]) => `<option value="${k}" ${(o.size || "") === k ? "selected" : ""}>${v}</option>`).join("")}</select>`;
+  _sizeField(o, key = "size", label = "panel.f.size") {
+    return `<label>${t(label)}</label><select data-k="${key}">${Object.entries(SIZE_NAMES).map(([k, v]) => `<option value="${k}" ${(o[key] || "") === k ? "selected" : ""}>${v}</option>`).join("")}</select>`;
   }
 
   _layerField() {
