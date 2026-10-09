@@ -50,7 +50,7 @@ Přidej **Stropní světlo**, **Závěsné světlo**, **Panel**, **Lampičku**, 
 | `fireplace` | Plamen, který při hoření mihotá |
 | `generic` | „Jiné zařízení“: vlastní ikona entity, chování podle domény (viz níže) |
 
-Nastavení: `name`, `entity`, `active` (seznam stavů nebo `{"above": n}`, které se počítají jako „běží“), `text` (vždy zobrazený pod ikonou), `text_on` (zobrazený, když běží; oba mohou být šablony jako `{{ states('sensor.washer_time') }}`), `label_position` (`top`, `left`, `right`, výchozí je pod ikonou) a `label_vertical` (popisek otočený o 90 stupňů), `color` / `color_on` (barva v klidu / za běhu; bez nich se použije barva stavu z motivu tvého Home Assistantu), `fx` (animace kruhu: `ring`, `radar`, `comet`, `countdown`, `spin`, `orbit`, `breath`, `blink`, `heartbeat`, `shake`, `none`).
+Nastavení: `name`, `entity`, `active` (seznam stavů nebo `{"above": n}`, které se počítají jako „běží“), `text` (vždy zobrazený pod ikonou), `text_on` (zobrazený, když běží; oba mohou být šablony jako `{{ states('sensor.washer_time') }}` a `{left:timer.x}` v nich ukáže po sekundách zbývající čas toho timeru, senzoru zbývajícího času nebo času konce, třeba `12:05`; samotné `{left}` čas kruhu `countdown`), `label_position` (`top`, `left`, `right`, výchozí je pod ikonou) a `label_vertical` (popisek otočený o 90 stupňů), `color` / `color_on` (barva v klidu / za běhu; bez nich se použije barva stavu z motivu tvého Home Assistantu), `fx` (animace kruhu: `ring`, `radar`, `comet`, `countdown`, `spin`, `orbit`, `breath`, `blink`, `heartbeat`, `shake`, `none`).
 
 Textové štítky pod ikonou mají pozadí ve stylu jmenovky místnosti (ve dne světlé, v noci tmavé).
 

@@ -50,7 +50,7 @@ Add **Ceiling light**, **Pendant light**, **Panel**, **Table lamp**, **Wall ligh
 | `fireplace` | A flame that flickers while burning |
 | `generic` | "Other device": the entity's own icon, behaviour by domain (below) |
 
-Settings: `name`, `entity`, `active` (a list of states or `{"above": n}` that count as "running"), `text` (always shown under the icon), `text_on` (shown while running; both may be templates such as `{{ states('sensor.washer_time') }}`), `label_position` (`top`, `left`, `right`, default under the icon) and `label_vertical` (the label turned by 90 degrees), `color` / `color_on` (idle / running colour; without them the state colour of your Home Assistant theme is used), `fx` (the ring animation: `ring`, `radar`, `comet`, `countdown`, `spin`, `orbit`, `breath`, `blink`, `heartbeat`, `shake`, `none`).
+Settings: `name`, `entity`, `active` (a list of states or `{"above": n}` that count as "running"), `text` (always shown under the icon), `text_on` (shown while running; both may be templates such as `{{ states('sensor.washer_time') }}`, and `{left:timer.x}` in them shows the time left of that timer, remaining-time or end-time sensor, e.g. `12:05`, updated every second; `{left}` alone that of the `countdown` ring), `label_position` (`top`, `left`, `right`, default under the icon) and `label_vertical` (the label turned by 90 degrees), `color` / `color_on` (idle / running colour; without them the state colour of your Home Assistant theme is used), `fx` (the ring animation: `ring`, `radar`, `comet`, `countdown`, `spin`, `orbit`, `breath`, `blink`, `heartbeat`, `shake`, `none`).
 
 Text labels under the icon have a background in the style of the room badge (light by day, dark at night).
 

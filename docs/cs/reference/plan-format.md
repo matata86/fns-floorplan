@@ -134,7 +134,7 @@ Nábytek, světla a dok robota sdílejí tento seznam.
 | `level` | string | první patro | Id patra |
 | `active` | list / `{"above": n}` | podle druhu / domény | Stavy, které se počítají jako „běží“ |
 | `text` | string | | Text pod ikonou, vždy; může být šablona |
-| `text_on` | string | | Text, když běží; může být šablona |
+| `text_on` | string | | Text, když běží; může být šablona, `{left:timer.x}` = zbývající čas té entity, `{left}` = odpočtu |
 | `label_position` | string | `bottom` | Pozice popisku: `bottom` (výchozí), `top`, `left`, `right` |
 | `label_vertical` | bool | `false` | Otočí popisek o 90 stupňů (čte se zdola nahoru) |
 | `color`, `color_on` | colour | barva stavu | Barva v klidu / za běhu |

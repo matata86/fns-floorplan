@@ -1682,6 +1682,7 @@ class FnsFloorplanPanel extends HTMLElement {
         ${this._sec(t("panel.f.sec_running"), `<label>${t("panel.f.active_state")}</label><input data-k="active" value="${esc(Array.isArray(o.active) ? o.active.join(", ") : o.active ? JSON.stringify(o.active) : "")}" placeholder="${o.kind === "media" ? "playing" : "on, run"}">
         <p class="hint">${t("panel.f.active_hint")}</p>
         ${field(t("panel.f.text_on"), "text_on", o.text_on || "")}
+        <p class="hint">${t("panel.f.text_on_hint")}</p>
         <label>${t("panel.f.color_on")}</label>${this._colorPick("color_on", o.color_on)}
         <p class="hint">${t("panel.f.color_on_hint")}</p>
         ${this._fxPicker("fx", o.fx, o.kind === "alarm" ? t("panel.f.fx_alarm_def") : domFx ? t("panel.f.fx_def_x", { fx: DEVICE_FX[domFx].split(" ")[0] }) : t("panel.f.fx_def_ring"), o.kind === "alarm" ? "radar" : domFx || "ring", DEVICE_ICON[o.kind] || "mdiShapeOutline", "progress", o.progress, undefined, undefined, o.progress_total)}`, true)}

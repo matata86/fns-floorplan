@@ -134,7 +134,7 @@ Möbel, Lichter und die Station des Roboters teilen sich diese Liste.
 | `level` | string | erste Etage | Etagen-ID |
 | `active` | list / `{"above": n}` | nach Art / Domain | Zustände, die als „läuft“ zählen |
 | `text` | string | | Text unter dem Symbol, immer; kann eine Vorlage sein |
-| `text_on` | string | | Text, solange es läuft; kann eine Vorlage sein |
+| `text_on` | string | | Text, solange es läuft; kann eine Vorlage sein, `{left:timer.x}` = Restzeit dieser Entität, `{left}` = des Countdowns |
 | `label_position` | string | `bottom` | Position der Beschriftung: `bottom` (Standard), `top`, `left`, `right` |
 | `label_vertical` | bool | `false` | Dreht die Beschriftung um 90 Grad (von unten nach oben lesbar) |
 | `color`, `color_on` | colour | Zustandsfarbe | Farbe im Ruhezustand / beim Laufen |

@@ -50,7 +50,7 @@ Dodaj **Lampę sufitową**, **Lampę wiszącą**, **Panel**, **Lampkę stołową
 | `fireplace` | Płomień migoczący podczas palenia |
 | `generic` | „Inne urządzenie”: własna ikona encji, zachowanie według domeny (niżej) |
 
-Ustawienia: `name`, `entity`, `active` (lista stanów lub `{"above": n}`, które liczą się jako „pracuje”), `text` (zawsze wyświetlany pod ikoną), `text_on` (wyświetlany podczas pracy; oba mogą być szablonami, np. `{{ states('sensor.washer_time') }}`), `label_position` (`top`, `left`, `right`, domyślnie pod ikoną) i `label_vertical` (etykieta obrócona o 90 stopni), `color` / `color_on` (kolor w spoczynku / podczas pracy; bez nich używany jest kolor stanu motywu twojego Home Assistanta), `fx` (animacja pierścienia: `ring`, `radar`, `comet`, `countdown`, `spin`, `orbit`, `breath`, `blink`, `heartbeat`, `shake`, `none`).
+Ustawienia: `name`, `entity`, `active` (lista stanów lub `{"above": n}`, które liczą się jako „pracuje”), `text` (zawsze wyświetlany pod ikoną), `text_on` (wyświetlany podczas pracy; oba mogą być szablonami, np. `{{ states('sensor.washer_time') }}`, a `{left:timer.x}` w nich pokazuje co sekundę pozostały czas tego timera, czujnika pozostałego czasu lub czasu zakończenia, np. `12:05`; samo `{left}` czas pierścienia `countdown`), `label_position` (`top`, `left`, `right`, domyślnie pod ikoną) i `label_vertical` (etykieta obrócona o 90 stopni), `color` / `color_on` (kolor w spoczynku / podczas pracy; bez nich używany jest kolor stanu motywu twojego Home Assistanta), `fx` (animacja pierścienia: `ring`, `radar`, `comet`, `countdown`, `spin`, `orbit`, `breath`, `blink`, `heartbeat`, `shake`, `none`).
 
 Etykiety tekstowe pod ikoną mają tło w stylu znacznika pomieszczenia (jasne w dzień, ciemne w nocy).
 
