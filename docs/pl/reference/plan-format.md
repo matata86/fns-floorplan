@@ -119,7 +119,7 @@ Meble, światła i stacja dokująca robota dzielą tę listę.
 |-----|------|-------------|
 | `entity` | encja | Czujnik binarny; `motion`, `occupancy`, `presence` = fale, `moisture` = czerwony puls |
 | `x`, `z` | liczba | Pozycja |
-| `layer` | integer | Kolejność wśród czujników w edytorze |
+| `layer` | integer | Kolejność wśród czujników i mebli w edytorze |
 | `level` | string | Id piętra |
 
 ## Urządzenia { #devices }

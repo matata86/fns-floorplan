@@ -119,7 +119,7 @@ Furniture, lights and the robot dock share this list.
 |-----|------|-------------|
 | `entity` | entity | A binary sensor; `motion`, `occupancy`, `presence` = ripples, `moisture` = red pulse |
 | `x`, `z` | number | Position |
-| `layer` | integer | Order among sensors in the editor |
+| `layer` | integer | Order among sensors and furniture in the editor |
 | `level` | string | Floor id |
 
 ## Devices

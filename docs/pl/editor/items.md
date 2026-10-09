@@ -16,7 +16,7 @@ Elementy to wszystko na planie, co nie jest ścianą: światła, urządzenia, cz
 | Pozycja | `x`, `z` | W metrach; albo przeciągnij |
 | Rozmiar | `size` | `xs`, `s`, `m` (domyślnie), `l`, `xl`, `xxl` (od 0,6 do 2 razy); dla świateł, urządzeń, stacji i tekstów |
 | Ikona | `icon` | Dowolna ikona `mdi:`; przyciski **Bez ikony** (`icon: none`) i **Resetuj** |
-| Warstwa | `layer` | Kolejność wśród elementów tego samego rodzaju: **Na wierzch**, **Do przodu**, **Do tyłu**, **Na spód** |
+| Warstwa | `layer` | Kolejność wśród elementów tego samego rodzaju: **Na wierzch**, **Na spód** |
 | Dotknięcie / podwójne dotknięcie / przytrzymanie | `tap_action` ... | [Akcje](#actions) |
 | Reguły | `rules` | Zobacz [Reguły](rules.md) |
 | Ukryj w panelu pomieszczenia | `sheet_hide` | Pomija element w [panelu pomieszczenia](../room-panel.md) |
@@ -92,7 +92,7 @@ Urządzenie bez własnego animowanego glifu (generic, camera, fridge, lock, alar
 - `motion`, `occupancy`, `presence`: płynne **fale**, gdy jest włączony,
 - `moisture`: pomieszczenie pulsuje na czerwono i pojawia się chip „Wyciek wody”.
 
-Na karcie czujnik jest rysowany tylko jako fale lub pulsowanie pomieszczenia; edytor pokazuje go z ikoną według klasy. Czujniki też mają `layer`, istotne tylko wśród czujników w edytorze.
+Na karcie czujnik jest rysowany tylko jako fale lub pulsowanie pomieszczenia; edytor pokazuje go z ikoną według klasy. Czujniki też mają `layer`. W edytorze dzielą jedną kolejność z meblami: **Na spód** chowa czujnik pod meble, żeby dało się wybrać mebel pod nim.
 
 ## Elementy tekstowe
 
@@ -148,7 +148,7 @@ texts:
 
 ## Warstwy
 
-Kolejność jest porównywana tylko wśród elementów tego samego rodzaju. Użyj **Na wierzch / Do przodu / Do tyłu / Na spód** w formularzu. Odkurzacz ma własne zasady, zobacz [Odkurzacz](../robot-vacuum.md#layer-and-stacking).
+Kolejność jest porównywana tylko wśród elementów tego samego rodzaju; meble i czujniki liczą się jako jeden rodzaj. Użyj **Na wierzch / Na spód** w formularzu. Odkurzacz ma własne zasady, zobacz [Odkurzacz](../robot-vacuum.md#layer-and-stacking).
 
 ## Grupy i zaznaczenie wielokrotne
 

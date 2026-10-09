@@ -16,7 +16,7 @@ Items are everything on the plan that is not a wall: lights, appliances, sensors
 | Position | `x`, `z` | In metres; or drag |
 | Size | `size` | `xs`, `s`, `m` (default), `l`, `xl`, `xxl` (0.6 to 2 times); for lights, appliances, the dock and texts |
 | Icon | `icon` | Any `mdi:` icon; buttons **No icon** (`icon: none`) and **Reset** |
-| Layer | `layer` | Stacking order among items of the same kind: **To front**, **Forward**, **Backward**, **To back** |
+| Layer | `layer` | Stacking order among items of the same kind: **To front**, **To back** |
 | Tap / double tap / hold | `tap_action` ... | [Actions](#actions) |
 | Rules | `rules` | See [Rules](rules.md) |
 | Hide in room panel | `sheet_hide` | Leaves the item out of the [room panel](../room-panel.md) |
@@ -92,7 +92,7 @@ An appliance without an animated glyph of its own (generic, camera, fridge, lock
 - `motion`, `occupancy`, `presence`: smooth **ripples** while it is on,
 - `moisture`: the room pulses red and a "Water leak" chip appears.
 
-On the card a sensor is drawn only as ripples or as the room pulse; the editor shows it with an icon by its class. Sensors have a `layer` too, only relevant among sensors in the editor.
+On the card a sensor is drawn only as ripples or as the room pulse; the editor shows it with an icon by its class. Sensors have a `layer` too. In the editor they share one order with furniture: **To back** puts a sensor under the furniture, so the furniture under it can be selected.
 
 ## Text items
 
@@ -148,7 +148,7 @@ texts:
 
 ## Layers
 
-The stacking order is only compared among items of the same kind. Use **To front / Forward / Backward / To back** in the form. The robot vacuum has its own rules, see [Robot vacuum](../robot-vacuum.md#layer-and-stacking).
+The stacking order is only compared among items of the same kind; furniture and sensors count as one kind. Use **To front / To back** in the form. The robot vacuum has its own rules, see [Robot vacuum](../robot-vacuum.md#layer-and-stacking).
 
 ## Groups and multi-selection
 

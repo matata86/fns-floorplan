@@ -119,7 +119,7 @@ Nábytek, světla a dok robota sdílejí tento seznam.
 |------|-----|-------|
 | `entity` | entity | Binární senzor; `motion`, `occupancy`, `presence` = vlnky, `moisture` = červený puls |
 | `x`, `z` | number | Pozice |
-| `layer` | integer | Pořadí mezi senzory v editoru |
+| `layer` | integer | Pořadí vůči senzorům a nábytku v editoru |
 | `level` | string | Id patra |
 
 ## Zařízení { #devices }

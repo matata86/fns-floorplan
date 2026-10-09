@@ -879,9 +879,19 @@ class FnsFloorplanPanel extends HTMLElement {
     };
     const icon = (g, item, size, fallback, cls = "ico") => (el("g", { class: cls }, g).innerHTML = iconHtml(item.icon, size, fallback));
     const layer = (o) => o.layer || 0;
-    // furniture first (by layer), lights over it, then appliances, sensors and labels on top
-    const order = plan.furniture.map((f, i) => [f, i]).sort((a, b) => isLight(a[0]) - isLight(b[0]) || layer(a[0]) - layer(b[0]));
-    for (const [f, i] of order) {
+    // furniture and sensors first (one order by layer, a sensor over furniture of the same layer), lights over them, then appliances and labels;
+    // the card draws a sensor only as ripples on the floor, so here it may go under a piece of furniture
+    const order = [...plan.furniture.map((f, i) => [f, i, "furniture"]), ...plan.sensors.map((s, i) => [s, i, "sensors"])]
+      .sort((a, b) => isLight(a[0]) - isLight(b[0]) || layer(a[0]) - layer(b[0]));
+    for (const [f, i, cat] of order) {
+      if (cat === "sensors") {
+        if (!this._on(f)) continue;
+        const g = group({ cat, i }, f.x, f.z);
+        el("circle", { r: 11, class: "sensor" + (f.entity ? "" : " noent") }, g);
+        const dc = states[f.entity]?.attributes.device_class;
+        icon(g, f, 14, dc === "moisture" ? "mdiWaterAlert" : "mdiMotionSensor", "ico sensor-ico");
+        continue;
+      }
       if (grouped.has(i) || !this._on(f)) continue;
       const res = ruled(f);
       const point = isPoint(f);
@@ -932,12 +942,6 @@ class FnsFloorplanPanel extends HTMLElement {
       // a generic item without its own icon shows its entity's icon, as on the card
       const so = !d.icon && d.kind === "generic" && this._hass.states[d.entity], ip = g.lastElementChild.querySelector("path");
       if (so) resolveIcon(null, so, this._hass).then((x) => x && ip.setAttribute("d", x));
-    });
-    plan.sensors.map((s, i) => [s, i]).filter(([s]) => this._on(s)).sort((a, b) => layer(a[0]) - layer(b[0])).forEach(([s, i]) => {
-      const g = group({ cat: "sensors", i }, s.x, s.z);
-      el("circle", { r: 11, class: "sensor" + (s.entity ? "" : " noent") }, g);
-      const dc = states[s.entity]?.attributes.device_class;
-      icon(g, s, 14, dc === "moisture" ? "mdiWaterAlert" : "mdiMotionSensor", "ico sensor-ico");
     });
     plan.texts.forEach((t, i) => {
       if (!this._on(t)) return;
@@ -2490,8 +2494,10 @@ Request (may be in Czech): ${ask}`;
       if (v) o.room.label_rotation = v; else delete o.room.label_rotation;
     } else if (a.startsWith("rot")) o.rotation = (((o.rotation || 0) + Number(a.slice(3))) % 360 + 360) % 360;
     else if (a.startsWith("layer:")) {
-      // z-order among items of the same kind; only the other items count, so a repeated click changes nothing
-      const others = this._plan[sel.cat].filter((x) => !targets.includes(x) && (sel.cat !== "furniture" || isLight(x) === isLight(o))).map((x) => x.layer || 0);
+      // z-order among items of the same kind (furniture and sensors share one); only the other items count, so a repeated click changes nothing
+      const floor = sel.cat === "sensors" || (sel.cat === "furniture" && !isLight(o));
+      const pool = floor ? [...this._plan.furniture.filter((x) => !isLight(x)), ...this._plan.sensors] : this._plan[sel.cat].filter((x) => sel.cat !== "furniture" || isLight(x));
+      const others = pool.filter((x) => !targets.includes(x)).map((x) => x.layer || 0);
       if (others.length) {
         const cur = o.layer || 0;
         const next = a === "layer:top" ? Math.max(cur, Math.max(...others) + 1) : Math.min(cur, Math.min(...others) - 1);

@@ -119,7 +119,7 @@ Möbel, Lichter und die Station des Roboters teilen sich diese Liste.
 |-----------|-----|--------------|
 | `entity` | entity | Ein Binärsensor; `motion`, `occupancy`, `presence` = Wellen, `moisture` = roter Puls |
 | `x`, `z` | number | Position |
-| `layer` | integer | Reihenfolge unter Sensoren im Editor |
+| `layer` | integer | Reihenfolge unter Sensoren und Möbeln im Editor |
 | `level` | string | Etagen-ID |
 
 ## Geräte { #devices }
