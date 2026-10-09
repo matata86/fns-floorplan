@@ -2,7 +2,7 @@
 
 Every release is listed with notes in the [GitHub releases](https://github.com/matata86/fns-floorplan/releases). This page summarises the 0.6.x line by theme.
 
-## 1.0.11 – 1.0.29
+## 1.0.11 – 1.0.31
 
 - Room panel: a light with colour temperature or colour has its brightness, temperature and favourite colours below the name again.
 

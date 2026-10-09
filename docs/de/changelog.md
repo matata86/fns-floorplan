@@ -2,7 +2,7 @@
 
 Jede Version ist mit Hinweisen in den [GitHub-Releases](https://github.com/matata86/fns-floorplan/releases) aufgeführt. Diese Seite fasst die Reihe 0.6.x nach Themen zusammen.
 
-## 1.0.11 – 1.0.29
+## 1.0.11 – 1.0.31
 
 - Raum-Panel: ein Licht mit Farbtemperatur oder Farbe hat unter dem Namen wieder Helligkeit, Farbtemperatur und Lieblingsfarben.
 
