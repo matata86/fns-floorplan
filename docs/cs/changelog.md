@@ -2,7 +2,9 @@
 
 Každé vydání je s poznámkami uvedeno na [GitHub releases](https://github.com/matata86/fns-floorplan/releases). Tato stránka shrnuje řadu 0.6.x podle témat.
 
-## 1.0.11 – 1.0.36
+## 1.0.11 – 1.0.37
+
+- Karta: karta má zase neprůhledné pozadí (barva karet motivu, ve světlém motivu bílá) a přes něj průhlednou primární barvu. Odznaky, světla a TV, které se animují, se po dobu pohybu přesunou do vlastní vrstvy nahoře, takže jmenovky místností a nehybné ikony vedle nich zůstanou ostré. Robot s dokem nad světly a spotřebiči se zase kreslí (zastavila ho chyba).
 
 - Karta: jmenovky místností, texty a odznaky jsou na běžných (ne HiDPI) displejích zase ostré; vedle běžící animace se některé kreslily rozmazaně.
 

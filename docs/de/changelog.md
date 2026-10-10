@@ -2,7 +2,9 @@
 
 Jede Version ist mit Hinweisen in den [GitHub-Releases](https://github.com/matata86/fns-floorplan/releases) aufgeführt. Diese Seite fasst die Reihe 0.6.x nach Themen zusammen.
 
-## 1.0.11 – 1.0.36
+## 1.0.11 – 1.0.37
+
+- Karte: Die Karte hat wieder einen deckenden Hintergrund (die Kartenfarbe des Themes, in einem hellen Theme weiß) unter dem durchscheinenden Primärton. Abzeichen, Lampen und Fernseher, die sich bewegen, wandern während der Animation in eine eigene Ebene darüber, sodass Raumbeschriftungen und ruhende Symbole daneben scharf bleiben. Ein Roboter, dessen Dock über Lampen und Geräten liegt, wird wieder gezeichnet (ein Fehler hatte ihn angehalten).
 
 - Karte: Raumbeschriftungen, Texte und Abzeichen sind auf normalen (nicht HiDPI) Bildschirmen wieder scharf; neben einer laufenden Animation wurden manche unscharf gezeichnet.
 

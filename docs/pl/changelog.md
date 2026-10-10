@@ -2,7 +2,9 @@
 
 Każde wydanie wraz z uwagami znajdziesz w [wydaniach na GitHubie](https://github.com/matata86/fns-floorplan/releases). Ta strona podsumowuje linię 0.6.x tematycznie.
 
-## 1.0.11 – 1.0.36
+## 1.0.11 – 1.0.37
+
+- Karta: karta znów ma nieprzezroczyste tło (kolor kart motywu, w jasnym motywie biały) pod przezroczystym kolorem podstawowym. Odznaki, lampy i telewizory, które się animują, na czas ruchu przechodzą do własnej warstwy na górze, więc etykiety pokoi i nieruchome ikony obok nich pozostają ostre. Robot, którego stacja leży nad lampami i urządzeniami, znów jest rysowany (zatrzymywał go błąd).
 
 - Karta: etykiety pokoi, teksty i odznaki są znów ostre na zwykłych (nie HiDPI) ekranach; obok trwającej animacji niektóre były rysowane rozmyte.
 
