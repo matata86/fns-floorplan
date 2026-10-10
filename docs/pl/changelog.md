@@ -2,7 +2,9 @@
 
 Każde wydanie wraz z uwagami znajdziesz w [wydaniach na GitHubie](https://github.com/matata86/fns-floorplan/releases). Ta strona podsumowuje linię 0.6.x tematycznie.
 
-## 1.0.11 – 1.0.37
+## 1.0.11 – 1.0.38
+
+- Karta: radar uzbrojonego alarmu znów obraca się płynnie (na Androidzie nadal skokami kilka razy na sekundę, tam płynny obrót się rozmazywał).
 
 - Karta: karta znów ma nieprzezroczyste tło (kolor kart motywu, w jasnym motywie biały) pod przezroczystym kolorem podstawowym. Odznaki, lampy i telewizory, które się animują, na czas ruchu przechodzą do własnej warstwy na górze, więc etykiety pokoi i nieruchome ikony obok nich pozostają ostre. Robot, którego stacja leży nad lampami i urządzeniami, znów jest rysowany (zatrzymywał go błąd).
 

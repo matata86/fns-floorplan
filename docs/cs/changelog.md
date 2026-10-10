@@ -2,7 +2,9 @@
 
 Každé vydání je s poznámkami uvedeno na [GitHub releases](https://github.com/matata86/fns-floorplan/releases). Tato stránka shrnuje řadu 0.6.x podle témat.
 
-## 1.0.11 – 1.0.37
+## 1.0.11 – 1.0.38
+
+- Karta: radar zapnutého alarmu se zase točí plynule (na Androidu dál v krocích několikrát za sekundu, plynulé otáčení tam dělalo šmouhy).
 
 - Karta: karta má zase neprůhledné pozadí (barva karet motivu, ve světlém motivu bílá) a přes něj průhlednou primární barvu. Odznaky, světla a TV, které se animují, se po dobu pohybu přesunou do vlastní vrstvy nahoře, takže jmenovky místností a nehybné ikony vedle nich zůstanou ostré. Robot s dokem nad světly a spotřebiči se zase kreslí (zastavila ho chyba).
 

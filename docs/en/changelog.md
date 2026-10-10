@@ -2,7 +2,9 @@
 
 Every release is listed with notes in the [GitHub releases](https://github.com/matata86/fns-floorplan/releases). This page summarises the 0.6.x line by theme.
 
-## 1.0.11 – 1.0.37
+## 1.0.11 – 1.0.38
+
+- Card: the radar of an armed alarm turns smoothly again (on Android it still steps a few times a second, where a smooth turn smeared).
 
 - Card: the card has an opaque background again (the theme's card colour, white in a light theme) under the see-through primary tint. Badges, lamps and TVs that animate move into a layer of their own on top while they move, so room labels and still icons stay sharp beside them. A robot whose dock sits above lights and appliances is drawn again (an error stopped it).
 

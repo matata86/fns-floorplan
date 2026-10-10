@@ -2,7 +2,9 @@
 
 Jede Version ist mit Hinweisen in den [GitHub-Releases](https://github.com/matata86/fns-floorplan/releases) aufgeführt. Diese Seite fasst die Reihe 0.6.x nach Themen zusammen.
 
-## 1.0.11 – 1.0.37
+## 1.0.11 – 1.0.38
+
+- Karte: Das Radar einer scharfen Alarmanlage dreht sich wieder flüssig (auf Android weiter in Schritten einige Male pro Sekunde, dort verschmierte eine flüssige Drehung).
 
 - Karte: Die Karte hat wieder einen deckenden Hintergrund (die Kartenfarbe des Themes, in einem hellen Theme weiß) unter dem durchscheinenden Primärton. Abzeichen, Lampen und Fernseher, die sich bewegen, wandern während der Animation in eine eigene Ebene darüber, sodass Raumbeschriftungen und ruhende Symbole daneben scharf bleiben. Ein Roboter, dessen Dock über Lampen und Geräten liegt, wird wieder gezeichnet (ein Fehler hatte ihn angehalten).
 
