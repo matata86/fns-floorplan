@@ -2,7 +2,9 @@
 
 Každé vydání je s poznámkami uvedeno na [GitHub releases](https://github.com/matata86/fns-floorplan/releases). Tato stránka shrnuje řadu 0.6.x podle témat.
 
-## 1.0.11 – 1.0.35
+## 1.0.11 – 1.0.36
+
+- Karta: jmenovky místností, texty a odznaky jsou na běžných (ne HiDPI) displejích zase ostré; vedle běžící animace se některé kreslily rozmazaně.
 
 - Karta: text zařízení umí každou sekundu odpočítávat časovač: `{left:timer.x}` ukáže zbývající čas jako m:ss (i senzor zbývajícího času nebo času dokončení; samotné `{left}` čas odpočtového kruhu).
 

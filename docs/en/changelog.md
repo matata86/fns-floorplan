@@ -2,7 +2,9 @@
 
 Every release is listed with notes in the [GitHub releases](https://github.com/matata86/fns-floorplan/releases). This page summarises the 0.6.x line by theme.
 
-## 1.0.11 – 1.0.35
+## 1.0.11 – 1.0.36
+
+- Card: room labels, texts and badges are sharp again on ordinary (non-HiDPI) screens; next to a running animation some of them were drawn blurred.
 
 - Card: a device text can count a timer down every second: `{left:timer.x}` shows its time left as m:ss (also a remaining-time or end-time sensor; `{left}` alone that of the countdown ring).
 

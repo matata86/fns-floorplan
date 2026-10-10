@@ -2,7 +2,9 @@
 
 Jede Version ist mit Hinweisen in den [GitHub-Releases](https://github.com/matata86/fns-floorplan/releases) aufgeführt. Diese Seite fasst die Reihe 0.6.x nach Themen zusammen.
 
-## 1.0.11 – 1.0.35
+## 1.0.11 – 1.0.36
+
+- Karte: Raumbeschriftungen, Texte und Abzeichen sind auf normalen (nicht HiDPI) Bildschirmen wieder scharf; neben einer laufenden Animation wurden manche unscharf gezeichnet.
 
 - Karte: ein Gerätetext kann einen Timer jede Sekunde herunterzählen: `{left:timer.x}` zeigt seine Restzeit als m:ss (auch ein Restzeit- oder Endzeit-Sensor; `{left}` allein die des Countdown-Rings).
 

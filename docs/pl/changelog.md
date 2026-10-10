@@ -2,7 +2,9 @@
 
 Każde wydanie wraz z uwagami znajdziesz w [wydaniach na GitHubie](https://github.com/matata86/fns-floorplan/releases). Ta strona podsumowuje linię 0.6.x tematycznie.
 
-## 1.0.11 – 1.0.35
+## 1.0.11 – 1.0.36
+
+- Karta: etykiety pokoi, teksty i odznaki są znów ostre na zwykłych (nie HiDPI) ekranach; obok trwającej animacji niektóre były rysowane rozmyte.
 
 - Karta: tekst urządzenia może co sekundę odliczać timer: `{left:timer.x}` pokazuje pozostały czas jako m:ss (także sensor pozostałego czasu lub czasu zakończenia; samo `{left}` czas pierścienia odliczania).
 
