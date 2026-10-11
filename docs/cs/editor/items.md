@@ -40,9 +40,9 @@ Přidej **Stropní světlo**, **Závěsné světlo**, **Panel**, **Lampičku**, 
 
 | Druh | Vypadá jako |
 |------|-------------|
-| `fan`, `purifier`, `dishwasher`, `dryer` | Animované ikony (sušička se třese, myčka poskakuje) |
+| `fan`, `purifier`, `dehumidifier`, `dishwasher`, `dryer` | Animované ikony (sušička se třese, myčka poskakuje); čistička vyfukuje vzduch, odvlhčovač kape |
 | `boiler` | Ohřívač vody |
-| `radiator` | Při animaci stoupají vlny tepla (barvu určuje `wave`) |
+| `radiator` | Při animaci stoupají vlny tepla (barvu určuje `wave`). **Trubka topení** v jeho panelu nakreslí trubku od kotle na podlaží; teče, když běží kotel i radiátor, úseky společné více radiátorům se kreslí jednou |
 | `alarm` | Štít podle stavu; byt při poplachu pulzuje červeně, při zabezpečování oranžově |
 | `media` | Ikona TV, reproduktoru nebo Kodi, zvukové vlny a název během přehrávání, obal v odznaku (`cover: false` ho vypne) |
 | `aquarium` | Bublinky |

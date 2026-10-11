@@ -40,9 +40,9 @@ Füge eine **Deckenleuchte**, **Pendelleuchte**, ein **Panel**, eine **Tischleuc
 
 | Art | Sieht aus wie |
 |-----|---------------|
-| `fan`, `purifier`, `dishwasher`, `dryer` | Animierte Symbole (der Trockner rüttelt, der Geschirrspüler hüpft) |
+| `fan`, `purifier`, `dehumidifier`, `dishwasher`, `dryer` | Animierte Symbole (der Trockner rüttelt, der Geschirrspüler hüpft); der Luftreiniger bläst Windlinien, der Luftentfeuchter tropft |
 | `boiler` | Warmwasserspeicher |
-| `radiator` | Wärmewellen steigen auf, solange er animiert ist (Farbe über `wave`) |
+| `radiator` | Wärmewellen steigen auf, solange er animiert ist (Farbe über `wave`). **Heizungsrohr** in seinem Panel zeichnet ein Rohr vom Kessel des Stockwerks; es fließt, wenn Kessel und Heizkörper beide laufen, gemeinsame Abschnitte mehrerer Heizkörper werden einmal gezeichnet |
 | `alarm` | Schild nach Zustand; die Wohnung pulsiert bei Auslösung rot, beim Scharfschalten orange |
 | `media` | TV-, Lautsprecher- oder Kodi-Symbol, Schallwellen und Titel bei der Wiedergabe, Cover im Badge (`cover: false` schaltet es aus) |
 | `aquarium` | Blasen |

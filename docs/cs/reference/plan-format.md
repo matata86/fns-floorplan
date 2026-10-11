@@ -127,7 +127,7 @@ Nábytek, světla a dok robota sdílejí tento seznam.
 | Klíč | Typ | Výchozí | Popis |
 |------|-----|---------|-------|
 | `id` | string | | Jedinečné id |
-| `kind` | string | | `fan`, `purifier`, `dishwasher`, `dryer`, `boiler`, `radiator`, `alarm`, `media`, `aquarium`, `camera`, `fridge`, `fireplace`, `lock`, `generic` |
+| `kind` | string | | `fan`, `purifier`, `dehumidifier`, `dishwasher`, `dryer`, `boiler`, `radiator`, `alarm`, `media`, `aquarium`, `camera`, `fridge`, `fireplace`, `lock`, `generic` |
 | `name` | string | | Název (tooltip) |
 | `entity` | entity | | Entita |
 | `x`, `z` | number | | Pozice |
@@ -139,6 +139,7 @@ Nábytek, světla a dok robota sdílejí tento seznam.
 | `label_vertical` | bool | `false` | Otočí popisek o 90 stupňů (čte se zdola nahoru) |
 | `color`, `color_on` | colour | barva stavu | Barva v klidu / za běhu |
 | `fx` | string | podle druhu | Animace kruhu |
+| `pipe` | list | | Jen radiátor: rohy `[[x, z], …]` trubky topení mezi kotlem na podlaží a radiátorem (`[]` = rovně). Teče, když běží kotel i radiátor, v barvě `wave` |
 | `progress`, `progress_total` | entity / minutes | | Zdroj odpočtu |
 | `cover` | boolean | `true` | `media`: `false` vypne obal alba |
 | `battery` | entity | baterie zařízení | Zařízení typu vysavač |

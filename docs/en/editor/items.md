@@ -40,9 +40,9 @@ Add **Ceiling light**, **Pendant light**, **Panel**, **Table lamp**, **Wall ligh
 
 | Kind | Looks like |
 |------|-----------|
-| `fan`, `purifier`, `dishwasher`, `dryer` | Animated icons (the dryer shakes, the dishwasher bounces) |
+| `fan`, `purifier`, `dehumidifier`, `dishwasher`, `dryer` | Animated icons (the dryer shakes, the dishwasher bounces); the purifier blows wind lines, the dehumidifier drips |
 | `boiler` | Water boiler |
-| `radiator` | Heat waves rise while it animates (colour set by `wave`) |
+| `radiator` | Heat waves rise while it animates (colour set by `wave`). **Heating pipe** in its panel draws a pipe from the floor's boiler; it flows while the boiler and the radiator both run, stretches shared by several radiators are drawn once |
 | `alarm` | Shield by state; the flat pulses red when triggered, orange while arming |
 | `media` | TV, speaker or Kodi icon, sound waves and the title while playing, cover art in the badge (`cover: false` turns it off) |
 | `aquarium` | Bubbles |

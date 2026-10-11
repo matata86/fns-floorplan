@@ -23,10 +23,10 @@ const NS = "http://www.w3.org/2000/svg";
 const byName = (keys, label, last) => keys.filter((k) => k !== last).sort((a, b) => label(a).localeCompare(label(b), getLang())).concat(keys.includes(last) ? [last] : []);
 const furnTypes = () => byName(Object.keys(FURNITURE), furnName, "other");
 const LIGHT_TYPES = tbl("panel.light_type", ["lamp_spot", "lamp_ceiling", "lamp_pendant", "lamp_panel", "lamp_table", "lamp_wall", "led_strip"]);
-const DEVICE_KINDS = tbl("panel.device_kind", ["fan", "purifier", "dishwasher", "dryer", "boiler", "radiator", "alarm", "media", "aquarium", "camera", "fridge", "fireplace", "lock", "generic"]);
+const DEVICE_KINDS = tbl("panel.device_kind", ["fan", "purifier", "dehumidifier", "dishwasher", "dryer", "boiler", "radiator", "alarm", "media", "aquarium", "camera", "fridge", "fireplace", "lock", "generic"]);
 const DEVICE_FX = tbl("panel.device_fx", ["ring", "radar", "comet", "countdown", "spin", "orbit", "breath", "blink", "heartbeat", "shake", "none"]);
 const DEVICE_ICON = {
-  fan: "mdiFan", purifier: "mdiAirPurifier", dishwasher: "mdiDishwasher", dryer: "mdiTumbleDryer", boiler: "mdiWaterBoiler",
+  fan: "mdiFan", purifier: "mdiAirPurifier", dehumidifier: "mdiAirHumidifier", dishwasher: "mdiDishwasher", dryer: "mdiTumbleDryer", boiler: "mdiWaterBoiler",
   radiator: "mdiRadiator", alarm: "mdiShieldOutline", media: "mdiCastVariant", generic: "mdiShapeOutline",
   aquarium: "mdiFishbowlOutline", camera: "mdiCctv", fridge: "mdiFridgeOutline", fireplace: "mdiFireplace", lock: "mdiLock",
 };
@@ -273,6 +273,9 @@ div.modes button.on { background: var(--primary-color, #03a9f4); color: var(--te
 .vtx.sel { fill: var(--primary-color, #03a9f4); }
 .mid { fill: var(--primary-color, #03a9f4); fill-opacity: .35; cursor: copy; }
 .edge-hit { stroke: transparent; stroke-width: 14; }
+.pipe { fill: none; stroke: #ef4444; stroke-opacity: .45; stroke-width: 3; stroke-linejoin: round; stroke-linecap: round; pointer-events: none; }
+.pipe.sel { stroke-opacity: 1; stroke-dasharray: 8 5; }
+.mode-items .pvtx, .mode-items .pmid { display: inline; }
 .mode-items .edge-hit { display: none; }
 .sheet-x { display: none; }
 .grip { width: 6px; flex: none; cursor: col-resize; background: transparent; border-left: 1px solid var(--divider-color, #e0e0e0); touch-action: none; }
@@ -933,6 +936,7 @@ class FnsFloorplanPanel extends HTMLElement {
       el("circle", { cx: 13, cy: -13, r: 7, class: "count" }, g);
       el("text", { class: "count-t", "text-anchor": "middle", x: 13, y: -9.5 }, g).textContent = members.length;
     }
+    for (const d of plan.devices) if (d.kind === "radiator" && Array.isArray(d.pipe) && this._on(d)) el("polyline", { points: this._route(d).map(P).join(" "), class: "pipe" }, svg);
     plan.devices.map((d, i) => [d, i]).filter(([d]) => this._on(d)).sort((a, b) => layer(a[0]) - layer(b[0])).forEach(([d, i]) => {
       const g = group({ cat: "devices", i }, d.x, d.z, 0, SIZES[d.size] || 1);
       const res = ruled(d);
@@ -972,6 +976,8 @@ class FnsFloorplanPanel extends HTMLElement {
       Object.entries({ x: bb.x - 8, y: bb.y - 4, width: bb.width + 16, height: bb.height + 8 }).forEach(([k, v]) => rect.setAttribute(k, v));
     }
     if (this._sel?.cat === "rooms") this._handles(svg, this._sel.i);
+    const rad = this._sel?.cat === "devices" && this._mode === "items" && plan.devices[this._sel.i];
+    if (rad?.kind === "radiator" && Array.isArray(rad.pipe) && this._on(rad)) this._pipeHandles(svg, this._sel.i);
     const f = this._sel?.cat === "furniture" && !this._sel.g && plan.furniture[this._sel.i];
     if (f && !isPoint(f) && this._mode === "items") this._resize(svg, f, this._sel);
     if (f && f.type === "lamp_spot" && this._mode === "items") {
@@ -1138,6 +1144,44 @@ class FnsFloorplanPanel extends HTMLElement {
           [x, z] = near || [nx ? nx.t : snap(x), nz ? nz.t : snap(z)];
           r.points[k] = [r3(Math.max(0, x)), r3(Math.max(0, z))];
           if (!ev?.altKey) for (const t of twins) t.room.points[t.k] = [...r.points[k]];
+        });
+      });
+    });
+  }
+
+  // heating route of a radiator: from the floor's boiler (if there is one) over its waypoints to the radiator
+  _route(d) {
+    const b = this._plan.devices.find((x) => x.kind === "boiler" && this._on(x));
+    return [...(b ? [[b.x, b.z]] : []), ...d.pipe, [d.x, d.z]];
+  }
+
+  // waypoints of the selected radiator's route: drag to move (onto a corner of any route, in line with one, else the grid;
+  // Alt: grid only), "+" in a stretch adds one there, Delete removes the selected one
+  _pipeHandles(svg, i) {
+    const d = this._plan.devices[i], pts = this._route(d), off = pts.length - d.pipe.length - 1;
+    el("polyline", { points: pts.map(P).join(" "), class: "pipe sel" }, svg);
+    for (let k = 1; k < pts.length; k++) {
+      const a = pts[k - 1], b = pts[k], [mx, mz] = P([(a[0] + b[0]) / 2, (a[1] + b[1]) / 2]);
+      el("circle", { cx: mx, cy: mz, r: 6, class: "mid pmid" }, svg).addEventListener("pointerdown", (e) => {
+        e.stopPropagation();
+        d.pipe.splice(k - off, 0, [r3(snap((a[0] + b[0]) / 2)), r3(snap((a[1] + b[1]) / 2))]);
+        this._sel = { cat: "devices", i, v: k - off };
+        this._changed();
+      });
+    }
+    d.pipe.forEach((p, k) => {
+      const [cx, cz] = P(p);
+      el("circle", { cx, cy: cz, r: 8, class: "vtx pvtx" + (this._sel.v === k ? " sel" : "") }, svg).addEventListener("pointerdown", (e) => {
+        const base = [...p];
+        const others = this._plan.devices.filter((x) => x.kind === "radiator" && Array.isArray(x.pipe) && this._on(x)).flatMap((x) => this._route(x)).filter((o) => o !== p);
+        this._press(e, { cat: "devices", i, v: k }, (dx, dz, pt, ev) => {
+          let x = base[0] + dx, z = base[1] + dz;
+          const near = !ev?.altKey && others.find((o) => Math.hypot(o[0] - x, o[1] - z) < 0.15);
+          const nx = !ev?.altKey && !near && nearest([x], others.map((o) => o[0]));
+          const nz = !ev?.altKey && !near && nearest([z], others.map((o) => o[1]));
+          this._guides = [...(nx ? [{ x: nx.t }] : []), ...(nz ? [{ z: nz.t }] : [])];
+          [x, z] = near || [nx ? nx.t : snap(x), nz ? nz.t : snap(z)];
+          d.pipe[k] = [r3(Math.max(0, x)), r3(Math.max(0, z))];
         });
       });
     });
@@ -1694,6 +1738,8 @@ class FnsFloorplanPanel extends HTMLElement {
         ${this._iconField(o, DEVICE_ICON[o.kind])}
         ${this._sizeField(o, "size", "panel.f.icon_size")}
         ${this._sizeField(o, "label_size", "panel.f.label_size")}`)}
+        ${o.kind === "radiator" ? this._sec(t("panel.f.sec_pipe"), `<p class="hint">${t(Array.isArray(o.pipe) ? "panel.f.pipe_hint" : "panel.f.pipe_none")}</p>
+        <div class="actions">${Array.isArray(o.pipe) ? `<button data-a="pipe-del" class="del">${t("panel.f.pipe_del")}</button>` : `<button data-a="pipe-add">${t("panel.f.pipe_add")}</button>`}</div>`) : ""}
         ${this._sec(t("panel.f.sec_pos"), `${xz}
         ${this._layerField(o)}`)}
         ${this._actionsUI(o, { tap: domTap ? (domTap.includes("press") ? t("panel.f.act_press") : t("panel.f.act_run")) : ACTIONS["more-info"] })}
@@ -2488,6 +2534,11 @@ Request (may be in Czech): ${ask}`;
     if (a.startsWith("ra:")) return this._ruleAction(targets, a);
     if (a.startsWith("place:")) this._place(a.slice(6));
     else if (a === "auto") delete this._plan.labels[sel.id];
+    else if (a === "pipe-add") {
+      // one corner square below the boiler (or 1 m aside without one), the rest is dragged into place
+      const b = this._plan.devices.find((x) => x.kind === "boiler" && this._on(x));
+      o.pipe = [b ? [r3(o.x), r3(b.z)] : [r3(Math.max(0, o.x - 1)), r3(o.z)]];
+    } else if (a === "pipe-del") { delete o.pipe; this._sel = { cat: sel.cat, i: sel.i }; }
     else if (a === "icon-reset") for (const t of targets) delete t.icon;
     else if (a === "icon-none") for (const t of targets) t.icon = "none";
     else if (a.startsWith("rot") && sel.cat === "labels") {
@@ -2612,6 +2663,14 @@ Request (may be in Czech): ${ask}`;
         const o = this._plan.openings[this._sel.i], r = this._plan.rooms.find((x) => x.id === o.room_id), ed = edgeOf(r, o.edge);
         o.offset = r3(clamp(o.offset + step[0] * ed.u[0] + step[1] * ed.u[1], o.width / 2, ed.L - o.width / 2));
       }
+      return this._changed();
+    }
+    const pipe = this._sel.cat === "devices" && this._sel.v != null && this._plan.devices[this._sel.i]?.pipe;
+    if (pipe?.[this._sel.v]) {
+      e.preventDefault();
+      if (e.key === "Delete" || e.key === "Backspace") { pipe.splice(this._sel.v, 1); this._sel = { cat: "devices", i: this._sel.i }; }
+      else if (step) { const q = pipe[this._sel.v]; pipe[this._sel.v] = [r3(Math.max(0, q[0] + step[0])), r3(Math.max(0, q[1] + step[1]))]; }
+      else return;
       return this._changed();
     }
     if (step) {

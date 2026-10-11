@@ -127,7 +127,7 @@ Meble, światła i stacja dokująca robota dzielą tę listę.
 | Klucz | Typ | Domyślnie | Opis |
 |-----|------|---------|-------------|
 | `id` | string | | Unikalne id |
-| `kind` | string | | `fan`, `purifier`, `dishwasher`, `dryer`, `boiler`, `radiator`, `alarm`, `media`, `aquarium`, `camera`, `fridge`, `fireplace`, `lock`, `generic` |
+| `kind` | string | | `fan`, `purifier`, `dehumidifier`, `dishwasher`, `dryer`, `boiler`, `radiator`, `alarm`, `media`, `aquarium`, `camera`, `fridge`, `fireplace`, `lock`, `generic` |
 | `name` | string | | Nazwa (podpowiedź) |
 | `entity` | encja | | Encja |
 | `x`, `z` | liczba | | Pozycja |
@@ -139,6 +139,7 @@ Meble, światła i stacja dokująca robota dzielą tę listę.
 | `label_vertical` | bool | `false` | Obraca etykietę o 90 stopni (czytana od dołu do góry) |
 | `color`, `color_on` | kolor | kolor stanu | Kolor w spoczynku / podczas pracy |
 | `fx` | string | według rodzaju | Animacja pierścienia |
+| `pipe` | list | | Tylko grzejnik: narożniki `[[x, z], …]` rury grzewczej między kotłem na piętrze a grzejnikiem (`[]` = prosto). Płynie, gdy pracują kocioł i grzejnik, w kolorze `wave` |
 | `progress`, `progress_total` | encja / minuty | | Źródło odliczania |
 | `cover` | boolean | `true` | `media`: `false` wyłącza okładkę |
 | `battery` | encja | bateria urządzenia | Odkurzacze |

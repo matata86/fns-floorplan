@@ -40,9 +40,9 @@ Dodaj **Lampę sufitową**, **Lampę wiszącą**, **Panel**, **Lampkę stołową
 
 | Rodzaj | Wygląda jak |
 |------|-----------|
-| `fan`, `purifier`, `dishwasher`, `dryer` | Animowane ikony (suszarka się trzęsie, zmywarka podskakuje) |
+| `fan`, `purifier`, `dehumidifier`, `dishwasher`, `dryer` | Animowane ikony (suszarka się trzęsie, zmywarka podskakuje); oczyszczacz dmucha strugi powietrza, osuszacz kapie |
 | `boiler` | Bojler |
-| `radiator` | Fale ciepła unoszą się podczas animacji (kolor ustawia `wave`) |
+| `radiator` | Fale ciepła unoszą się podczas animacji (kolor ustawia `wave`). **Rura grzewcza** w jego panelu rysuje rurę od kotła na piętrze; płynie, gdy pracują kocioł i grzejnik, odcinki wspólne kilku grzejników są rysowane raz |
 | `alarm` | Tarcza według stanu; mieszkanie pulsuje na czerwono po uruchomieniu alarmu, na pomarańczowo podczas uzbrajania |
 | `media` | Ikona telewizora, głośnika lub Kodi, fale dźwięku i tytuł podczas odtwarzania, okładka w znaczniku (`cover: false` to wyłącza) |
 | `aquarium` | Bąbelki |

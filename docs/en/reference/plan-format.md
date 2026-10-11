@@ -127,7 +127,7 @@ Furniture, lights and the robot dock share this list.
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | `id` | string | | Unique id |
-| `kind` | string | | `fan`, `purifier`, `dishwasher`, `dryer`, `boiler`, `radiator`, `alarm`, `media`, `aquarium`, `camera`, `fridge`, `fireplace`, `lock`, `generic` |
+| `kind` | string | | `fan`, `purifier`, `dehumidifier`, `dishwasher`, `dryer`, `boiler`, `radiator`, `alarm`, `media`, `aquarium`, `camera`, `fridge`, `fireplace`, `lock`, `generic` |
 | `name` | string | | Name (tooltip) |
 | `entity` | entity | | The entity |
 | `x`, `z` | number | | Position |
@@ -139,6 +139,7 @@ Furniture, lights and the robot dock share this list.
 | `label_vertical` | bool | `false` | Turns the label by 90 degrees (reads bottom to top) |
 | `color`, `color_on` | colour | state colour | Idle / running colour |
 | `fx` | string | by kind | Ring animation |
+| `pipe` | list | | Radiator only: corners `[[x, z], …]` of its heating pipe between the floor's boiler and the radiator (`[]` = straight). Flows while the boiler and the radiator both run, in the `wave` colour |
 | `progress`, `progress_total` | entity / minutes | | Countdown source |
 | `cover` | boolean | `true` | `media`: `false` turns off the cover art |
 | `battery` | entity | device battery | Vacuum devices |
