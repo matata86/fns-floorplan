@@ -139,7 +139,7 @@ Möbel, Lichter und die Station des Roboters teilen sich diese Liste.
 | `label_vertical` | bool | `false` | Dreht die Beschriftung um 90 Grad (von unten nach oben lesbar) |
 | `color`, `color_on` | colour | Zustandsfarbe | Farbe im Ruhezustand / beim Laufen |
 | `fx` | string | nach Art | Ringanimation |
-| `pipe` | list | | Nur Heizkörper: Ecken `[[x, z], …]` des Heizungsrohrs zwischen dem Kessel des Stockwerks und dem Heizkörper (`[]` = gerade). Fließt, wenn Kessel und Heizkörper beide laufen, in der Farbe `wave` |
+| `pipe` | list | | Nur Heizkörper (auch Möbel `type: radiator`, das nach `animate` einer Regel fließt): Ecken `[[x, z], …]` des Heizungsrohrs zwischen dem Kessel des Stockwerks und dem Heizkörper (`[]` = gerade). Fließt, wenn Kessel und Heizkörper beide laufen, in der Farbe `wave` |
 | `progress`, `progress_total` | entity / minutes | | Quelle des Countdowns |
 | `cover` | boolean | `true` | `media`: `false` schaltet das Cover aus |
 | `battery` | entity | Gerätebatterie | Staubsaugergeräte |

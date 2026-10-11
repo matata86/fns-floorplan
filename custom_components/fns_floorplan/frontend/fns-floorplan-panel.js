@@ -936,7 +936,7 @@ class FnsFloorplanPanel extends HTMLElement {
       el("circle", { cx: 13, cy: -13, r: 7, class: "count" }, g);
       el("text", { class: "count-t", "text-anchor": "middle", x: 13, y: -9.5 }, g).textContent = members.length;
     }
-    for (const d of plan.devices) if (d.kind === "radiator" && Array.isArray(d.pipe) && this._on(d)) el("polyline", { points: this._route(d).map(P).join(" "), class: "pipe" }, svg);
+    for (const d of this._radiators()) el("polyline", { points: this._route(d).map(P).join(" "), class: "pipe" }, svg);
     plan.devices.map((d, i) => [d, i]).filter(([d]) => this._on(d)).sort((a, b) => layer(a[0]) - layer(b[0])).forEach(([d, i]) => {
       const g = group({ cat: "devices", i }, d.x, d.z, 0, SIZES[d.size] || 1);
       const res = ruled(d);
@@ -976,8 +976,8 @@ class FnsFloorplanPanel extends HTMLElement {
       Object.entries({ x: bb.x - 8, y: bb.y - 4, width: bb.width + 16, height: bb.height + 8 }).forEach(([k, v]) => rect.setAttribute(k, v));
     }
     if (this._sel?.cat === "rooms") this._handles(svg, this._sel.i);
-    const rad = this._sel?.cat === "devices" && this._mode === "items" && plan.devices[this._sel.i];
-    if (rad?.kind === "radiator" && Array.isArray(rad.pipe) && this._on(rad)) this._pipeHandles(svg, this._sel.i);
+    const rad = (this._sel?.cat === "devices" || (this._sel?.cat === "furniture" && !this._sel.g)) && this._mode === "items" && plan[this._sel.cat][this._sel.i];
+    if (rad && this._radiators().includes(rad)) this._pipeHandles(svg, this._sel.cat, this._sel.i);
     const f = this._sel?.cat === "furniture" && !this._sel.g && plan.furniture[this._sel.i];
     if (f && !isPoint(f) && this._mode === "items") this._resize(svg, f, this._sel);
     if (f && f.type === "lamp_spot" && this._mode === "items") {
@@ -1149,7 +1149,17 @@ class FnsFloorplanPanel extends HTMLElement {
     });
   }
 
+  // "Heating pipe" section of a radiator (appliance or furniture)
+  _pipeSec(o) {
+    return this._sec(t("panel.f.sec_pipe"), `<p class="hint">${t(Array.isArray(o.pipe) ? "panel.f.pipe_hint" : "panel.f.pipe_none")}</p>
+        <div class="actions">${Array.isArray(o.pipe) ? `<button data-a="pipe-del" class="del">${t("panel.f.pipe_del")}</button>` : `<button data-a="pipe-add">${t("panel.f.pipe_add")}</button>`}</div>`);
+  }
+
   // heating route of a radiator: from the floor's boiler (if there is one) over its waypoints to the radiator
+  // radiators with a pipe on this floor: appliances and pieces of furniture
+  _radiators() {
+    return [...this._plan.devices.filter((d) => d.kind === "radiator"), ...this._plan.furniture.filter((f) => f.type === "radiator")].filter((d) => Array.isArray(d.pipe) && this._on(d));
+  }
   _route(d) {
     const b = this._plan.devices.find((x) => x.kind === "boiler" && this._on(x));
     return [...(b ? [[b.x, b.z]] : []), ...d.pipe, [d.x, d.z]];
@@ -1157,15 +1167,15 @@ class FnsFloorplanPanel extends HTMLElement {
 
   // waypoints of the selected radiator's route: drag to move (onto a corner of any route, in line with one, else the grid;
   // Alt: grid only), "+" in a stretch adds one there, Delete removes the selected one
-  _pipeHandles(svg, i) {
-    const d = this._plan.devices[i], pts = this._route(d), off = pts.length - d.pipe.length - 1;
+  _pipeHandles(svg, cat, i) {
+    const d = this._plan[cat][i], pts = this._route(d), off = pts.length - d.pipe.length - 1;
     el("polyline", { points: pts.map(P).join(" "), class: "pipe sel" }, svg);
     for (let k = 1; k < pts.length; k++) {
       const a = pts[k - 1], b = pts[k], [mx, mz] = P([(a[0] + b[0]) / 2, (a[1] + b[1]) / 2]);
       el("circle", { cx: mx, cy: mz, r: 6, class: "mid pmid" }, svg).addEventListener("pointerdown", (e) => {
         e.stopPropagation();
         d.pipe.splice(k - off, 0, [r3(snap((a[0] + b[0]) / 2)), r3(snap((a[1] + b[1]) / 2))]);
-        this._sel = { cat: "devices", i, v: k - off };
+        this._sel = { cat, i, v: k - off };
         this._changed();
       });
     }
@@ -1173,8 +1183,8 @@ class FnsFloorplanPanel extends HTMLElement {
       const [cx, cz] = P(p);
       el("circle", { cx, cy: cz, r: 8, class: "vtx pvtx" + (this._sel.v === k ? " sel" : "") }, svg).addEventListener("pointerdown", (e) => {
         const base = [...p];
-        const others = this._plan.devices.filter((x) => x.kind === "radiator" && Array.isArray(x.pipe) && this._on(x)).flatMap((x) => this._route(x)).filter((o) => o !== p);
-        this._press(e, { cat: "devices", i, v: k }, (dx, dz, pt, ev) => {
+        const others = this._radiators().flatMap((x) => this._route(x)).filter((o) => o !== p);
+        this._press(e, { cat, i, v: k }, (dx, dz, pt, ev) => {
           let x = base[0] + dx, z = base[1] + dz;
           const near = !ev?.altKey && others.find((o) => Math.hypot(o[0] - x, o[1] - z) < 0.15);
           const nx = !ev?.altKey && !near && nearest([x], others.map((o) => o[0]));
@@ -1700,6 +1710,7 @@ class FnsFloorplanPanel extends HTMLElement {
         ${light ? `<label>${t("panel.f.room_light")}</label><input data-k="room_light" type="number" min="0" step="5" placeholder="100"
           value="${o.room_light === false ? 15 : typeof o.room_light === "number" ? Math.round(o.room_light * 100) : ""}">` : ""}
         ${light || dock ? `<label class="chk"><input type="checkbox" data-k="sheet_hide" ${o.sheet_hide ? "checked" : ""}> ${t("panel.f.sheet_hide")}</label>` : ""}`, true)}
+        ${o.type === "radiator" && !sel.g ? this._pipeSec(o) : ""}
         ${dock ? this._sec(t("panel.f.sec_running_vac"), `<label>${t("panel.f.color_cleaning")}</label>${this._colorPick("color_on", o.color_on)}
         <p class="hint">${t("panel.f.state_color_hint")}</p>
         ${this._fxPicker("fx", o.fx, t("panel.f.fx_none_drive"), "none", "mdiRobotVacuum", "progress", o.progress, t("panel.f.none_lc"), t("panel.f.fx_title_cleaning"), o.progress_total).replace(/<button class="fxt[^"]*" data-fx="none"[\s\S]*?<\/button>/, "")}`) : ""}
@@ -1738,8 +1749,7 @@ class FnsFloorplanPanel extends HTMLElement {
         ${this._iconField(o, DEVICE_ICON[o.kind])}
         ${this._sizeField(o, "size", "panel.f.icon_size")}
         ${this._sizeField(o, "label_size", "panel.f.label_size")}`)}
-        ${o.kind === "radiator" ? this._sec(t("panel.f.sec_pipe"), `<p class="hint">${t(Array.isArray(o.pipe) ? "panel.f.pipe_hint" : "panel.f.pipe_none")}</p>
-        <div class="actions">${Array.isArray(o.pipe) ? `<button data-a="pipe-del" class="del">${t("panel.f.pipe_del")}</button>` : `<button data-a="pipe-add">${t("panel.f.pipe_add")}</button>`}</div>`) : ""}
+        ${o.kind === "radiator" ? this._pipeSec(o) : ""}
         ${this._sec(t("panel.f.sec_pos"), `${xz}
         ${this._layerField(o)}`)}
         ${this._actionsUI(o, { tap: domTap ? (domTap.includes("press") ? t("panel.f.act_press") : t("panel.f.act_run")) : ACTIONS["more-info"] })}
@@ -2665,10 +2675,10 @@ Request (may be in Czech): ${ask}`;
       }
       return this._changed();
     }
-    const pipe = this._sel.cat === "devices" && this._sel.v != null && this._plan.devices[this._sel.i]?.pipe;
+    const pipe = (this._sel.cat === "devices" || this._sel.cat === "furniture") && this._sel.v != null && this._plan[this._sel.cat][this._sel.i]?.pipe;
     if (pipe?.[this._sel.v]) {
       e.preventDefault();
-      if (e.key === "Delete" || e.key === "Backspace") { pipe.splice(this._sel.v, 1); this._sel = { cat: "devices", i: this._sel.i }; }
+      if (e.key === "Delete" || e.key === "Backspace") { pipe.splice(this._sel.v, 1); this._sel = { cat: this._sel.cat, i: this._sel.i }; }
       else if (step) { const q = pipe[this._sel.v]; pipe[this._sel.v] = [r3(Math.max(0, q[0] + step[0])), r3(Math.max(0, q[1] + step[1]))]; }
       else return;
       return this._changed();

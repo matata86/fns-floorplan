@@ -139,7 +139,7 @@ Meble, światła i stacja dokująca robota dzielą tę listę.
 | `label_vertical` | bool | `false` | Obraca etykietę o 90 stopni (czytana od dołu do góry) |
 | `color`, `color_on` | kolor | kolor stanu | Kolor w spoczynku / podczas pracy |
 | `fx` | string | według rodzaju | Animacja pierścienia |
-| `pipe` | list | | Tylko grzejnik: narożniki `[[x, z], …]` rury grzewczej między kotłem na piętrze a grzejnikiem (`[]` = prosto). Płynie, gdy pracują kocioł i grzejnik, w kolorze `wave` |
+| `pipe` | list | | Tylko grzejnik (także mebel `type: radiator`, który płynie według `animate` z reguły): narożniki `[[x, z], …]` rury grzewczej między kotłem na piętrze a grzejnikiem (`[]` = prosto). Płynie, gdy pracują kocioł i grzejnik, w kolorze `wave` |
 | `progress`, `progress_total` | encja / minuty | | Źródło odliczania |
 | `cover` | boolean | `true` | `media`: `false` wyłącza okładkę |
 | `battery` | encja | bateria urządzenia | Odkurzacze |
