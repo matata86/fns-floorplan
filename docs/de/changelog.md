@@ -2,7 +2,9 @@
 
 Jede Version ist mit Hinweisen in den [GitHub-Releases](https://github.com/matata86/fns-floorplan/releases) aufgeführt. Diese Seite fasst die Reihe 0.6.x nach Themen zusammen.
 
-## 1.0.11 – 1.0.40
+## 1.0.11 – 1.0.41
+
+- Karte: Ein Heizungsrohr endet 0,25 m vor seinem Heizkörper.
 
 - Karte: Auch ein Heizkörper als Möbel (`type: radiator`) kann ein Heizungsrohr haben; es fließt nach `animate` und `wave` seiner Regeln.
 

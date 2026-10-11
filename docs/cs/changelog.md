@@ -2,7 +2,9 @@
 
 Každé vydání je s poznámkami uvedeno na [GitHub releases](https://github.com/matata86/fns-floorplan/releases). Tato stránka shrnuje řadu 0.6.x podle témat.
 
-## 1.0.11 – 1.0.40
+## 1.0.11 – 1.0.41
+
+- Karta: trubka topení končí 0,25 m před radiátorem.
 
 - Karta: trubku topení může mít i radiátor jako nábytek (`type: radiator`); teče podle `animate` a `wave` z jeho pravidel.
 

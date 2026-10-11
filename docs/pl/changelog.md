@@ -2,7 +2,9 @@
 
 Każde wydanie wraz z uwagami znajdziesz w [wydaniach na GitHubie](https://github.com/matata86/fns-floorplan/releases). Ta strona podsumowuje linię 0.6.x tematycznie.
 
-## 1.0.11 – 1.0.40
+## 1.0.11 – 1.0.41
+
+- Karta: rura grzewcza kończy się 0,25 m przed grzejnikiem.
 
 - Karta: rurę grzewczą może mieć też grzejnik jako mebel (`type: radiator`); płynie według `animate` i `wave` z jego reguł.
 
