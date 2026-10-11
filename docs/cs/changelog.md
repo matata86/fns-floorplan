@@ -2,7 +2,9 @@
 
 Každé vydání je s poznámkami uvedeno na [GitHub releases](https://github.com/matata86/fns-floorplan/releases). Tato stránka shrnuje řadu 0.6.x podle témat.
 
-## 1.0.11 – 1.0.38
+## 1.0.11 – 1.0.39
+
+- Karta: radiátor může mít trubku topení od kotle na podlaží (editor: sekce **Trubka topení** u radiátoru). Teče, když běží kotel i radiátor, v barvě vlnek radiátoru; úseky společné více radiátorům se kreslí jednou. Nový druh spotřebiče `dehumidifier` (odvlhčovač).
 
 - Karta: radar zapnutého alarmu se zase točí plynule (na Androidu dál v krocích několikrát za sekundu, plynulé otáčení tam dělalo šmouhy).
 

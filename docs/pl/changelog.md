@@ -2,7 +2,9 @@
 
 Każde wydanie wraz z uwagami znajdziesz w [wydaniach na GitHubie](https://github.com/matata86/fns-floorplan/releases). Ta strona podsumowuje linię 0.6.x tematycznie.
 
-## 1.0.11 – 1.0.38
+## 1.0.11 – 1.0.39
+
+- Karta: grzejnik może mieć rurę grzewczą od kotła na piętrze (edytor: sekcja **Rura grzewcza** grzejnika). Płynie, gdy pracują kocioł i grzejnik, w kolorze fal grzejnika; odcinki wspólne kilku grzejników są rysowane raz. Nowy rodzaj urządzenia `dehumidifier` (osuszacz).
 
 - Karta: radar uzbrojonego alarmu znów obraca się płynnie (na Androidzie nadal skokami kilka razy na sekundę, tam płynny obrót się rozmazywał).
 

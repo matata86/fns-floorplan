@@ -2,7 +2,9 @@
 
 Every release is listed with notes in the [GitHub releases](https://github.com/matata86/fns-floorplan/releases). This page summarises the 0.6.x line by theme.
 
-## 1.0.11 – 1.0.38
+## 1.0.11 – 1.0.39
+
+- Card: a radiator can have a heating pipe from the floor's boiler (editor: the radiator's **Heating pipe** section). It flows while the boiler and the radiator both run, in the radiator's wave colour; stretches shared by several radiators are drawn once. New appliance kind `dehumidifier`.
 
 - Card: the radar of an armed alarm turns smoothly again (on Android it still steps a few times a second, where a smooth turn smeared).
 

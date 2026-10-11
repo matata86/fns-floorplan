@@ -2,7 +2,9 @@
 
 Jede Version ist mit Hinweisen in den [GitHub-Releases](https://github.com/matata86/fns-floorplan/releases) aufgeführt. Diese Seite fasst die Reihe 0.6.x nach Themen zusammen.
 
-## 1.0.11 – 1.0.38
+## 1.0.11 – 1.0.39
+
+- Karte: Ein Heizkörper kann ein Heizungsrohr vom Kessel des Stockwerks haben (Editor: Abschnitt **Heizungsrohr** des Heizkörpers). Es fließt, wenn Kessel und Heizkörper beide laufen, in der Wellenfarbe des Heizkörpers; gemeinsame Abschnitte mehrerer Heizkörper werden einmal gezeichnet. Neue Geräteart `dehumidifier` (Luftentfeuchter).
 
 - Karte: Das Radar einer scharfen Alarmanlage dreht sich wieder flüssig (auf Android weiter in Schritten einige Male pro Sekunde, dort verschmierte eine flüssige Drehung).
 
