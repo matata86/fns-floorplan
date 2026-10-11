@@ -2,7 +2,9 @@
 
 Każde wydanie wraz z uwagami znajdziesz w [wydaniach na GitHubie](https://github.com/matata86/fns-floorplan/releases). Ta strona podsumowuje linię 0.6.x tematycznie.
 
-## 1.0.11 – 1.0.39
+## 1.0.11 – 1.0.40
+
+- Karta: rurę grzewczą może mieć też grzejnik jako mebel (`type: radiator`); płynie według `animate` i `wave` z jego reguł.
 
 - Karta: grzejnik może mieć rurę grzewczą od kotła na piętrze (edytor: sekcja **Rura grzewcza** grzejnika). Płynie, gdy pracują kocioł i grzejnik, w kolorze fal grzejnika; odcinki wspólne kilku grzejników są rysowane raz. Nowy rodzaj urządzenia `dehumidifier` (osuszacz).
 

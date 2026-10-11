@@ -2,7 +2,9 @@
 
 Každé vydání je s poznámkami uvedeno na [GitHub releases](https://github.com/matata86/fns-floorplan/releases). Tato stránka shrnuje řadu 0.6.x podle témat.
 
-## 1.0.11 – 1.0.39
+## 1.0.11 – 1.0.40
+
+- Karta: trubku topení může mít i radiátor jako nábytek (`type: radiator`); teče podle `animate` a `wave` z jeho pravidel.
 
 - Karta: radiátor může mít trubku topení od kotle na podlaží (editor: sekce **Trubka topení** u radiátoru). Teče, když běží kotel i radiátor, v barvě vlnek radiátoru; úseky společné více radiátorům se kreslí jednou. Nový druh spotřebiče `dehumidifier` (odvlhčovač).
 

@@ -2,7 +2,9 @@
 
 Jede Version ist mit Hinweisen in den [GitHub-Releases](https://github.com/matata86/fns-floorplan/releases) aufgeführt. Diese Seite fasst die Reihe 0.6.x nach Themen zusammen.
 
-## 1.0.11 – 1.0.39
+## 1.0.11 – 1.0.40
+
+- Karte: Auch ein Heizkörper als Möbel (`type: radiator`) kann ein Heizungsrohr haben; es fließt nach `animate` und `wave` seiner Regeln.
 
 - Karte: Ein Heizkörper kann ein Heizungsrohr vom Kessel des Stockwerks haben (Editor: Abschnitt **Heizungsrohr** des Heizkörpers). Es fließt, wenn Kessel und Heizkörper beide laufen, in der Wellenfarbe des Heizkörpers; gemeinsame Abschnitte mehrerer Heizkörper werden einmal gezeichnet. Neue Geräteart `dehumidifier` (Luftentfeuchter).
 
