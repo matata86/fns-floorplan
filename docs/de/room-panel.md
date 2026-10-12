@@ -24,7 +24,7 @@ Das Panel ist aus den eigenen Karten von Home Assistant gebaut, jede wie auf ein
 | **Fenster und Türen** | Öffnungen des Raums mit Kontakt und ihre Rollläden (auch aus den weiteren Entitäten) mit Öffnen / Stopp / Schließen neben dem Namen und dem Positionsregler darunter; der Kontakt zeigt nur, wann er sich zuletzt geändert hat, das Symbol zeigt, ob er offen ist |
 | **Schalter** | `switch` und `input_boolean` |
 | **Medien** | Mediaplayer und Fernbedienungen (Fernseher, Lautsprecher, Player); ein Player mit einstellbarer Lautstärke erhält einen Lautstärkeregler neben dem Namen; die Kachel nimmt die volle Breite ein |
-| **Roboter** | Saugroboter mit Start / Stopp / zur Station, Mähroboter; die Kachel nimmt die volle Breite ein, die Schaltflächen stehen neben dem Namen |
+| **Saugroboter** | Saugroboter mit Start / Stopp / zur Station, Mähroboter; die Kachel nimmt die volle Breite ein, die Schaltflächen stehen neben dem Namen |
 | **Geräte** | Haushaltsgeräte (ein Schloss erhält Schlossbefehle) |
 | **Sensoren** | Sensoren des Raums, auch die darin platzierten PIR- und Wasserleck-Sensoren; binäre Sensoren (Anwesenheit, Bewegung, Leck) zeigen nur die Zeit der letzten Änderung, den Zustand zeigt das Symbol |
 | **Sonstige** | Alles andere |

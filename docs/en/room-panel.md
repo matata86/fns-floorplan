@@ -24,7 +24,7 @@ The panel is built from Home Assistant's own cards, each placed like on a dashbo
 | **Windows & doors** | Openings of the room with a contact, and their blinds (and covers among the extra entities) with open / stop / close next to the name and a position slider below; the contact shows only when it last changed, the icon shows whether it is open |
 | **Switches** | `switch` and `input_boolean` |
 | **Media** | Media players and remotes (TVs, speakers, players); a player that can set its volume gets a volume slider next to the name; the tile takes the full width |
-| **Robots** | Robot vacuums with start / stop / home, lawn mowers; the tile takes the full width with the buttons next to the name |
+| **Vacuums** | Robot vacuums with start / stop / home, lawn mowers; the tile takes the full width with the buttons next to the name |
 | **Devices** | Appliances (a lock gets lock commands) |
 | **Sensors** | Sensors of the room, including the PIR and water leak sensors placed in it; binary sensors (presence, motion, leak) show only when they last changed, the icon shows the state |
 | **Other** | Everything else |

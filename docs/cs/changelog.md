@@ -2,7 +2,9 @@
 
 Každé vydání je s poznámkami uvedeno na [GitHub releases](https://github.com/matata86/fns-floorplan/releases). Tato stránka shrnuje řadu 0.6.x podle témat.
 
-## 1.0.11 – 1.0.41
+## 1.0.11 – 1.0.42
+
+- Panel místnosti: sekce Roboti se jmenuje Vysavače, sekce Senzory má novou ikonu.
 
 - Karta: trubka topení končí 0,25 m před radiátorem.
 

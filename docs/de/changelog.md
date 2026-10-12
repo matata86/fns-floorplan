@@ -2,7 +2,9 @@
 
 Jede Version ist mit Hinweisen in den [GitHub-Releases](https://github.com/matata86/fns-floorplan/releases) aufgeführt. Diese Seite fasst die Reihe 0.6.x nach Themen zusammen.
 
-## 1.0.11 – 1.0.41
+## 1.0.11 – 1.0.42
+
+- Raum-Panel: Der Abschnitt Roboter heißt jetzt Saugroboter, der Abschnitt Sensoren hat ein neues Symbol.
 
 - Karte: Ein Heizungsrohr endet 0,25 m vor seinem Heizkörper.
 

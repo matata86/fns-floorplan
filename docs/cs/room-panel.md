@@ -24,7 +24,7 @@ Panel je postavený z vlastních karet Home Assistantu, každá je vložená jak
 | **Okna a dveře** | Otvory místnosti s kontaktem a jejich rolety (i rolety z dalších entit) s tlačítky otevřít / stop / zavřít vedle názvu a posuvníkem polohy pod nimi; kontakt ukazuje jen to, kdy se naposledy změnil, ikona ukazuje, jestli je otevřený |
 | **Spínače** | `switch` a `input_boolean` |
 | **Média** | Přehrávače médií a ovladače (televize, reproduktory, přehrávače); přehrávač s nastavitelnou hlasitostí má posuvník hlasitosti vedle názvu; dlaždice zabírá celou šířku |
-| **Roboti** | Robotické vysavače se spuštěním / zastavením / návratem do doku, robotické sekačky; dlaždice zabírá celou šířku, tlačítka jsou vedle názvu |
+| **Vysavače** | Robotické vysavače se spuštěním / zastavením / návratem do doku, robotické sekačky; dlaždice zabírá celou šířku, tlačítka jsou vedle názvu |
 | **Zařízení** | Spotřebiče (zámek dostane příkazy zámku) |
 | **Senzory** | Senzory místnosti, včetně v ní umístěných senzorů pohybu (PIR) a úniku vody; binární senzory (přítomnost, pohyb, únik) ukazují jen čas poslední změny, stav ukazuje ikona |
 | **Ostatní** | Všechno ostatní |

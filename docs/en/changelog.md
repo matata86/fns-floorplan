@@ -2,7 +2,9 @@
 
 Every release is listed with notes in the [GitHub releases](https://github.com/matata86/fns-floorplan/releases). This page summarises the 0.6.x line by theme.
 
-## 1.0.11 – 1.0.41
+## 1.0.11 – 1.0.42
+
+- Room panel: the Robots section is now called Vacuums, the Sensors section has a new icon.
 
 - Card: a heating pipe ends 0.25 m short of its radiator.
 

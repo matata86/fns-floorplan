@@ -2,7 +2,9 @@
 
 Każde wydanie wraz z uwagami znajdziesz w [wydaniach na GitHubie](https://github.com/matata86/fns-floorplan/releases). Ta strona podsumowuje linię 0.6.x tematycznie.
 
-## 1.0.11 – 1.0.41
+## 1.0.11 – 1.0.42
+
+- Panel pomieszczenia: sekcja Roboty nazywa się teraz Odkurzacze, sekcja Czujniki ma nową ikonę.
 
 - Karta: rura grzewcza kończy się 0,25 m przed grzejnikiem.
 

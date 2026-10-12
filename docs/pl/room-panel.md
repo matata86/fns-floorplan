@@ -24,7 +24,7 @@ Panel jest zbudowany z własnych kart Home Assistanta, każda umieszczona jak na
 | **Okna i drzwi** | Otwory pomieszczenia z czujnikiem kontaktowym i ich rolety (także z dodatkowych encji) z przyciskami otwórz / stop / zamknij obok nazwy i suwakiem położenia pod nimi; czujnik kontaktowy pokazuje tylko, kiedy ostatnio się zmienił, ikona pokazuje, czy jest otwarty |
 | **Przełączniki** | `switch` i `input_boolean` |
 | **Multimedia** | Odtwarzacze multimediów i piloty (telewizory, głośniki, odtwarzacze); odtwarzacz z regulacją głośności dostaje suwak głośności obok nazwy; kafelek zajmuje całą szerokość |
-| **Roboty** | Odkurzacze automatyczne ze start / stop / powrót do stacji, kosiarki automatyczne; kafelek zajmuje całą szerokość, przyciski są obok nazwy |
+| **Odkurzacze** | Odkurzacze automatyczne ze start / stop / powrót do stacji, kosiarki automatyczne; kafelek zajmuje całą szerokość, przyciski są obok nazwy |
 | **Urządzenia** | Urządzenia (zamek dostaje polecenia zamka) |
 | **Czujniki** | Czujniki pomieszczenia, także umieszczone w nim czujniki ruchu (PIR) i wycieku wody; czujniki binarne (obecność, ruch, wyciek) pokazują tylko czas ostatniej zmiany, stan pokazuje ikona |
 | **Inne** | Cała reszta |
