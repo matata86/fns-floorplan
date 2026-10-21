@@ -167,7 +167,7 @@ Meble, światła i stacja dokująca robota dzielą tę listę.
 |-----|------|-------------|
 | `icon` | string | Dowolna ikona `mdi:`; `none` oznacza brak ikony |
 | `size` | string | `xs`, `s`, `m`, `l`, `xl`, `xxl` |
-| `layer` | integer | Kolejność w obrębie rodzaju |
+| `layer` | integer | Kolejność w obrębie rodzaju (urządzenia dzielą kolejność ze światłami) |
 | `sheet_hide` | boolean | Pomiń w panelu pomieszczenia |
 | `tap_action`, `double_tap_action`, `hold_action` | obiekt | `action`: `toggle`, `more-info`, `perform-action` (`perform_action`, `data`), `navigate` (`navigation_path`), `url` (`url_path`), `none` |
 

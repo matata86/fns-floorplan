@@ -80,7 +80,7 @@ Räume und Elemente gehören über den Schlüssel `level` zu einer Etage; ohne i
 
 ## Vorlagenbild zum Nachzeichnen { #tracing-image }
 
-Um über eine vorhandene Zeichnung zu zeichnen, lade ein Bild unter einer Etage hoch: Etagenverwaltung, **Etagen-Unterlage**. Du kannst es verschieben, in der Größe ändern und seine Deckkraft einstellen. Das Bild ist nur im Editor sichtbar, nie auf der Karte. Erlaubte Formate sind PNG, JPG, WEBP und SVG bis 15 MB. Die Datei wird in `www/fns_floorplan/` deiner Konfiguration gespeichert (ausgeliefert als `/local/fns_floorplan/...`).
+Um über eine vorhandene Zeichnung zu zeichnen, lade ein Bild unter einer Etage hoch: Etagenverwaltung, **Etagen-Unterlage**. Du kannst es verschieben, in der Größe ändern und seine Deckkraft einstellen. Das Bild ist nur im Editor sichtbar, nie auf der Karte. Erlaubte Formate sind PNG, JPG, WEBP und SVG bis 15 MB. Die Datei wird in `fns_floorplan_bg/` deiner Konfiguration gespeichert und nur an angemeldete Administratoren ausgeliefert.
 
 ![Eine eingescannte Grundrisszeichnung unter den Räumen im Editor](../../assets/screenshots/de/editor-tracing-image.png){ loading=lazy }
 

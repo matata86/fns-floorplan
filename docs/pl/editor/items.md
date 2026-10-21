@@ -16,7 +16,7 @@ Elementy to wszystko na planie, co nie jest ścianą: światła, urządzenia, cz
 | Pozycja | `x`, `z` | W metrach; albo przeciągnij |
 | Rozmiar | `size` | `xs`, `s`, `m` (domyślnie), `l`, `xl`, `xxl` (od 0,6 do 2 razy); dla świateł, urządzeń, stacji i tekstów |
 | Ikona | `icon` | Dowolna ikona `mdi:`; przyciski **Bez ikony** (`icon: none`) i **Resetuj** |
-| Warstwa | `layer` | Kolejność wśród elementów tego samego rodzaju: **Na wierzch**, **Na spód** |
+| Warstwa | `layer` | Kolejność wśród elementów tego samego rodzaju; meble z czujnikami to jeden rodzaj, światła z urządzeniami drugi: **Na wierzch**, **Na spód** |
 | Dotknięcie / podwójne dotknięcie / przytrzymanie | `tap_action` ... | [Akcje](#actions) |
 | Reguły | `rules` | Zobacz [Reguły](rules.md) |
 | Ukryj w panelu pomieszczenia | `sheet_hide` | Pomija element w [panelu pomieszczenia](../room-panel.md) |
@@ -148,7 +148,7 @@ texts:
 
 ## Warstwy
 
-Kolejność jest porównywana tylko wśród elementów tego samego rodzaju; meble i czujniki liczą się jako jeden rodzaj. Użyj **Na wierzch / Na spód** w formularzu. Odkurzacz ma własne zasady, zobacz [Odkurzacz](../robot-vacuum.md#layer-and-stacking).
+Kolejność jest porównywana tylko wśród elementów tego samego rodzaju; meble i czujniki liczą się jako jeden rodzaj, światła i urządzenia jako drugi (Na wierzch na zmywarce stawia ją nad światłem i odwrotnie). To, co się właśnie animuje (działające urządzenie, świecące światło z pulsem), jest rysowane nad statycznymi znaczkami niezależnie od kolejności. Użyj **Na wierzch / Na spód** w formularzu. Odkurzacz ma własne zasady, zobacz [Odkurzacz](../robot-vacuum.md#layer-and-stacking).
 
 ## Grupy i zaznaczenie wielokrotne
 

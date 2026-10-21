@@ -80,6 +80,6 @@ Your plan is stored by Home Assistant (`.storage/fns_floorplan`) and is not touc
 1. Remove the card from your dashboards.
 2. **Settings, Devices & services, FNS Floorplan, three-dot menu, Delete.**
 3. Remove the repository in HACS (or delete the folder `custom_components/fns_floorplan`) and restart.
-4. Optional: delete the stored plan files `.storage/fns_floorplan` and `.storage/fns_floorplan.history`, and the tracing images in `www/fns_floorplan/`.
+4. Optional: delete the stored plan files `.storage/fns_floorplan` and `.storage/fns_floorplan.history`, and the tracing images in `fns_floorplan_bg/`.
 
 Next: [Quick start](quick-start.md).

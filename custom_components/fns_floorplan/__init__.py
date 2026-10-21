@@ -14,6 +14,7 @@ import re
 import time
 
 import voluptuous as vol
+from aiohttp import web
 
 from homeassistant.components import frontend, websocket_api
 from homeassistant.components.frontend import add_extra_js_url
@@ -97,6 +98,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     websocket_api.async_register_command(hass, ws_yaml_dump)
     websocket_api.async_register_command(hass, ws_history_list)
     websocket_api.async_register_command(hass, ws_history_get)
+    await hass.async_add_executor_job(_bg_migrate, hass)
     if not hass.data.get(DATA_VIEW):  # views cannot be registered twice after a reload
         hass.http.register_view(BackgroundView())
         hass.data[DATA_VIEW] = True
@@ -206,11 +208,36 @@ def ws_history_get(hass: HomeAssistant, connection: websocket_api.ActiveConnecti
     connection.send_error(msg["id"], "not_found", f"Revision {msg['rev']} is not in the history")
 
 
-# floor background images are only for tracing in the editor, they live in /config/www
+# floor background images are only for tracing in the editor; they live outside /config/www
+# (which HA serves without authentication) and are only handed out by the authenticated view below
 
 
 def _bg_dir(hass: HomeAssistant) -> str:
-    return hass.config.path("www", "fns_floorplan")
+    return hass.config.path("fns_floorplan_bg")
+
+
+def _bg_migrate(hass: HomeAssistant) -> None:
+    """Move images that older versions stored in the public /config/www folder."""
+    old = hass.config.path("www", "fns_floorplan")
+    if not os.path.isdir(old):
+        return
+    new = _bg_dir(hass)
+    for name in os.listdir(old):
+        if re.fullmatch(r"bg_[A-Za-z0-9_-]+\.[a-z0-9]+", name):
+            os.makedirs(new, exist_ok=True)
+            os.replace(os.path.join(old, name), os.path.join(new, name))
+    try:
+        os.rmdir(old)
+    except OSError:
+        pass
+
+
+def _bg_find(folder: str, level: str) -> str | None:
+    if os.path.isdir(folder):
+        for name in os.listdir(folder):
+            if re.fullmatch(rf"bg_{re.escape(level)}\.[a-z0-9]+", name):
+                return os.path.join(folder, name)
+    return None
 
 
 def _bg_clear(folder: str, level: str) -> None:
@@ -239,6 +266,19 @@ class BackgroundView(HomeAssistantView):
     name = "api:fns_floorplan:background"
     requires_auth = True
 
+    async def get(self, request):
+        if not request["hass_user"].is_admin:
+            return self.json_message("admin only", 403)
+        hass = request.app[KEY_HASS]
+        path = await hass.async_add_executor_job(_bg_find, _bg_dir(hass), _bg_level(request.query.get("level", "")))
+        if not path:
+            return self.json_message("not found", 404)
+        return web.FileResponse(path, headers={
+            "X-Content-Type-Options": "nosniff",
+            "Content-Security-Policy": "default-src 'none'; style-src 'unsafe-inline'; sandbox",
+            "Cache-Control": "private, no-cache",
+        })
+
     async def post(self, request):
         if not request["hass_user"].is_admin:
             return self.json_message("admin only", 403)
@@ -256,7 +296,7 @@ class BackgroundView(HomeAssistantView):
         if len(content) > BG_MAX:
             return self.json_message("file too large", 413)
         await hass.async_add_executor_job(_bg_write, _bg_dir(hass), level, ext, content)
-        return self.json({"url": f"/local/fns_floorplan/bg_{level}.{ext}?v={int(time.time())}"})
+        return self.json({"url": f"{self.url}?level={level}&v={int(time.time())}"})
 
     async def delete(self, request):
         if not request["hass_user"].is_admin:

@@ -761,7 +761,7 @@ class FnsFloorplanPanel extends HTMLElement {
     const bg = this._plan.backgrounds?.[this._level];
     if (bg?.url) {
       const [bx, bz] = P([bg.left || 0, bg.top || 0]);
-      el("image", { href: bg.url, x: bx, y: bz, width: bg.width * S, height: bg.width * S * 3, preserveAspectRatio: "xMinYMin meet", opacity: bg.opacity ?? 0.4, style: "pointer-events:none" }, svg);
+      el("image", { href: this._bgBlob(bg.url, this._level), x: bx, y: bz, width: bg.width * S, height: bg.width * S * 3, preserveAspectRatio: "xMinYMin meet", opacity: bg.opacity ?? 0.4, style: "pointer-events:none" }, svg);
     }
     svg.setAttribute("class", "mode-" + this._mode);
     if (this._multi && !this._multi.some((m) => selEq(m, this._sel))) this._multi = null;
@@ -900,6 +900,7 @@ class FnsFloorplanPanel extends HTMLElement {
       const point = isPoint(f);
       const g = group({ cat: "furniture", i }, f.x, f.z, point ? 0 : f.rotation || 0, point ? SIZES[f.size] || 1 : 1);
       if (res.hide) g.classList.add("rhid");
+      if (isLight(f)) { g.dataset.layer = layer(f); g.dataset.top = ""; }
       const w = f.w * S, d = f.d * S;
       const missing = isLight(f) && !f.entity;
       if (f.type === "led_strip") {
@@ -931,6 +932,7 @@ class FnsFloorplanPanel extends HTMLElement {
       const sel = { cat: "furniture", i: members[0], g: members }, o = this._get(sel);
       const g = group(sel, o.x, o.z, 0, SIZES[o.size] || 1);
       if (ruled(o).hide) g.classList.add("rhid");
+      g.dataset.layer = Math.max(...members.map((m) => layer(plan.furniture[m]))); g.dataset.top = "";
       el("circle", { r: 15, class: "lamp" }, g);
       icon(g, o, 18, lightIcon(o.type), "ico lamp-ico");
       el("circle", { cx: 13, cy: -13, r: 7, class: "count" }, g);
@@ -939,6 +941,7 @@ class FnsFloorplanPanel extends HTMLElement {
     for (const d of this._radiators()) el("polyline", { points: this._route(d).map(P).join(" "), class: "pipe" }, svg);
     plan.devices.map((d, i) => [d, i]).filter(([d]) => this._on(d)).sort((a, b) => layer(a[0]) - layer(b[0])).forEach(([d, i]) => {
       const g = group({ cat: "devices", i }, d.x, d.z, 0, SIZES[d.size] || 1);
+      g.dataset.layer = layer(d); g.dataset.top = "";
       const res = ruled(d);
       if (res.hide) g.classList.add("rhid");
       paint(el("circle", { r: 15, class: "dev" + (d.entity ? "" : " noent") }, g), res, false);
@@ -947,6 +950,10 @@ class FnsFloorplanPanel extends HTMLElement {
       const so = !d.icon && d.kind === "generic" && this._hass.states[d.entity], ip = g.lastElementChild.querySelector("path");
       if (so) resolveIcon(null, so, this._hass).then((x) => x && ip.setAttribute("d", x));
     });
+    // lights and appliances share one stacking order (layer); at the same layer a light stays under an appliance
+    const tops = [...svg.querySelectorAll(":scope > [data-top]")];
+    const after = tops.at(-1)?.nextSibling || null;
+    tops.map((n, k) => [n, k]).sort((a, b) => a[0].dataset.layer - b[0].dataset.layer || a[1] - b[1]).forEach(([n]) => svg.insertBefore(n, after));
     plan.texts.forEach((t, i) => {
       if (!this._on(t)) return;
       const g = group({ cat: "texts", i }, t.x, t.z, t.rotation || 0, SIZES[t.size] || 1);
@@ -1560,6 +1567,19 @@ class FnsFloorplanPanel extends HTMLElement {
       });
       list.appendChild(row);
     }
+  }
+
+  // the image is served only to a logged-in admin, so it is fetched with the token and shown from a blob URL
+  _bgBlob(key, lvl) {
+    const c = (this._bgCache ||= new Map());
+    if (!c.has(key)) {
+      c.set(key, "");
+      this._hass.fetchWithAuth(`/api/fns_floorplan/background?level=${encodeURIComponent(lvl)}`)
+        .then((r) => (r.ok ? r.blob() : Promise.reject(r.status)))
+        .then((b) => { c.set(key, URL.createObjectURL(b)); this._draw(); })
+        .catch(() => c.delete(key));
+    }
+    return c.get(key);
   }
 
   // tracing image of the current floor: upload, position, opacity (the card never shows it)
@@ -2556,9 +2576,9 @@ Request (may be in Czech): ${ask}`;
       if (v) o.room.label_rotation = v; else delete o.room.label_rotation;
     } else if (a.startsWith("rot")) o.rotation = (((o.rotation || 0) + Number(a.slice(3))) % 360 + 360) % 360;
     else if (a.startsWith("layer:")) {
-      // z-order among items of the same kind (furniture and sensors share one); only the other items count, so a repeated click changes nothing
+      // z-order among items of the same kind (furniture+sensors one kind, lights+appliances the other); only the other items count, so a repeated click changes nothing
       const floor = sel.cat === "sensors" || (sel.cat === "furniture" && !isLight(o));
-      const pool = floor ? [...this._plan.furniture.filter((x) => !isLight(x)), ...this._plan.sensors] : this._plan[sel.cat].filter((x) => sel.cat !== "furniture" || isLight(x));
+      const pool = floor ? [...this._plan.furniture.filter((x) => !isLight(x)), ...this._plan.sensors] : sel.cat === "devices" || (sel.cat === "furniture" && isLight(o)) ? [...this._plan.furniture.filter(isLight), ...this._plan.devices] : this._plan[sel.cat];
       const others = pool.filter((x) => !targets.includes(x)).map((x) => x.layer || 0);
       if (others.length) {
         const cur = o.layer || 0;

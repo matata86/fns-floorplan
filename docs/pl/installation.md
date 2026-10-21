@@ -80,6 +80,6 @@ Twój plan jest przechowywany przez Home Assistanta (`.storage/fns_floorplan`) i
 1. Usuń kartę ze swoich pulpitów.
 2. **Ustawienia, Urządzenia oraz usługi, FNS Floorplan, menu z trzema kropkami, Usuń.**
 3. Usuń repozytorium w HACS (albo folder `custom_components/fns_floorplan`) i zrestartuj.
-4. Opcjonalnie: usuń zapisane pliki planu `.storage/fns_floorplan` i `.storage/fns_floorplan.history` oraz obrazy podkładu w `www/fns_floorplan/`.
+4. Opcjonalnie: usuń zapisane pliki planu `.storage/fns_floorplan` i `.storage/fns_floorplan.history` oraz obrazy podkładu w `fns_floorplan_bg/`.
 
 Dalej: [Szybki start](quick-start.md).

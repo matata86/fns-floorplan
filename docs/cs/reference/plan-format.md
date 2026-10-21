@@ -167,7 +167,7 @@ Nábytek, světla a dok robota sdílejí tento seznam.
 |------|-----|-------|
 | `icon` | string | Libovolná ikona `mdi:`; `none` = bez ikony |
 | `size` | string | `xs`, `s`, `m`, `l`, `xl`, `xxl` |
-| `layer` | integer | Pořadí překrytí v rámci druhu |
+| `layer` | integer | Pořadí překrytí v rámci druhu (spotřebiče sdílí pořadí se světly) |
 | `sheet_hide` | boolean | Vynechat z panelu místnosti |
 | `tap_action`, `double_tap_action`, `hold_action` | object | `action`: `toggle`, `more-info`, `perform-action` (`perform_action`, `data`), `navigate` (`navigation_path`), `url` (`url_path`), `none` |
 

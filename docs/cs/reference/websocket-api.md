@@ -106,10 +106,10 @@ Podkladové obrázky pater se nenahrávají přes websocket, ale přes HTTP endp
 
 | Metoda | URL | Tělo | Výsledek |
 |--------|-----|------|----------|
-| `POST` | `/api/fns_floorplan/background` | formulář multipart: `level` (id patra), `file` (png, jpg, jpeg, webp nebo svg, nejvýše 15 MB) | `{"url": "/local/fns_floorplan/bg_<level>.<ext>?v=<timestamp>"}` |
+| `POST` | `/api/fns_floorplan/background` | formulář multipart: `level` (id patra), `file` (png, jpg, jpeg, webp nebo svg, nejvýše 15 MB) | `{"url": "/api/fns_floorplan/background?level=<level>&v=<timestamp>"}` |
 | `DELETE` | `/api/fns_floorplan/background?level=<id>` | žádné | `{"ok": true}` |
 
-Soubor se ukládá do `www/fns_floorplan/bg_<level>.<ext>` (nové nahrání nahradí starý soubor daného patra). Chyby: 403 pro uživatele bez práv administrátora, 400 pro nepodporovaný typ, 413 pro příliš velký soubor. Vrácená `url` patří do `backgrounds[level].url` v půdorysu, který se pak uloží přes `plan/save`.
+Soubor se ukládá do `fns_floorplan_bg/bg_<level>.<ext>` (mimo `www`; `GET` na stejné URL vrátí soubor jen administrátorovi) (nové nahrání nahradí starý soubor daného patra). Chyby: 403 pro uživatele bez práv administrátora, 400 pro nepodporovaný typ, 413 pro příliš velký soubor. Vrácená `url` patří do `backgrounds[level].url` v půdorysu, který se pak uloží přes `plan/save`.
 
 ```bash
 curl -X POST -H "Authorization: Bearer $TOKEN" \

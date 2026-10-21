@@ -16,7 +16,7 @@ Položky jsou vše na půdorysu, co není zeď: světla, spotřebiče, senzory, 
 | Pozice | `x`, `z` | V metrech; nebo přetáhni |
 | Velikost | `size` | `xs`, `s`, `m` (výchozí), `l`, `xl`, `xxl` (0,6 až 2násobek); pro světla, spotřebiče, dok a texty |
 | Ikona | `icon` | Libovolná ikona `mdi:`; tlačítka **Bez ikony** (`icon: none`) a **Vrátit výchozí** |
-| Vrstva | `layer` | Pořadí překrytí mezi položkami stejného druhu: **Do popředí**, **Do pozadí** |
+| Vrstva | `layer` | Pořadí překrytí mezi položkami stejného druhu; nábytek se senzory je jeden druh, světla se spotřebiči druhý: **Do popředí**, **Do pozadí** |
 | Klepnutí / dvojklik / podržení | `tap_action` ... | [Akce](#actions) |
 | Pravidla | `rules` | Viz [Pravidla](rules.md) |
 | Nezobrazovat v panelu místnosti | `sheet_hide` | Vynechá položku z [panelu místnosti](../room-panel.md) |
@@ -148,7 +148,7 @@ texts:
 
 ## Vrstvy
 
-Pořadí překrytí se porovnává jen mezi položkami stejného druhu, nábytek a senzory jsou jeden druh. Použij **Do popředí / Do pozadí** ve formuláři. Robotický vysavač má vlastní pravidla, viz [Robotický vysavač](../robot-vacuum.md#layer-and-stacking).
+Pořadí překrytí se porovnává jen mezi položkami stejného druhu, nábytek a senzory jsou jeden druh, světla a spotřebiče druhý (Do popředí na myčce ji dá nad světlo a naopak). Co se právě animuje (běžící spotřebič, svítící světlo s pulzem), kreslí se nad statickými odznaky bez ohledu na pořadí. Použij **Do popředí / Do pozadí** ve formuláři. Robotický vysavač má vlastní pravidla, viz [Robotický vysavač](../robot-vacuum.md#layer-and-stacking).
 
 ## Skupiny a vícenásobný výběr
 

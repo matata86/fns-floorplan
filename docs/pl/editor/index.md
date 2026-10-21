@@ -80,7 +80,7 @@ Pomieszczenia i elementy należą do piętra przez klucz `level`; te bez niego n
 
 ## Podkład do obrysowania { #tracing-image }
 
-Aby rysować plan na istniejącym rysunku, wgraj obraz pod piętro: zarządzanie piętrami, **Podkład piętra**. Przesuń go, zmień rozmiar i ustaw jego przezroczystość. Obraz jest widoczny tylko w edytorze, nigdy na karcie. Dozwolone formaty to PNG, JPG, WEBP i SVG do 15 MB. Plik jest przechowywany w `www/fns_floorplan/` twojej konfiguracji (serwowany jako `/local/fns_floorplan/...`).
+Aby rysować plan na istniejącym rysunku, wgraj obraz pod piętro: zarządzanie piętrami, **Podkład piętra**. Przesuń go, zmień rozmiar i ustaw jego przezroczystość. Obraz jest widoczny tylko w edytorze, nigdy na karcie. Dozwolone formaty to PNG, JPG, WEBP i SVG do 15 MB. Plik jest przechowywany w `fns_floorplan_bg/` twojej konfiguracji i udostępniany tylko zalogowanemu administratorowi.
 
 ![Zeskanowany rysunek rzutu pod pomieszczeniami w edytorze](../../assets/screenshots/pl/editor-tracing-image.png){ loading=lazy }
 

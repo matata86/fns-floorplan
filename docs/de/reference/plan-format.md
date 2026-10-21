@@ -167,7 +167,7 @@ Möbel, Lichter und die Station des Roboters teilen sich diese Liste.
 |-----------|-----|--------------|
 | `icon` | string | Jedes `mdi:`-Symbol; `none` für kein Symbol |
 | `size` | string | `xs`, `s`, `m`, `l`, `xl`, `xxl` |
-| `layer` | integer | Stapelreihenfolge innerhalb der Art |
+| `layer` | integer | Stapelreihenfolge innerhalb der Art (Geräte teilen die Reihenfolge mit Lichtern) |
 | `sheet_hide` | boolean | Im Raum-Panel weglassen |
 | `tap_action`, `double_tap_action`, `hold_action` | object | `action`: `toggle`, `more-info`, `perform-action` (`perform_action`, `data`), `navigate` (`navigation_path`), `url` (`url_path`), `none` |
 

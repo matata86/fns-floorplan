@@ -16,7 +16,7 @@ Items are everything on the plan that is not a wall: lights, appliances, sensors
 | Position | `x`, `z` | In metres; or drag |
 | Size | `size` | `xs`, `s`, `m` (default), `l`, `xl`, `xxl` (0.6 to 2 times); for lights, appliances, the dock and texts |
 | Icon | `icon` | Any `mdi:` icon; buttons **No icon** (`icon: none`) and **Reset** |
-| Layer | `layer` | Stacking order among items of the same kind: **To front**, **To back** |
+| Layer | `layer` | Stacking order among items of the same kind; furniture with sensors is one kind, lights with appliances another: **To front**, **To back** |
 | Tap / double tap / hold | `tap_action` ... | [Actions](#actions) |
 | Rules | `rules` | See [Rules](rules.md) |
 | Hide in room panel | `sheet_hide` | Leaves the item out of the [room panel](../room-panel.md) |
@@ -148,7 +148,7 @@ texts:
 
 ## Layers
 
-The stacking order is only compared among items of the same kind; furniture and sensors count as one kind. Use **To front / To back** in the form. The robot vacuum has its own rules, see [Robot vacuum](../robot-vacuum.md#layer-and-stacking).
+The stacking order is only compared among items of the same kind; furniture and sensors count as one kind, lights and appliances as another (To front on a dishwasher puts it above a light and vice versa). Whatever is animating right now (a running appliance, a lit light with its pulse) is drawn above the static badges regardless of order. Use **To front / To back** in the form. The robot vacuum has its own rules, see [Robot vacuum](../robot-vacuum.md#layer-and-stacking).
 
 ## Groups and multi-selection
 

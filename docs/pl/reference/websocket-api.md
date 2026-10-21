@@ -106,10 +106,10 @@ Podkłady pięter nie są wgrywane przez websocket, lecz przez endpoint HTTP int
 
 | Metoda | URL | Treść | Wynik |
 |--------|-----|------|--------|
-| `POST` | `/api/fns_floorplan/background` | formularz multipart: `level` (id piętra), `file` (png, jpg, jpeg, webp lub svg, najwyżej 15 MB) | `{"url": "/local/fns_floorplan/bg_<level>.<ext>?v=<timestamp>"}` |
+| `POST` | `/api/fns_floorplan/background` | formularz multipart: `level` (id piętra), `file` (png, jpg, jpeg, webp lub svg, najwyżej 15 MB) | `{"url": "/api/fns_floorplan/background?level=<level>&v=<timestamp>"}` |
 | `DELETE` | `/api/fns_floorplan/background?level=<id>` | brak | `{"ok": true}` |
 
-Plik jest przechowywany w `www/fns_floorplan/bg_<level>.<ext>` (nowe wgranie zastępuje stare dla tego piętra). Błędy: 403 dla nie-administratorów, 400 dla nieobsługiwanego typu, 413 dla zbyt dużego pliku. Zwrócony `url` trafia do `backgrounds[level].url` planu, który następnie zapisujesz przez `plan/save`.
+Plik jest przechowywany w `fns_floorplan_bg/bg_<level>.<ext>` (poza `www`; `GET` na ten sam URL zwraca plik tylko administratorowi) (nowe wgranie zastępuje stare dla tego piętra). Błędy: 403 dla nie-administratorów, 400 dla nieobsługiwanego typu, 413 dla zbyt dużego pliku. Zwrócony `url` trafia do `backgrounds[level].url` planu, który następnie zapisujesz przez `plan/save`.
 
 ```bash
 curl -X POST -H "Authorization: Bearer $TOKEN" \

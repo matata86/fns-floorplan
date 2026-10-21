@@ -106,10 +106,10 @@ Floor tracing images are not uploaded over the websocket but through an HTTP end
 
 | Method | URL | Body | Result |
 |--------|-----|------|--------|
-| `POST` | `/api/fns_floorplan/background` | multipart form: `level` (floor id), `file` (png, jpg, jpeg, webp or svg, at most 15 MB) | `{"url": "/local/fns_floorplan/bg_<level>.<ext>?v=<timestamp>"}` |
+| `POST` | `/api/fns_floorplan/background` | multipart form: `level` (floor id), `file` (png, jpg, jpeg, webp or svg, at most 15 MB) | `{"url": "/api/fns_floorplan/background?level=<level>&v=<timestamp>"}` |
 | `DELETE` | `/api/fns_floorplan/background?level=<id>` | none | `{"ok": true}` |
 
-The file is stored in `www/fns_floorplan/bg_<level>.<ext>` (a new upload replaces the old one of that floor). Errors: 403 for non-admins, 400 for an unsupported type, 413 for a file that is too large. The returned `url` goes into `backgrounds[level].url` of the plan, which is then saved with `plan/save`.
+The file is stored in `fns_floorplan_bg/bg_<level>.<ext>` (outside `www`; `GET` on the same URL returns the file to administrators only) (a new upload replaces the old one of that floor). Errors: 403 for non-admins, 400 for an unsupported type, 413 for a file that is too large. The returned `url` goes into `backgrounds[level].url` of the plan, which is then saved with `plan/save`.
 
 ```bash
 curl -X POST -H "Authorization: Bearer $TOKEN" \

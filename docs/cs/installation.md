@@ -80,6 +80,6 @@ Tvůj půdorys uchovává Home Assistant (`.storage/fns_floorplan`) a aktualizac
 1. Odstraň kartu ze všech dashboardů.
 2. **Nastavení, Zařízení a služby, FNS Floorplan, nabídka se třemi tečkami, Smazat.**
 3. Odstraň repozitář v HACS (nebo smaž složku `custom_components/fns_floorplan`) a restartuj.
-4. Volitelně smaž uložené soubory půdorysu `.storage/fns_floorplan` a `.storage/fns_floorplan.history` a podkladové obrázky ve složce `www/fns_floorplan/`.
+4. Volitelně smaž uložené soubory půdorysu `.storage/fns_floorplan` a `.storage/fns_floorplan.history` a podkladové obrázky ve složce `fns_floorplan_bg/`.
 
 Dál: [Rychlý start](quick-start.md).

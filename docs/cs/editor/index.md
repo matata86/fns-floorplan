@@ -80,7 +80,7 @@ Místnosti a prvky patří k patru přes klíč `level`; ty bez něj patří k p
 
 ## Podklad pro obkreslení { #tracing-image }
 
-Chceš-li kreslit přes existující výkres, nahraj obrázek pod patro: správa pater, **Podklad patra**. Můžeš ho posouvat, měnit mu velikost a nastavit průhlednost. Obrázek je vidět jen v editoru, na kartě nikdy. Povolené formáty jsou PNG, JPG, WEBP a SVG do 15 MB. Soubor se ukládá do `www/fns_floorplan/` v tvé konfiguraci (zpřístupněný jako `/local/fns_floorplan/...`).
+Chceš-li kreslit přes existující výkres, nahraj obrázek pod patro: správa pater, **Podklad patra**. Můžeš ho posouvat, měnit mu velikost a nastavit průhlednost. Obrázek je vidět jen v editoru, na kartě nikdy. Povolené formáty jsou PNG, JPG, WEBP a SVG do 15 MB. Soubor se ukládá do `fns_floorplan_bg/` v tvé konfiguraci a je dostupný jen přihlášenému správci.
 
 ![Naskenovaný výkres půdorysu pod místnostmi v editoru](../../assets/screenshots/cs/editor-tracing-image.png){ loading=lazy }
 

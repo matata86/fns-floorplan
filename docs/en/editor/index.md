@@ -80,7 +80,7 @@ Rooms and items belong to a floor with the `level` key; ones without it belong t
 
 ## Tracing image
 
-To draw a plan over an existing drawing, upload an image under a floor: floor management, **Tracing image**. Move and resize it, and set its opacity. The image is only visible in the editor, never on the card. Allowed formats are PNG, JPG, WEBP and SVG up to 15 MB. The file is stored in `www/fns_floorplan/` of your configuration (served as `/local/fns_floorplan/...`).
+To draw a plan over an existing drawing, upload an image under a floor: floor management, **Tracing image**. Move and resize it, and set its opacity. The image is only visible in the editor, never on the card. Allowed formats are PNG, JPG, WEBP and SVG up to 15 MB. The file is stored in `fns_floorplan_bg/` of your configuration and is only served to a logged-in administrator.
 
 ![A scanned floor plan drawing under the rooms in the editor](../../assets/screenshots/en/editor-tracing-image.png){ loading=lazy }
 

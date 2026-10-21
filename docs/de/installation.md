@@ -80,6 +80,6 @@ Dein Grundriss wird von Home Assistant gespeichert (`.storage/fns_floorplan`) un
 1. Entferne die Karte aus deinen Dashboards.
 2. **Einstellungen, Geräte & Dienste, FNS Floorplan, Dreipunktmenü, Löschen.**
 3. Entferne das Repository in HACS (oder lösche den Ordner `custom_components/fns_floorplan`) und starte neu.
-4. Optional: Lösche die gespeicherten Plandateien `.storage/fns_floorplan` und `.storage/fns_floorplan.history` sowie die Vorlagenbilder in `www/fns_floorplan/`.
+4. Optional: Lösche die gespeicherten Plandateien `.storage/fns_floorplan` und `.storage/fns_floorplan.history` sowie die Vorlagenbilder in `fns_floorplan_bg/`.
 
 Weiter: [Schnellstart](quick-start.md).

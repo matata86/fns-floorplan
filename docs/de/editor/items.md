@@ -16,7 +16,7 @@ Elemente sind alles auf dem Plan, was keine Wand ist: Lichter, Geräte, Sensoren
 | Position | `x`, `z` | In Metern; oder ziehen |
 | Größe | `size` | `xs`, `s`, `m` (Standard), `l`, `xl`, `xxl` (0,6- bis 2-fach); für Lichter, Geräte, die Station und Texte |
 | Symbol | `icon` | Jedes `mdi:`-Symbol; Schaltflächen **Kein Symbol** (`icon: none`) und **Standard wiederherstellen** |
-| Reihenfolge | `layer` | Stapelreihenfolge unter Elementen derselben Art: **In den Vordergrund**, **In den Hintergrund** |
+| Reihenfolge | `layer` | Stapelreihenfolge unter Elementen derselben Art; Möbel mit Sensoren sind eine Art, Lichter mit Geräten die andere: **In den Vordergrund**, **In den Hintergrund** |
 | Tippen / Doppeltippen / Halten | `tap_action` ... | [Aktionen](#actions) |
 | Regeln | `rules` | Siehe [Regeln](rules.md) |
 | Nicht im Raumpanel anzeigen | `sheet_hide` | Lässt das Element im [Raum-Panel](../room-panel.md) weg |
@@ -148,7 +148,7 @@ texts:
 
 ## Reihenfolge
 
-Die Stapelreihenfolge wird nur unter Elementen derselben Art verglichen; Möbel und Sensoren zählen als eine Art. Nutze **In den Vordergrund / In den Hintergrund** im Formular. Der Saugroboter hat eigene Regeln, siehe [Saugroboter](../robot-vacuum.md#layer-and-stacking).
+Die Stapelreihenfolge wird nur unter Elementen derselben Art verglichen; Möbel und Sensoren zählen als eine Art, Lichter und Geräte als eine andere (In den Vordergrund bei der Spülmaschine legt sie über ein Licht und umgekehrt). Was gerade animiert wird (ein laufendes Gerät, ein leuchtendes Licht mit Puls), wird unabhängig von der Reihenfolge über den statischen Symbolen gezeichnet. Nutze **In den Vordergrund / In den Hintergrund** im Formular. Der Saugroboter hat eigene Regeln, siehe [Saugroboter](../robot-vacuum.md#layer-and-stacking).
 
 ## Gruppen und Mehrfachauswahl
 

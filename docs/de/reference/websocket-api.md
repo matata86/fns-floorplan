@@ -106,10 +106,10 @@ Vorlagenbilder der Etagen werden nicht über den Websocket hochgeladen, sondern 
 
 | Methode | URL | Body | Ergebnis |
 |---------|-----|------|----------|
-| `POST` | `/api/fns_floorplan/background` | Multipart-Formular: `level` (Etagen-ID), `file` (png, jpg, jpeg, webp oder svg, höchstens 15 MB) | `{"url": "/local/fns_floorplan/bg_<level>.<ext>?v=<timestamp>"}` |
+| `POST` | `/api/fns_floorplan/background` | Multipart-Formular: `level` (Etagen-ID), `file` (png, jpg, jpeg, webp oder svg, höchstens 15 MB) | `{"url": "/api/fns_floorplan/background?level=<level>&v=<timestamp>"}` |
 | `DELETE` | `/api/fns_floorplan/background?level=<id>` | keiner | `{"ok": true}` |
 
-Die Datei wird in `www/fns_floorplan/bg_<level>.<ext>` gespeichert (ein neuer Upload ersetzt den alten dieser Etage). Fehler: 403 für Nicht-Administratoren, 400 für einen nicht unterstützten Typ, 413 für eine zu große Datei. Die zurückgegebene `url` gehört in `backgrounds[level].url` des Plans, der dann mit `plan/save` gespeichert wird.
+Die Datei wird in `fns_floorplan_bg/bg_<level>.<ext>` (außerhalb von `www`; `GET` auf dieselbe URL liefert die Datei nur an Administratoren) gespeichert (ein neuer Upload ersetzt den alten dieser Etage). Fehler: 403 für Nicht-Administratoren, 400 für einen nicht unterstützten Typ, 413 für eine zu große Datei. Die zurückgegebene `url` gehört in `backgrounds[level].url` des Plans, der dann mit `plan/save` gespeichert wird.
 
 ```bash
 curl -X POST -H "Authorization: Bearer $TOKEN" \

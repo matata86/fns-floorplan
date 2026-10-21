@@ -167,7 +167,7 @@ Furniture, lights and the robot dock share this list.
 |-----|------|-------------|
 | `icon` | string | Any `mdi:` icon; `none` for no icon |
 | `size` | string | `xs`, `s`, `m`, `l`, `xl`, `xxl` |
-| `layer` | integer | Stacking order within the kind |
+| `layer` | integer | Stacking order within the kind (appliances share the order with lights) |
 | `sheet_hide` | boolean | Leave out of the room panel |
 | `tap_action`, `double_tap_action`, `hold_action` | object | `action`: `toggle`, `more-info`, `perform-action` (`perform_action`, `data`), `navigate` (`navigation_path`), `url` (`url_path`), `none` |
 
