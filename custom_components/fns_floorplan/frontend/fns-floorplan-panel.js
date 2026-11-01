@@ -892,7 +892,7 @@ class FnsFloorplanPanel extends HTMLElement {
         const g = group({ cat, i }, f.x, f.z);
         el("circle", { r: 11, class: "sensor" + (f.entity ? "" : " noent") }, g);
         const dc = states[f.entity]?.attributes.device_class;
-        icon(g, f, 14, dc === "moisture" ? "mdiWaterAlert" : "mdiMotionSensor", "ico sensor-ico");
+        icon(g, f, 14, dc === "moisture" ? "mdiWaterAlert" : ["smoke", "gas", "carbon_monoxide"].includes(dc) ? "mdiFire" : "mdiMotionSensor", "ico sensor-ico");
         continue;
       }
       if (grouped.has(i) || !this._on(f)) continue;
