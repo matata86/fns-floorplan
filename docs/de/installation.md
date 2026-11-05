@@ -8,13 +8,14 @@
 
 ## Installation mit HACS
 
-FNS Floorplan steht nicht in der Standardliste von HACS, du fügst es deshalb als benutzerdefiniertes Repository hinzu.
+FNS Floorplan ist im Standard-Store von HACS, ein benutzerdefiniertes Repository ist also nicht nötig.
 
 1. Öffne **HACS** in der Seitenleiste von Home Assistant.
-2. Öffne oben rechts das Menü mit den drei Punkten und wähle **Benutzerdefinierte Repositories**.
-3. Gib `https://github.com/matata86/fns-floorplan` als Repository ein und wähle die Kategorie **Integration**. Klicke auf **Hinzufügen**.
-4. Suche in HACS nach **FNS Floorplan** und klicke auf **Herunterladen**.
-5. **Starte Home Assistant neu** (Einstellungen, System, Neu starten).
+2. Suche nach **FNS Floorplan** und klicke auf **Herunterladen**.
+3. **Starte Home Assistant neu** (Einstellungen, System, Neu starten).
+
+!!! note
+    Das Repository wurde am 4. November 2026 zur Standardliste von HACS hinzugefügt, es kann bis zu 8 Stunden dauern, bis es erscheint. Siehst du es noch nicht, füge `https://github.com/matata86/fns-floorplan` als benutzerdefiniertes Repository hinzu (Dreipunktmenü, **Benutzerdefinierte Repositories**, Kategorie **Integration**).
 
 Oder öffne es direkt in HACS mit diesem Button:
 

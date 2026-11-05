@@ -8,13 +8,14 @@
 
 ## Instalace přes HACS
 
-FNS Floorplan není ve výchozím seznamu HACS, přidáš ho proto jako vlastní repozitář.
+FNS Floorplan je ve výchozím obchodě HACS, vlastní repozitář tedy není potřeba.
 
 1. Otevři **HACS** v postranním menu Home Assistantu.
-2. V pravém horním rohu otevři nabídku s třemi tečkami a zvol **Vlastní repozitáře**.
-3. Jako repozitář zadej `https://github.com/matata86/fns-floorplan`, jako kategorii vyber **Integrace** a klikni na **Přidat**.
-4. V HACS vyhledej **FNS Floorplan** a klikni na **Stáhnout**.
-5. **Restartuj Home Assistant** (Nastavení, Systém, Restartovat).
+2. Vyhledej **FNS Floorplan** a klikni na **Stáhnout**.
+3. **Restartuj Home Assistant** (Nastavení, Systém, Restartovat).
+
+!!! note
+    Repozitář byl do výchozího seznamu HACS přidán 4. listopadu 2026 a zobrazení může trvat až 8 hodin. Pokud ho zatím nevidíš, přidej `https://github.com/matata86/fns-floorplan` jako vlastní repozitář (nabídka se třemi tečkami, **Vlastní repozitáře**, kategorie **Integrace**).
 
 Nebo ho otevři v HACS rovnou tímto tlačítkem:
 

@@ -63,7 +63,7 @@ An animated 2D floor plan for Home Assistant that shows the live state of your h
 
 ## Installation
 
-1. In HACS open the three-dot menu, **Custom repositories**, add `https://github.com/matata86/fns-floorplan` with category **Integration**, then install **FNS Floorplan**.
+1. In HACS search for **FNS Floorplan** and download it (it is in the HACS default store; if it does not show up yet, add `https://github.com/matata86/fns-floorplan` via three-dot menu, **Custom repositories**, category **Integration**).
 2. Restart Home Assistant.
 3. **Settings, Devices & services, Add integration, FNS Floorplan.**
 4. Optional: click **Configure** on the integration to show or hide the editor in the sidebar. The editor is always reachable at `/fns-floorplan`.
