@@ -1727,6 +1727,7 @@ class FnsFloorplanPanel extends HTMLElement {
         ${field(light ? t("panel.f.entity_light") : o.type === "tv_wall" ? t("panel.f.entity_tv") : dock ? t("panel.f.entity_vac") : t("panel.f.entity_opt"), "entity", o.entity || "", "text", 'list="ents"')}
         ${dock ? `<label>${t("panel.f.battery")}</label><input data-k="battery" value="${esc(o.battery || "")}" placeholder="sensor.*_battery" list="ents">` : ""}
         ${dock ? this._vacPairing(o) : ""}
+        ${dock ? this._vacPosition(o) : ""}
         ${light ? `<label>${t("panel.f.room_light")}</label><input data-k="room_light" type="number" min="0" step="5" placeholder="100"
           value="${o.room_light === false ? 15 : typeof o.room_light === "number" ? Math.round(o.room_light * 100) : ""}">` : ""}
         ${light || dock ? `<label class="chk"><input type="checkbox" data-k="sheet_hide" ${o.sheet_hide ? "checked" : ""}> ${t("panel.f.sheet_hide")}</label>` : ""}`, true)}
@@ -1817,6 +1818,15 @@ class FnsFloorplanPanel extends HTMLElement {
     return this._sec(t("panel.f.sec_pairing"), `<input data-k="room_sensor" value="${esc(sensor)}" data-label="${t("panel.f.vp_sensor")}" placeholder="sensor.*_current_room" list="ents">
       <p class="hint">${t("panel.f.vp_hint")}</p>
       ${sensor ? `${rows}<input data-k="rm_add" data-label="${t("panel.f.vp_add")}" placeholder="${t("panel.f.vp_add_ph")}">` : `<p class="hint">${t("panel.f.vp_first")}</p>`}`, true);
+  }
+
+  // dock: exact position from the AnyVac sensor; the dock is the anchor, rotation / mirror / scale fit its map to the plan
+  _vacPosition(o) {
+    return this._sec(t("panel.f.sec_pos"), `<input data-k="pos_entity" value="${esc(o.pos_entity || "")}" data-label="${t("panel.f.pos_entity")}" placeholder="sensor.*_anyvac_map" list="ents">
+      <p class="hint">${t("panel.f.pos_hint")}</p>
+      ${o.pos_entity ? `<input data-k="pos_rot" type="number" step="1" value="${o.pos_rot ?? ""}" data-label="${t("panel.f.pos_rot")}" placeholder="0">
+      <select data-k="pos_flip" data-label="${t("panel.f.pos_flip")}"><option value="" ${o.pos_flip ? "" : "selected"}>${t("panel.f.pos_no")}</option><option value="1" ${o.pos_flip ? "selected" : ""}>${t("panel.f.pos_yes")}</option></select>
+      <input data-k="pos_scale" type="number" step="0.01" min="0.1" value="${o.pos_scale ?? ""}" data-label="${t("panel.f.pos_scale")}" placeholder="1">` : ""}`, !!o.pos_entity);
   }
 
   // swaps plain inputs and selects for HA's ha-selector (same data-k, same set callback)

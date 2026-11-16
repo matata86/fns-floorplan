@@ -81,3 +81,7 @@ Robot se objeví v [panelu místnosti](room-panel.md) místnosti, ve které má 
 Můžeš také umístit zařízení `generic` s entitou `vacuum.*`: běží při úklidu nebo návratu (kruh `comet`) a v doku ukazuje kruh baterie a text s nabitím („nabíjí se 64 %“ nebo „100 %“). Baterie se bere z registru zařízení (senzor s `device_class: battery` a binární senzor `battery_charging` na stejném zařízení) nebo z atributu `battery_level`.
 
 Zpět na [Položky](editor/items.md).
+
+## Přesná pozice (AnyVac)
+
+Bez ní robot jen jede simulovanou trasu místností, kterou hlásí senzor. S integrací [AnyVac](https://github.com/Michailjovic/anyvac) (HACS, jen Roborock) ukazuje, kde skutečný vysavač opravdu je. V formuláři doku nastav **Senzor pozice** na `sensor.*_anyvac_map`. Kotvou je dok: karta čte ze senzoru `vacuum_position` a `charger` (mm) a robota umístí do stejné vzdálenosti od doku. Je-li robot proti půdorysu otočený nebo zrcadlově, uprav **Otočení**, **Zrcadlit** a **Měřítko** (`pos_rot`, `pos_flip`, `pos_scale` na doku), až jízda z doku sedí se skutečnou.

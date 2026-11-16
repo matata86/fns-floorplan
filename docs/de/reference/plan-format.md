@@ -110,6 +110,7 @@ Möbel, Lichter und die Station des Roboters teilen sich diese Liste.
 | `icon`, `size`, `layer` | | | Gemeinsame Elementfelder |
 | `group` | string | | Gruppen-ID (gesetzt durch die Schaltfläche **Gruppieren**) |
 | `room_sensor`, `room_map`, `battery` | | | Station: siehe [Saugroboter](../robot-vacuum.md) |
+| `pos_entity`, `pos_rot`, `pos_flip`, `pos_scale` | | | Station: genaue Position aus AnyVac, siehe [Saugroboter](../robot-vacuum.md) |
 | `color_on`, `fx`, `progress`, `progress_total` | | | Station: Aussehen beim Saugen |
 | `rules`, `tap_action`, `double_tap_action`, `hold_action`, `sheet_hide` | | | |
 

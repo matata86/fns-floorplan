@@ -81,3 +81,7 @@ The robot appears in the [room panel](room-panel.md) of the room with its dock. 
 You can also place a `generic` appliance with a `vacuum.*` entity: it runs while cleaning or returning (ring `comet`), and in the dock it shows the battery ring and the text with the charge ("charging 64 %" or "100 %"). The battery comes from the device registry (a sensor with `device_class: battery` and the `battery_charging` binary sensor on the same device) or the `battery_level` attribute.
 
 Back to [Items](editor/items.md).
+
+## Exact position (AnyVac)
+
+Without it the robot only drives a simulated route through the reported room. With the [AnyVac](https://github.com/Michailjovic/anyvac) integration (HACS, Roborock only) it shows where the real vacuum is. Set **Position sensor** in the dock's form to `sensor.*_anyvac_map`. The dock is the anchor: the card reads `vacuum_position` and `charger` (mm) from the sensor and places the robot at the same offset from the dock. If the robot is turned or mirrored against the plan, adjust **Rotation**, **Mirror** and **Scale** (`pos_rot`, `pos_flip`, `pos_scale` on the dock) until a drive from the dock matches the real one.

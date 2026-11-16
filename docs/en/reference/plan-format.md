@@ -110,6 +110,7 @@ Furniture, lights and the robot dock share this list.
 | `icon`, `size`, `layer` | | | Common item fields |
 | `group` | string | | Group id (set by the **Group** button) |
 | `room_sensor`, `room_map`, `battery` | | | Dock: see [Robot vacuum](../robot-vacuum.md) |
+| `pos_entity`, `pos_rot`, `pos_flip`, `pos_scale` | | | Dock: exact position from AnyVac, see [Robot vacuum](../robot-vacuum.md) |
 | `color_on`, `fx`, `progress`, `progress_total` | | | Dock: look while cleaning |
 | `rules`, `tap_action`, `double_tap_action`, `hold_action`, `sheet_hide` | | | |
 

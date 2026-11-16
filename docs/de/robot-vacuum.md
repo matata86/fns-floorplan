@@ -81,3 +81,7 @@ Der Roboter erscheint im [Raum-Panel](room-panel.md) des Raums mit seiner Statio
 Du kannst auch ein `generic`-Gerät mit einer `vacuum.*`-Entität platzieren: Es läuft beim Saugen oder bei der Rückkehr (Ring `comet`) und zeigt in der Station den Akkuring und den Text mit dem Ladestand („lädt 64 %“ oder „100 %“). Der Akku stammt aus der Geräteregistrierung (ein Sensor mit `device_class: battery` und der Binärsensor `battery_charging` am selben Gerät) oder aus dem Attribut `battery_level`.
 
 Zurück zu [Elemente](editor/items.md).
+
+## Genaue Position (AnyVac)
+
+Ohne sie fährt der Roboter nur eine simulierte Route durch den gemeldeten Raum. Mit der Integration [AnyVac](https://github.com/Michailjovic/anyvac) (HACS, nur Roborock) zeigt er, wo der echte Sauger ist. Trage im Formular der Station den **Positionssensor** `sensor.*_anyvac_map` ein. Anker ist die Station: Die Karte liest `vacuum_position` und `charger` (mm) aus dem Sensor und setzt den Roboter in denselben Abstand zur Station. Ist er gegenüber dem Grundriss gedreht oder gespiegelt, passe **Drehung**, **Spiegeln** und **Maßstab** (`pos_rot`, `pos_flip`, `pos_scale` an der Station) an, bis eine Fahrt von der Station zur echten passt.

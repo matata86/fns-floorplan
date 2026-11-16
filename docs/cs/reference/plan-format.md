@@ -110,6 +110,7 @@ Nábytek, světla a dok robota sdílejí tento seznam.
 | `icon`, `size`, `layer` | | | Společná pole položek |
 | `group` | string | | Id skupiny (nastavuje tlačítko **Seskupit**) |
 | `room_sensor`, `room_map`, `battery` | | | Dok: viz [Robotický vysavač](../robot-vacuum.md) |
+| `pos_entity`, `pos_rot`, `pos_flip`, `pos_scale` | | | Dok: přesná pozice z AnyVac, viz [Robotický vysavač](../robot-vacuum.md) |
 | `color_on`, `fx`, `progress`, `progress_total` | | | Dok: vzhled při úklidu |
 | `rules`, `tap_action`, `double_tap_action`, `hold_action`, `sheet_hide` | | | |
 
